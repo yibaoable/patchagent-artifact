@@ -1,5 +1,5 @@
 fix_commit: 8fbbf5513d609c1770b391b99e33314cd0742704
 fix_date: '2016-12-17'
-project: extractfix-libxml2
+project: extractfix-libxml2-harness
 sanitizer: AddressSanitizer
 tag: 8f30bdf-heap_buffer_overflow

@@ -19,7 +19,7 @@ import shutil
 import tempfile
 import subprocess
 
-from typing import Union
+from typing import Union, Optional
 
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
@@ -31,7 +31,8 @@ BEARCC = os.path.join(ROOT, "skyset_tools", "compiler", "bearcc")
 BEARCXX = os.path.join(ROOT, "skyset_tools", "compiler", "bear++")
 
 SYZ_SYMBOLIZER = os.path.join(ROOT, "skyset_tools", "skykaller", "bin", "syz-symbolize")
-assert os.path.exists(SYZ_SYMBOLIZER)
+# print("SYZ_SYMBOLIZER:",SYZ_SYMBOLIZER)
+# assert os.path.exists(SYZ_SYMBOLIZER)
 
 
 def get_commit(tag: str) -> str:
@@ -107,6 +108,47 @@ def apply_patch(repo_path: str, patch_path: str) -> bool:
 
     return p.returncode == 0
 
+def apply_git_diff(workdir: str, diff_text: str) -> bool:
+    """将 diff 文本应用到工作副本。"""
+    def run_command(cmd: str, cwd: Optional[str] = None, timeout: int = 300):
+        """执行shell命令，返回 (success, stdout, stderr)。"""
+        try:
+            result = subprocess.run(
+                cmd,
+                shell=True,
+                capture_output=True,
+                text=True,
+                cwd=cwd,
+                timeout=timeout
+            )
+            if result.returncode == 0:
+                return True, result.stdout, result.stderr
+            else:
+                return False, result.stdout, result.stderr
+
+        except subprocess.TimeoutExpired:
+            return False, "", "Command timeout"
+        except Exception as e:
+            return False, "", str(e) 
+    
+    with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.patch') as tf:
+        tf.write(diff_text)
+        tf.flush()
+        tmp_path = tf.name
+    try:
+        success, _, stderr = run_command(f"git apply {tmp_path}", cwd=workdir)
+        if not success:
+            success, _, stderr = run_command(f"git apply --ignore-whitespace {tmp_path}", cwd=workdir)
+            if not success:
+                success, _, stderr = run_command(f"git apply --ignore-space-change --ignore-whitespace {tmp_path}", cwd=workdir)
+                if not success:
+                    return False
+        return True
+    finally:
+        try:
+            os.remove(tmp_path)
+        except Exception:
+            pass 
 
 def regenerate_patch(project: str, tag: str, patch_path: str) -> tuple[bool, str]:
     immutable_path = get_immutable_path(project, tag)
@@ -149,7 +191,7 @@ def pull_immutable(project: str, tag: str):
     immutable_repo.git.checkout(get_commit(tag))
 
 
-def build(
+def checkout(
     project: str,
     tag: str,
     sanitizer: str,
@@ -174,10 +216,24 @@ def build(
 
     assert git.Repo(mutable_path).head.object.hexsha.startswith(get_commit(tag))
 
-    if patch_path is not None:
-        if not apply_patch(mutable_path, patch_path):
-            return (False, "Patch failed to apply")
+    return True, ""
 
+    # if patch_payload:
+    #     if not apply_git_diff(mutable_path, patch_payload):
+    #         return (False, "Patch failed to apply")
+
+    # elif patch_path is not None:
+    #     if not apply_patch(mutable_path, patch_path):
+    #         return (False, "Patch failed to apply")
+
+def compile(
+    project: str,
+    tag: str,
+    sanitizer: str,
+    patch_path: Union[str, None] = None,
+    rebuild: bool = True,
+) -> tuple[bool, str]:
+    mutable_path = get_sanitizer_build_path(project, tag, sanitizer, patch_path is not None)
     if sanitizer == "AddressSanitizer":
         env = os.environ.copy()
         env.update(
@@ -200,6 +256,7 @@ def build(
         )
         try:
             stdout, stderr = build_process.communicate(timeout=60 * 60)
+            print(stderr)
         except subprocess.TimeoutExpired:
             build_process.kill()
             return (False, "Compilation Timeout")
@@ -450,9 +507,10 @@ def test(
 def test_functional(
     project: str,
     tag: str,
+    sanitizer: str,
     patch_path: Union[str, None] = None,
 ) -> dict:
-    mutable_path = get_functional_test_path(project, tag, patch_path is not None)
+    mutable_path = get_sanitizer_build_path(project, tag, sanitizer, patch_path is not None)
     immutable_path = get_immutable_path(project, tag)
 
     if not os.path.exists(immutable_path):
@@ -461,10 +519,10 @@ def test_functional(
     if not os.path.exists(mutable_path):
         shutil.copytree(get_immutable_path(project, tag), mutable_path)
 
-    cleanup(mutable_path)
+    # cleanup(mutable_path)
     test_functional_script_path = get_test_functional_script_path(project)
-    if patch_path:
-        apply_patch(mutable_path, patch_path)
+    # if patch_path:
+    #     apply_patch(mutable_path, patch_path)
 
     if not os.path.exists(test_functional_script_path):
         return {
