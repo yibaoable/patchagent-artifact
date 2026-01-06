@@ -29,7 +29,7 @@ tag: 06df58f-null_pointer_deref
 ## Usage
 
 ```
-usage: run.py [-h] --project PROJECT --tag TAG [--patch_path PATCH_PATH] [--action {build,test,all}]
+usage: run.py [-h] --project PROJECT --tag TAG [--patch_path PATCH_PATH] [--action {checkout,compile,test_poc,test_func,all}] [--save]
 
 Skyset
 
@@ -39,6 +39,7 @@ options:
   --tag TAG             Tag name
   --patch_path PATCH_PATH
                         Patch path
-  --action {build,test,all}
+  --action {checkout,compile,test_poc,test_func,all}
                         Action name
+  --save                choose to save the report or not
 ```

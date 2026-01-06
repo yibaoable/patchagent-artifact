@@ -1,0 +1,1602 @@
+{
+    "extractfix-libxml2-harness-1": {
+        "fix_commit": "8fbbf5513d609c1770b391b99e33314cd0742704",
+        "fix_date": "2016-12-17",
+        "project": "extractfix-libxml2-harness",
+        "sanitizer": "AddressSanitizer",
+        "tag": "8f30bdf-heap_buffer_overflow",
+        "vul_commit": "8f30bdf",
+        "vul_func": []
+    },
+    "c-blosc2-2": {
+        "fix_commit": "98bb9e682481b934f65db1bbd73bc2c3a41f2931",
+        "fix_date": "2021-01-25",
+        "project": "c-blosc2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "aebf2b9-heap_buffer_overflow",
+        "vul_commit": "aebf2b9",
+        "vul_func": []
+    },
+    "c-blosc2-3": {
+        "fix_commit": "1a79d783cc791faf12fa9f6f6f92c26fb8be4967",
+        "fix_date": "2021-03-13",
+        "project": "c-blosc2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4f6d42a-invalid_free",
+        "vul_commit": "4f6d42a",
+        "vul_func": []
+    },
+    "c-blosc2-4": {
+        "fix_commit": "61aae4f319ac801ead90d789cbd7f7e3f2efd133",
+        "fix_date": "2021-01-30",
+        "project": "c-blosc2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "cb15f1b-unknown_read",
+        "vul_commit": "cb15f1b",
+        "vul_func": []
+    },
+    "c-blosc2-5": {
+        "fix_commit": "ce9aa2247006ed182dabb922bd3536b13375c4cf",
+        "fix_date": "2021-04-13",
+        "project": "c-blosc2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "81c2fcd-heap_buffer_overflow_b",
+        "vul_commit": "81c2fcd",
+        "vul_func": []
+    },
+    "c-blosc2-6": {
+        "fix_commit": "8a058b7a6be4d7e47a9af5831c454fca8c725dd4",
+        "fix_date": "2021-05-10",
+        "project": "c-blosc2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "81c2fcd-heap_buffer_overflow_c",
+        "vul_commit": "81c2fcd",
+        "vul_func": []
+    },
+    "c-blosc2-7": {
+        "fix_commit": "4f6d42ab4b25e781dad94c5324dab8a4dbb702ad",
+        "fix_date": "2021-03-02",
+        "project": "c-blosc2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "6fc4790-heap_buffer_overflow_b",
+        "vul_commit": "6fc4790",
+        "vul_func": []
+    },
+    "c-blosc2-8": {
+        "fix_commit": "ac7b9359e84d796bfb1ff1fd3f7c9eaf9a506799",
+        "fix_date": "2021-06-08",
+        "project": "c-blosc2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "38b23d5-negative_size_param",
+        "vul_commit": "38b23d5",
+        "vul_func": []
+    },
+    "extractfix-jasper-9": {
+        "fix_commit": "d8c2604cd438c41ec72aff52c16ebd8183068020",
+        "fix_date": "2016-10-15",
+        "project": "extractfix-jasper",
+        "sanitizer": "AddressSanitizer",
+        "tag": "3c55b39-heap_buffer_overflow",
+        "vul_commit": "3c55b39",
+        "vul_func": []
+    },
+    "extractfix-jasper-10": {
+        "fix_commit": "d91198abd00fc435a397fe6bad906a4c1748e9cf",
+        "fix_date": "2016-10-23",
+        "project": "extractfix-jasper",
+        "sanitizer": "UndefinedBehaviorSanitizer",
+        "tag": "3c55b39-heap_buffer_overflow",
+        "vul_commit": "3c55b39",
+        "vul_func": []
+    },
+    "c-blosc-11": {
+        "fix_commit": "8f702156e8c9ecc8bbcbabfc0d8ee38bc294dddd",
+        "fix_date": "2021-09-28",
+        "project": "c-blosc",
+        "sanitizer": "AddressSanitizer",
+        "tag": "41f3a2e-heap_buffer_overflow",
+        "vul_commit": "41f3a2e",
+        "vul_func": []
+    },
+    "c-blosc-12": {
+        "fix_commit": "e3fdd3e506a23ec66d9f3fe2fe346e4a03b1787a",
+        "fix_date": "2020-07-03",
+        "project": "c-blosc",
+        "sanitizer": "AddressSanitizer",
+        "tag": "01df770-heap_buffer_overflow",
+        "vul_commit": "01df770",
+        "vul_func": []
+    },
+    "irssi-13": {
+        "fix_commit": "73e73df1c5f7fc632e7a74f78bd1e857c0ef972d",
+        "fix_date": "2021-02-26",
+        "project": "irssi",
+        "sanitizer": "AddressSanitizer",
+        "tag": "b472570-heap_buffer_overflow_a",
+        "vul_commit": "b472570",
+        "vul_func": []
+    },
+    "irssi-14": {
+        "fix_commit": "3dbfac5699c6887b7149a0b1c805c4730f63d0f4",
+        "fix_date": "2021-04-20",
+        "project": "irssi",
+        "sanitizer": "AddressSanitizer",
+        "tag": "afcb483-heap_use_after_free",
+        "vul_commit": "afcb483",
+        "vul_func": []
+    },
+    "irssi-15": {
+        "fix_commit": "4c069f5c8f3b63d8ba8556ba8292e1f5972508d6",
+        "fix_date": "2021-02-27",
+        "project": "irssi",
+        "sanitizer": "AddressSanitizer",
+        "tag": "b472570-heap_buffer_overflow_b",
+        "vul_commit": "b472570",
+        "vul_func": []
+    },
+    "lz4-16": {
+        "fix_commit": "910ec80d2856cfa825e2230ff2de8347a4fa4522",
+        "fix_date": "2022-07-09",
+        "project": "lz4",
+        "sanitizer": "AddressSanitizer",
+        "tag": "9d20cd5-invalid_free",
+        "vul_commit": "9d20cd5",
+        "vul_func": []
+    },
+    "lz4-17": {
+        "fix_commit": "13a2d9e34ffc4170720ce417c73e396d0ac1471a",
+        "fix_date": "2019-07-17",
+        "project": "lz4",
+        "sanitizer": "AddressSanitizer",
+        "tag": "7654a5a-heap_buffer_overflow",
+        "vul_commit": "7654a5a",
+        "vul_func": []
+    },
+    "wasm3-harness-18": {
+        "fix_commit": "6bb612ccbfd5f8993a07a99092fab534722df1c3",
+        "fix_date": "2021-05-04",
+        "project": "wasm3-harness",
+        "sanitizer": "AddressSanitizer",
+        "tag": "bc32ee0-unknown_read",
+        "vul_commit": "bc32ee0",
+        "vul_func": []
+    },
+    "wasm3-harness-19": {
+        "fix_commit": "ce6105b4c1c2d662c653f7ff4522f91262ee2cd8",
+        "fix_date": "2021-04-09",
+        "project": "wasm3-harness",
+        "sanitizer": "AddressSanitizer",
+        "tag": "355285d-global_buffer_overflow",
+        "vul_commit": "355285d",
+        "vul_func": []
+    },
+    "wasm3-harness-20": {
+        "fix_commit": "79255ba1dbbb476e57a5f450eb0bbe1b84ef0f01",
+        "fix_date": "2021-04-12",
+        "project": "wasm3-harness",
+        "sanitizer": "AddressSanitizer",
+        "tag": "0124fd5-heap_buffer_overflow",
+        "vul_commit": "0124fd5",
+        "vul_func": []
+    },
+    "wasm3-harness-21": {
+        "fix_commit": "6bb612ccbfd5f8993a07a99092fab534722df1c3",
+        "fix_date": "2021-05-04",
+        "project": "wasm3-harness",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4f0b769-heap_use_after_free",
+        "vul_commit": "4f0b769",
+        "vul_func": []
+    },
+    "wasm3-harness-22": {
+        "fix_commit": "6bb612ccbfd5f8993a07a99092fab534722df1c3",
+        "fix_date": "2021-05-04",
+        "project": "wasm3-harness",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4f0b769-unknown_write",
+        "vul_commit": "4f0b769",
+        "vul_func": []
+    },
+    "wasm3-harness-23": {
+        "fix_commit": "6bb612ccbfd5f8993a07a99092fab534722df1c3",
+        "fix_date": "2021-05-04",
+        "project": "wasm3-harness",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4f0b769-unknown_read",
+        "vul_commit": "4f0b769",
+        "vul_func": []
+    },
+    "wasm3-harness-24": {
+        "fix_commit": "6bb612ccbfd5f8993a07a99092fab534722df1c3",
+        "fix_date": "2021-05-04",
+        "project": "wasm3-harness",
+        "sanitizer": "AddressSanitizer",
+        "tag": "bc32ee0-segv_on_unknown_address",
+        "vul_commit": "bc32ee0",
+        "vul_func": []
+    },
+    "extractfix-libxml2-25": {
+        "fix_commit": "94691dc884d1a8ada39f073408b4bb92fe7fe882",
+        "fix_date": "2017-06-07",
+        "project": "extractfix-libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "362b322-null_ptr_dereference",
+        "vul_commit": "362b322",
+        "vul_func": []
+    },
+    "extractfix-libxml2-26": {
+        "fix_commit": "a820dbeac29d330bae4be05d9ecd939ad6b4aa33",
+        "fix_date": "2016-03-01",
+        "project": "extractfix-libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "db07dd6-heap_buffer_overflow",
+        "vul_commit": "db07dd6",
+        "vul_func": []
+    },
+    "extractfix-libxml2-27": {
+        "fix_commit": "6a36fbe3b3e001a8a840b5c1fdd81cefc9947f0d",
+        "fix_date": "2012-10-30",
+        "project": "extractfix-libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4ea74a4-heap_buffer_overflow",
+        "vul_commit": "4ea74a4",
+        "vul_func": []
+    },
+    "extractfix-libxml2-28": {
+        "fix_commit": "db07dd613e461df93dde7902c6505629bf0734e9",
+        "fix_date": "2016-04-17",
+        "project": "extractfix-libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "cbb2716-heap_buffer_overflow",
+        "vul_commit": "cbb2716",
+        "vul_func": []
+    },
+    "md4c-29": {
+        "fix_commit": "62b60979f6a281b2b3cf883abc84299431fe2f76",
+        "fix_date": "2022-01-14",
+        "project": "md4c",
+        "sanitizer": "AddressSanitizer",
+        "tag": "db9ab41-unknown_read",
+        "vul_commit": "db9ab41",
+        "vul_func": []
+    },
+    "md4c-30": {
+        "fix_commit": "62b60979f6a281b2b3cf883abc84299431fe2f76",
+        "fix_date": "2022-01-14",
+        "project": "md4c",
+        "sanitizer": "AddressSanitizer",
+        "tag": "db9ab41-heap_buffer_overflow",
+        "vul_commit": "db9ab41",
+        "vul_func": []
+    },
+    "md4c-31": {
+        "fix_commit": "260cd3394d45bd51f2002936a63401419658ecd7",
+        "fix_date": "2021-08-25",
+        "project": "md4c",
+        "sanitizer": "AddressSanitizer",
+        "tag": "3478ec6-heap_buffer_overflow_a",
+        "vul_commit": "3478ec6",
+        "vul_func": []
+    },
+    "md4c-32": {
+        "fix_commit": "f436c3029850c138e54a0de055d61db45130409e",
+        "fix_date": "2022-01-06",
+        "project": "md4c",
+        "sanitizer": "AddressSanitizer",
+        "tag": "3478ec6-heap_buffer_overflow_b",
+        "vul_commit": "3478ec6",
+        "vul_func": []
+    },
+    "libxml2-33": {
+        "fix_commit": "04d1bedd8c3fc5d9e41d11e2d0da08a966b732d3",
+        "fix_date": "2023-03-21",
+        "project": "libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "9ef2a9a-global_buffer_overflow_b",
+        "vul_commit": "9ef2a9a",
+        "vul_func": []
+    },
+    "libxml2-34": {
+        "fix_commit": "ca2bfecea9c23f8d2e11741fff7c6a5372c56bb8",
+        "fix_date": "2023-03-15",
+        "project": "libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "b167c73-global_buffer_overflow_c",
+        "vul_commit": "b167c73",
+        "vul_func": []
+    },
+    "libxml2-35": {
+        "fix_commit": "8090e5856465c0b8e26e2a080f4b498f37fa83ab",
+        "fix_date": "2023-03-17",
+        "project": "libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "b167c73-global_buffer_overflow_d",
+        "vul_commit": "b167c73",
+        "vul_func": []
+    },
+    "libxml2-36": {
+        "fix_commit": "ca2bfecea9c23f8d2e11741fff7c6a5372c56bb8",
+        "fix_date": "2023-03-15",
+        "project": "libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "b167c73-global_buffer_overflow_a",
+        "vul_commit": "b167c73",
+        "vul_func": []
+    },
+    "libxml2-37": {
+        "fix_commit": "1061537efdf3874c91fd50d18f98c4b8a3518e52",
+        "fix_date": "2023-03-26",
+        "project": "libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "7fbd454-global_buffer_overflow",
+        "vul_commit": "7fbd454",
+        "vul_func": []
+    },
+    "libxml2-38": {
+        "fix_commit": "ca2bfecea9c23f8d2e11741fff7c6a5372c56bb8",
+        "fix_date": "2023-03-15",
+        "project": "libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "5f4ec41-global_buffer_overflow",
+        "vul_commit": "5f4ec41",
+        "vul_func": []
+    },
+    "libxml2-39": {
+        "fix_commit": "ca2bfecea9c23f8d2e11741fff7c6a5372c56bb8",
+        "fix_date": "2023-03-15",
+        "project": "libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "b167c73-global_buffer_overflow_e",
+        "vul_commit": "b167c73",
+        "vul_func": []
+    },
+    "libxml2-40": {
+        "fix_commit": "067986fa674f0811614dab4c4572f5f7ff483400",
+        "fix_date": "2023-03-18",
+        "project": "libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "9ef2a9a-global_buffer_overflow_a",
+        "vul_commit": "9ef2a9a",
+        "vul_func": []
+    },
+    "libxml2-41": {
+        "fix_commit": "b236b7a588ac2973a057ec578011cdc17c26f16d",
+        "fix_date": "2023-06-08",
+        "project": "libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "20f5c73-global_buffer_overflow",
+        "vul_commit": "20f5c73",
+        "vul_func": []
+    },
+    "libxml2-42": {
+        "fix_commit": "ca2bfecea9c23f8d2e11741fff7c6a5372c56bb8",
+        "fix_date": "2023-03-15",
+        "project": "libxml2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "b167c73-global_buffer_overflow_b",
+        "vul_commit": "b167c73",
+        "vul_func": []
+    },
+    "libmobi-43": {
+        "fix_commit": "1e0378e6f9e4ae415cedc9eb10850888897c5dba",
+        "fix_date": "2022-05-03",
+        "project": "libmobi",
+        "sanitizer": "AddressSanitizer",
+        "tag": "1297ee0-heap_out_of_bound",
+        "vul_commit": "1297ee0",
+        "vul_func": []
+    },
+    "libmobi-44": {
+        "fix_commit": "c0699c8693c47f14a2e57dec7292e862ac7adf9c",
+        "fix_date": "2022-04-27",
+        "project": "libmobi",
+        "sanitizer": "AddressSanitizer",
+        "tag": "eafc415-null_pointer_deref",
+        "vul_commit": "eafc415",
+        "vul_func": []
+    },
+    "libmobi-45": {
+        "fix_commit": "eafc415bc6067e72577f70d6dd5acbf057ce6e6f",
+        "fix_date": "2022-04-27",
+        "project": "libmobi",
+        "sanitizer": "AddressSanitizer",
+        "tag": "afa8ce1-stack_out_of_bound",
+        "vul_commit": "afa8ce1",
+        "vul_func": []
+    },
+    "libmobi-46": {
+        "fix_commit": "1e4924565689f893a1d3517cc78781a9499c4397",
+        "fix_date": "2022-05-27",
+        "project": "libmobi",
+        "sanitizer": "AddressSanitizer",
+        "tag": "eb4a262-null_pointer_deref",
+        "vul_commit": "eb4a262",
+        "vul_func": []
+    },
+    "libmobi-47": {
+        "fix_commit": "fb1ab50e448ddbed746fd27ae07469bc506d838b",
+        "fix_date": "2022-04-26",
+        "project": "libmobi",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4b60805-heap_out_of_bound",
+        "vul_commit": "4b60805",
+        "vul_func": []
+    },
+    "sleuthkit-48": {
+        "fix_commit": "629bd4588352fce4fc1bfe7b44d353175e7a3f0d",
+        "fix_date": "2021-09-21",
+        "project": "sleuthkit",
+        "sanitizer": "AddressSanitizer",
+        "tag": "38a13f9-heap_buffer_overflow",
+        "vul_commit": "38a13f9",
+        "vul_func": []
+    },
+    "sleuthkit-49": {
+        "fix_commit": "4d379cb12e67f5bc690d2e2e4d6ce752c2b41e67",
+        "fix_date": "2021-04-22",
+        "project": "sleuthkit",
+        "sanitizer": "AddressSanitizer",
+        "tag": "34f995d-heap_buffer_overflow_b",
+        "vul_commit": "34f995d",
+        "vul_func": []
+    },
+    "sleuthkit-50": {
+        "fix_commit": "b3dfb4d6a522fff042bea03b9b8f6516e4e86354",
+        "fix_date": "2021-04-22",
+        "project": "sleuthkit",
+        "sanitizer": "AddressSanitizer",
+        "tag": "d9b19e1-heap_buffer_overflow",
+        "vul_commit": "d9b19e1",
+        "vul_func": []
+    },
+    "sleuthkit-51": {
+        "fix_commit": "b3dfb4d6a522fff042bea03b9b8f6516e4e86354",
+        "fix_date": "2021-04-22",
+        "project": "sleuthkit",
+        "sanitizer": "AddressSanitizer",
+        "tag": "82d254b-heap_buffer_overflow",
+        "vul_commit": "82d254b",
+        "vul_func": []
+    },
+    "sleuthkit-52": {
+        "fix_commit": "243274a82cc506507bc59083d63a0d3b7ced611e",
+        "fix_date": "2020-09-10",
+        "project": "sleuthkit",
+        "sanitizer": "AddressSanitizer",
+        "tag": "34f995d-heap_buffer_overflow_a",
+        "vul_commit": "34f995d",
+        "vul_func": []
+    },
+    "assimp-53": {
+        "fix_commit": "ee02c389ca2106cc70f5cea2d7e5d43b96510f27",
+        "fix_date": "2022-12-15",
+        "project": "assimp",
+        "sanitizer": "AddressSanitizer",
+        "tag": "0422dff-heap_buffer_overflow",
+        "vul_commit": "0422dff",
+        "vul_func": [
+            {
+                "file_path": "code/AssetLib/OFF/OFFLoader.cpp",
+                "start_line": 110,
+                "end_line": 332
+            }
+        ]
+    },
+    "assimp-54": {
+        "fix_commit": "36dfa3bed31fe220a15648083a78c925fbec0792",
+        "fix_date": "2023-06-14",
+        "project": "assimp",
+        "sanitizer": "AddressSanitizer",
+        "tag": "2d44861-unknown_write",
+        "vul_commit": "2d44861",
+        "vul_func": []
+    },
+    "assimp-55": {
+        "fix_commit": "96b071bdb1965084c6e78073f9f42a872300f308",
+        "fix_date": "2023-01-04",
+        "project": "assimp",
+        "sanitizer": "AddressSanitizer",
+        "tag": "565539b-heap_buffer_overflow",
+        "vul_commit": "565539b",
+        "vul_func": []
+    },
+    "libsndfile-56": {
+        "fix_commit": "3970faeb7fc8cee60cc5260ab4102433c37d5d63",
+        "fix_date": "2021-02-15",
+        "project": "libsndfile",
+        "sanitizer": "AddressSanitizer",
+        "tag": "2b4cc4b-heap_buffer_overflow",
+        "vul_commit": "2b4cc4b",
+        "vul_func": []
+    },
+    "libsndfile-57": {
+        "fix_commit": "deb669ee8be55a94565f6f8a6b60890c2e7c6f32",
+        "fix_date": "2021-02-21",
+        "project": "libsndfile",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4819cad-heap_buffer_overflow",
+        "vul_commit": "4819cad",
+        "vul_func": []
+    },
+    "libsndfile-58": {
+        "fix_commit": "1998691e5687037a77b5addd4ca7533bfbe90553",
+        "fix_date": "2020-10-22",
+        "project": "libsndfile",
+        "sanitizer": "AddressSanitizer",
+        "tag": "932aead-negative_size_param",
+        "vul_commit": "932aead",
+        "vul_func": []
+    },
+    "libsndfile-59": {
+        "fix_commit": "949c89122d1081d69260a16a56350624c4db5916",
+        "fix_date": "2021-04-26",
+        "project": "libsndfile",
+        "sanitizer": "AddressSanitizer",
+        "tag": "b706e62-heap_buffer_overflow",
+        "vul_commit": "b706e62",
+        "vul_func": []
+    },
+    "libsndfile-60": {
+        "fix_commit": "a9815b3f228df00086e0a40bcc43162fc19896a1",
+        "fix_date": "2021-02-21",
+        "project": "libsndfile",
+        "sanitizer": "AddressSanitizer",
+        "tag": "fe49327-heap_buffer_overflow",
+        "vul_commit": "fe49327",
+        "vul_func": []
+    },
+    "gpac-61": {
+        "fix_commit": "d0ced41651b279bb054eb6390751e2d4eb84819a",
+        "fix_date": "2023-10-17",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "d2de8b5-stack_out_of_bound",
+        "vul_commit": "d2de8b5",
+        "vul_func": []
+    },
+    "gpac-62": {
+        "fix_commit": "20bf89461a690df89b0f3b6dbd2ae24d9c1c53d8",
+        "fix_date": "2022-01-21",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "94cf5b1-stack_out_of_bound",
+        "vul_commit": "94cf5b1",
+        "vul_func": []
+    },
+    "gpac-63": {
+        "fix_commit": "9971fb125cf91cefd081a080c417b90bbe4a467b",
+        "fix_date": "2023-01-17",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "7e2cb01-use_after_free",
+        "vul_commit": "7e2cb01",
+        "vul_func": []
+    },
+    "gpac-64": {
+        "fix_commit": "895ac12da168435eb8db3f96978ffa4c69d66c3a",
+        "fix_date": "2023-09-02",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "7e2e92f-use_after_free",
+        "vul_commit": "7e2e92f",
+        "vul_func": []
+    },
+    "gpac-65": {
+        "fix_commit": "d067ab3ccdeaa340e8c045a0fd5bcfc22b809e8f",
+        "fix_date": "2023-02-13",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "1b77837-heap_out_of_bound",
+        "vul_commit": "1b77837",
+        "vul_func": []
+    },
+    "gpac-66": {
+        "fix_commit": "7a6f636db3360bb16d18078d51e8c596f31302a1",
+        "fix_date": "2023-10-13",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "7edc40f-null_pointer_deref",
+        "vul_commit": "7edc40f",
+        "vul_func": []
+    },
+    "gpac-67": {
+        "fix_commit": "db74835944548fc3bdf03121b0e012373bdebb3e",
+        "fix_date": "2023-10-23",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "fc9e290-heap_out_of_bound",
+        "vul_commit": "fc9e290",
+        "vul_func": []
+    },
+    "gpac-68": {
+        "fix_commit": "3ec93d73d048ed7b46fe6e9f307cc7a0cc13db63",
+        "fix_date": "2023-09-01",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "de7f3a8-heap_out_of_bound",
+        "vul_commit": "de7f3a8",
+        "vul_func": []
+    },
+    "gpac-69": {
+        "fix_commit": "77510778516803b7f7402d7423c6d6bef50254c3",
+        "fix_date": "2022-09-12",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4c77303-heap_out_of_bound",
+        "vul_commit": "4c77303",
+        "vul_func": []
+    },
+    "gpac-70": {
+        "fix_commit": "aa8f03c119fc78bc887eb79dfc4b5f82f3474ed9",
+        "fix_date": "2022-02-21",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "89a80ca-heap_out_of_bound",
+        "vul_commit": "89a80ca",
+        "vul_func": []
+    },
+    "gpac-71": {
+        "fix_commit": "4925c40b32dc2a786ef5954a027b22262c9d6f59",
+        "fix_date": "2023-10-13",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "ca1b48f-heap_out_of_bound",
+        "vul_commit": "ca1b48f",
+        "vul_func": []
+    },
+    "gpac-72": {
+        "fix_commit": "ea7395f39f601a7750d48d606e9d10ea0b7beefe",
+        "fix_date": "2023-02-09",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "8db20cb-heap_out_of_bound",
+        "vul_commit": "8db20cb",
+        "vul_func": []
+    },
+    "gpac-73": {
+        "fix_commit": "9c74581c7827a6e1aea0f0a6f787ae22b4331a12",
+        "fix_date": "2022-01-27",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "a6b6408-heap_out_of_bound",
+        "vul_commit": "a6b6408",
+        "vul_func": []
+    },
+    "gpac-74": {
+        "fix_commit": "fb5eb9016e6ee69ebebf20c9a046ae023e341502",
+        "fix_date": "2023-10-13",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4925c40-use_after_free",
+        "vul_commit": "4925c40",
+        "vul_func": []
+    },
+    "gpac-75": {
+        "fix_commit": "193633b1648582444fc99776cd741d7ba0125e86",
+        "fix_date": "2023-08-31",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "cc95b16-heap_out_of_bound",
+        "vul_commit": "cc95b16",
+        "vul_func": []
+    },
+    "gpac-76": {
+        "fix_commit": "e9b9134bbf8f952e59f7919f0ceac4d55cb0fe0b",
+        "fix_date": "2023-10-13",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "7a6f636-stack_out_of_bound",
+        "vul_commit": "7a6f636",
+        "vul_func": []
+    },
+    "gpac-77": {
+        "fix_commit": "b13e9986aa1134c764b0d84f0f66328429b9c2eb",
+        "fix_date": "2022-01-21",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "ebedc7a-use_after_free",
+        "vul_commit": "ebedc7a",
+        "vul_func": []
+    },
+    "gpac-78": {
+        "fix_commit": "b68b3f0bf5c366e003221d78fd663a1d5514a876",
+        "fix_date": "2023-08-31",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4607052-double_free",
+        "vul_commit": "4607052",
+        "vul_func": []
+    },
+    "gpac-79": {
+        "fix_commit": "7e2e92feb1b30fac1d659f6620d743b5a188ffe0",
+        "fix_date": "2023-09-02",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "a8bc2c8-heap_out_of_bound",
+        "vul_commit": "a8bc2c8",
+        "vul_func": []
+    },
+    "gpac-80": {
+        "fix_commit": "ba59206b3225f0e8e95a27eff41cb1c49ddf9a37",
+        "fix_date": "2023-05-22",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "6f28c4c-null_pointer_deref",
+        "vul_commit": "6f28c4c",
+        "vul_func": []
+    },
+    "gpac-81": {
+        "fix_commit": "000c84a87f73b901d267e6f96446e9bfc78d1214",
+        "fix_date": "2022-11-23",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "78f5269-heap_out_of_bound",
+        "vul_commit": "78f5269",
+        "vul_func": []
+    },
+    "gpac-82": {
+        "fix_commit": "4bac19ad854159b21ba70d8ab7c4e1cd1db8ea1c",
+        "fix_date": "2023-08-31",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "b1042c3-null_pointer_deref",
+        "vul_commit": "b1042c3",
+        "vul_func": []
+    },
+    "gpac-83": {
+        "fix_commit": "52cd40b83714b95f1d4b864d591e722e211a60d4",
+        "fix_date": "2023-10-13",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "49cb88a-heap_out_of_bound",
+        "vul_commit": "49cb88a",
+        "vul_func": []
+    },
+    "gpac-84": {
+        "fix_commit": "fece8097e1270a2be68acda8dfe9435868a16f8e",
+        "fix_date": "2022-03-21",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "3ffe59c-heap_out_of_bound",
+        "vul_commit": "3ffe59c",
+        "vul_func": []
+    },
+    "gpac-85": {
+        "fix_commit": "dc7de8d3d604426c7a6e628d90cb9fb88e7b4c2c",
+        "fix_date": "2022-07-12",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "0b29a41-use_after_free",
+        "vul_commit": "0b29a41",
+        "vul_func": []
+    },
+    "gpac-86": {
+        "fix_commit": "ca1b48f0abe71bf81a58995d7d75dc27f5a17ddc",
+        "fix_date": "2023-10-13",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "50a60b0-null_pointer_deref",
+        "vul_commit": "50a60b0",
+        "vul_func": []
+    },
+    "gpac-87": {
+        "fix_commit": "c31941822ee275a35bc148382bafef1c53ec1c26",
+        "fix_date": "2022-11-23",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "514a3af-stack_out_of_bound",
+        "vul_commit": "514a3af",
+        "vul_func": []
+    },
+    "gpac-88": {
+        "fix_commit": "827d849fcb7a38c2c4a5a1ebcf6b1d4f3ff3a5b4",
+        "fix_date": "2022-01-21",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "bb9ee4c-heap_out_of_bound",
+        "vul_commit": "bb9ee4c",
+        "vul_func": []
+    },
+    "gpac-89": {
+        "fix_commit": "4c7730384f0ec26b79d536ba79fbbfc746fda87a",
+        "fix_date": "2022-09-12",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "b6b6360-null_pointer_deref",
+        "vul_commit": "b6b6360",
+        "vul_func": []
+    },
+    "gpac-90": {
+        "fix_commit": "6a748ccc3f76ff10e3ae43014967ea4b0c088aaf",
+        "fix_date": "2023-06-15",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "be23476-heap_out_of_bound",
+        "vul_commit": "be23476",
+        "vul_func": []
+    },
+    "gpac-91": {
+        "fix_commit": "b1042c3eefca87c4bc32afb404ed6518d693e5be",
+        "fix_date": "2023-08-31",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "112767e-heap_out_of_bound",
+        "vul_commit": "112767e",
+        "vul_func": []
+    },
+    "gpac-92": {
+        "fix_commit": "53387aa86c1af1228d0fa57c67f9c7330716d5a7",
+        "fix_date": "2023-05-31",
+        "project": "gpac",
+        "sanitizer": "AddressSanitizer",
+        "tag": "8f3088b-null_pointer_deref",
+        "vul_commit": "8f3088b",
+        "vul_func": []
+    },
+    "libtpms-93": {
+        "fix_commit": "034a5c02488cf7f0048e130177fc71c9e626e135",
+        "fix_date": "2021-07-23",
+        "project": "libtpms",
+        "sanitizer": "AddressSanitizer",
+        "tag": "e563166-stack_buffer_overflow",
+        "vul_commit": "e563166",
+        "vul_func": []
+    },
+    "h3-94": {
+        "fix_commit": "fce1c53844ca21dcc14f3acabeaf2e12d47e5568",
+        "fix_date": "2022-09-12",
+        "project": "h3",
+        "sanitizer": "AddressSanitizer",
+        "tag": "f581626-global_buffer_overflow",
+        "vul_commit": "f581626",
+        "vul_func": []
+    },
+    "radare2-95": {
+        "fix_commit": "3ecdbf8e21186a9c5a4d3cfa3b1e9fd27045340e",
+        "fix_date": "2022-05-13",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "a16cb20-heap_out_of_bound",
+        "vul_commit": "a16cb20",
+        "vul_func": []
+    },
+    "radare2-96": {
+        "fix_commit": "ecc44b6a2f18ee70ac133365de0e509d26d5e168",
+        "fix_date": "2022-04-24",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "0927ed3-heap_out_of_bound",
+        "vul_commit": "0927ed3",
+        "vul_func": []
+    },
+    "radare2-97": {
+        "fix_commit": "a35f89f86ed12161af09330e92e5a213014e46a1",
+        "fix_date": "2022-02-21",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "515e592-heap_out_of_bound",
+        "vul_commit": "515e592",
+        "vul_func": []
+    },
+    "radare2-98": {
+        "fix_commit": "37897226a1a31f982bfefdc4aeefc2e50355c73c",
+        "fix_date": "2022-01-06",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "7cfd367-use_after_free",
+        "vul_commit": "7cfd367",
+        "vul_func": []
+    },
+    "radare2-99": {
+        "fix_commit": "feaa4e7f7399c51ee6f52deb84dc3f795b4035d6",
+        "fix_date": "2022-01-31",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "72ffc02-null_pointer_deref",
+        "vul_commit": "72ffc02",
+        "vul_func": []
+    },
+    "radare2-100": {
+        "fix_commit": "1dd65336f0f0c351d6ea853efcf73cf9c0030862",
+        "fix_date": "2022-04-16",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "a58b8d4-heap_out_of_bound",
+        "vul_commit": "a58b8d4",
+        "vul_func": []
+    },
+    "radare2-101": {
+        "fix_commit": "0052500c1ed5bf8263b26b9fd7773dbdc6f170c4",
+        "fix_date": "2022-03-22",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "0be8f25-heap_out_of_bound",
+        "vul_commit": "0be8f25",
+        "vul_func": []
+    },
+    "radare2-102": {
+        "fix_commit": "842f809d4ec6a12af2906f948657281c9ebc8a24",
+        "fix_date": "2022-12-29",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "5c0bde8-null_pointer_deref",
+        "vul_commit": "5c0bde8",
+        "vul_func": []
+    },
+    "radare2-103": {
+        "fix_commit": "a7ce29647fcb38386d7439696375e16e093d6acb",
+        "fix_date": "2022-03-21",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "d22d160-use_after_free",
+        "vul_commit": "d22d160",
+        "vul_func": []
+    },
+    "radare2-104": {
+        "fix_commit": "c84b7232626badd075caf3ae29661b609164bac6",
+        "fix_date": "2022-02-18",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "108dc76-heap_out_of_bound",
+        "vul_commit": "108dc76",
+        "vul_func": []
+    },
+    "radare2-105": {
+        "fix_commit": "a5aafb99c3965259c84ddcf45a91144bf7eb4cf1",
+        "fix_date": "2022-05-10",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4b22fc5-null_pointer_deref",
+        "vul_commit": "4b22fc5",
+        "vul_func": []
+    },
+    "radare2-106": {
+        "fix_commit": "35482cb760db10f87a62569e2f8872dbd95e9269",
+        "fix_date": "2022-02-07",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "d17a7bd-use_after_free",
+        "vul_commit": "d17a7bd",
+        "vul_func": []
+    },
+    "radare2-107": {
+        "fix_commit": "10517e3ff0e609697eb8cde60ec8dc999ee5ea24",
+        "fix_date": "2022-03-04",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "cf780fd-use_after_free",
+        "vul_commit": "cf780fd",
+        "vul_func": []
+    },
+    "radare2-108": {
+        "fix_commit": "669a404b6d98d5db409a5ebadae4e94b34ef5136",
+        "fix_date": "2022-04-22",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4823451-heap_out_of_bound",
+        "vul_commit": "4823451",
+        "vul_func": []
+    },
+    "radare2-109": {
+        "fix_commit": "8525ad0b9fd596f4b251bb3d7b114e6dc7ce1ee8",
+        "fix_date": "2022-02-07",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "9650e3c-use_after_free",
+        "vul_commit": "9650e3c",
+        "vul_func": []
+    },
+    "radare2-110": {
+        "fix_commit": "193f4fe01d7f626e2ea937450f2e0c4604420e9d",
+        "fix_date": "2022-05-26",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "eca58ce-heap_out_of_bound",
+        "vul_commit": "eca58ce",
+        "vul_func": []
+    },
+    "radare2-111": {
+        "fix_commit": "1bdda93e348c160c84e30da3637acef26d0348de",
+        "fix_date": "2023-10-19",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "d026503-heap_out_of_bound",
+        "vul_commit": "d026503",
+        "vul_func": []
+    },
+    "radare2-112": {
+        "fix_commit": "d4ce40b516ffd70cf2e9e36832d8de139117d522",
+        "fix_date": "2022-03-24",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "9bcc98f-heap_out_of_bound",
+        "vul_commit": "9bcc98f",
+        "vul_func": []
+    },
+    "radare2-113": {
+        "fix_commit": "ba919adb74ac368bf76b150a00347ded78b572dd",
+        "fix_date": "2023-08-14",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "95b648f-heap_out_of_bound",
+        "vul_commit": "95b648f",
+        "vul_func": []
+    },
+    "radare2-114": {
+        "fix_commit": "515e592b9bea0612bc63d8e93239ff35bcf645c7",
+        "fix_date": "2022-02-21",
+        "project": "radare2",
+        "sanitizer": "AddressSanitizer",
+        "tag": "27fe803-null_pointer_deref",
+        "vul_commit": "27fe803",
+        "vul_func": []
+    },
+    "mruby-115": {
+        "fix_commit": "7f5a490d09f4d56801ac3a3e4e39e03e1471b44c",
+        "fix_date": "2022-03-26",
+        "project": "mruby",
+        "sanitizer": "AddressSanitizer",
+        "tag": "bf5bbf0-use_after_free",
+        "vul_commit": "bf5bbf0",
+        "vul_func": []
+    },
+    "mruby-116": {
+        "fix_commit": "3cf291f72224715942beaf8553e42ba8891ab3c6",
+        "fix_date": "2022-04-04",
+        "project": "mruby",
+        "sanitizer": "AddressSanitizer",
+        "tag": "8aec568-use_after_free",
+        "vul_commit": "8aec568",
+        "vul_func": []
+    },
+    "mruby-117": {
+        "fix_commit": "aa7f98dedb68d735a1665d3a289036c88b0c47ce",
+        "fix_date": "2022-05-29",
+        "project": "mruby",
+        "sanitizer": "AddressSanitizer",
+        "tag": "af5acf3-use_after_free",
+        "vul_commit": "af5acf3",
+        "vul_func": []
+    },
+    "mruby-118": {
+        "fix_commit": "a4d97934d51cb88954cc49161dc1d151f64afb6b",
+        "fix_date": "2022-04-21",
+        "project": "mruby",
+        "sanitizer": "AddressSanitizer",
+        "tag": "bdc244e-null_pointer_deref",
+        "vul_commit": "bdc244e",
+        "vul_func": []
+    },
+    "mruby-119": {
+        "fix_commit": "aaa28a508903041dd7399d4159a8ace9766b022f",
+        "fix_date": "2022-03-25",
+        "project": "mruby",
+        "sanitizer": "AddressSanitizer",
+        "tag": "b4168c9-use_after_free",
+        "vul_commit": "b4168c9",
+        "vul_func": []
+    },
+    "mruby-120": {
+        "fix_commit": "38b164ace7d6ae1c367883a3d67d7f559783faad",
+        "fix_date": "2022-02-12",
+        "project": "mruby",
+        "sanitizer": "AddressSanitizer",
+        "tag": "0ed3fcf-heap_out_of_bound",
+        "vul_commit": "0ed3fcf",
+        "vul_func": []
+    },
+    "mruby-121": {
+        "fix_commit": "b1d0296a937fe278239bdfac840a3fd0e93b3ee9",
+        "fix_date": "2022-04-09",
+        "project": "mruby",
+        "sanitizer": "AddressSanitizer",
+        "tag": "c30e6eb-heap_out_of_bound",
+        "vul_commit": "c30e6eb",
+        "vul_func": []
+    },
+    "mruby-122": {
+        "fix_commit": "c8c083cb750606b2da81582cd8e43b442bb143e6",
+        "fix_date": "2022-04-09",
+        "project": "mruby",
+        "sanitizer": "AddressSanitizer",
+        "tag": "55b5261-null_pointer_deref",
+        "vul_commit": "55b5261",
+        "vul_func": []
+    },
+    "mruby-123": {
+        "fix_commit": "a844f8965584c0737c436cfaf98bdccdf8d8b39e",
+        "fix_date": "2021-09-23",
+        "project": "mruby",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4c196db-heap_out_of_bound",
+        "vul_commit": "4c196db",
+        "vul_func": []
+    },
+    "mruby-124": {
+        "fix_commit": "00acae117da1b45b318dc36531a7b0021b8097ae",
+        "fix_date": "2022-04-01",
+        "project": "mruby",
+        "sanitizer": "AddressSanitizer",
+        "tag": "d1f1b4e-null_pointe_deref",
+        "vul_commit": "d1f1b4e",
+        "vul_func": []
+    },
+    "extractfix-libtiff-125": {
+        "fix_commit": "391e77fcd217e78b2c51342ac3ddb7100ecacdd2",
+        "fix_date": "2016-06-28",
+        "project": "extractfix-libtiff",
+        "sanitizer": "AddressSanitizer",
+        "tag": "c421b99-heap_buffer_overflow",
+        "vul_commit": "c421b99",
+        "vul_func": []
+    },
+    "extractfix-libtiff-126": {
+        "fix_commit": "531a87ec56c682d65fa1c09f0474124cfb2a1dda",
+        "fix_date": "2013-09-20",
+        "project": "extractfix-libtiff",
+        "sanitizer": "AddressSanitizer",
+        "tag": "acb5bb9-heap_buffer_overflow",
+        "vul_commit": "acb5bb9",
+        "vul_func": []
+    },
+    "extractfix-libtiff-127": {
+        "fix_commit": "0a76a8c765c7b8327c59646284fa78c3c27e5490",
+        "fix_date": "2017-01-11",
+        "project": "extractfix-libtiff",
+        "sanitizer": "UndefinedBehaviorSanitizer",
+        "tag": "3144e57-invalid_shift",
+        "vul_commit": "3144e57",
+        "vul_func": []
+    },
+    "extractfix-libtiff-128": {
+        "fix_commit": "bd024f07019f5d9fea236675607a69f74a66bc7b",
+        "fix_date": "2016-08-15",
+        "project": "extractfix-libtiff",
+        "sanitizer": "AddressSanitizer",
+        "tag": "e596d4e-divide-by-zero",
+        "vul_commit": "e596d4e",
+        "vul_func": []
+    },
+    "extractfix-libtiff-129": {
+        "fix_commit": "47f2fb61a3a64667bce1a8398a8fcb1b348ff122",
+        "fix_date": "2017-01-11",
+        "project": "extractfix-libtiff",
+        "sanitizer": "AddressSanitizer",
+        "tag": "2c00d31-divide_by_zero",
+        "vul_commit": "2c00d31",
+        "vul_func": []
+    },
+    "extractfix-libtiff-130": {
+        "fix_commit": "d651abc097d91fac57f33b5f9447d0a9183f58e7",
+        "fix_date": "2016-11-09",
+        "project": "extractfix-libtiff",
+        "sanitizer": "AddressSanitizer",
+        "tag": "6a984bf-heap_buffer_overflow",
+        "vul_commit": "6a984bf",
+        "vul_func": []
+    },
+    "extractfix-libtiff-131": {
+        "fix_commit": "43bc256d8ae44b92d2734a3c5bc73957a4d7c1ec",
+        "fix_date": "2016-12-03",
+        "project": "extractfix-libtiff",
+        "sanitizer": "AddressSanitizer",
+        "tag": "9a72a69-divide_by_zero",
+        "vul_commit": "9a72a69",
+        "vul_func": []
+    },
+    "extractfix-libtiff-132": {
+        "fix_commit": "c7153361a4041260719b340f73f2f76b0969235c",
+        "fix_date": "2017-01-11",
+        "project": "extractfix-libtiff",
+        "sanitizer": "AddressSanitizer",
+        "tag": "891b1b9-heap_buffer_overflow",
+        "vul_commit": "891b1b9",
+        "vul_func": []
+    },
+    "extractfix-libtiff-133": {
+        "fix_commit": "5ed9fea523316c2f5cec4d393e4d5d671c2dbc33",
+        "fix_date": "2016-12-17",
+        "project": "extractfix-libtiff",
+        "sanitizer": "AddressSanitizer",
+        "tag": "f3069a5-heap_buffer_overflow",
+        "vul_commit": "f3069a5",
+        "vul_func": []
+    },
+    "extractfix-libtiff-134": {
+        "fix_commit": "d9783e4a1476b6787a51c5ae9e9b3156527589f0",
+        "fix_date": "2016-07-11",
+        "project": "extractfix-libtiff",
+        "sanitizer": "AddressSanitizer",
+        "tag": "0ba5d88-heap_buffer_overflow",
+        "vul_commit": "0ba5d88",
+        "vul_func": []
+    },
+    "extractfix-libtiff-135": {
+        "fix_commit": "3206e0c752a62da1ae606867113ed3bf9bf73306",
+        "fix_date": "2014-12-21",
+        "project": "extractfix-libtiff",
+        "sanitizer": "AddressSanitizer",
+        "tag": "8b6e80f-heap_buffer_overflow",
+        "vul_commit": "8b6e80f",
+        "vul_func": []
+    },
+    "hoextdown-136": {
+        "fix_commit": "7c7dc6ac9adce5413ab54dcd604db95a9b935b05",
+        "fix_date": "2020-06-29",
+        "project": "hoextdown",
+        "sanitizer": "AddressSanitizer",
+        "tag": "933f9da-heap_buffer_overflow",
+        "vul_commit": "933f9da",
+        "vul_func": []
+    },
+    "htslib-137": {
+        "fix_commit": "92ea05adb2478c64be571aff6fe00130fd29c252",
+        "fix_date": "2019-10-15",
+        "project": "htslib",
+        "sanitizer": "AddressSanitizer",
+        "tag": "dd6f0b7-unknown_read",
+        "vul_commit": "dd6f0b7",
+        "vul_func": []
+    },
+    "openexr-138": {
+        "fix_commit": "6f235a803c6370583891f008181f85a91eedb681",
+        "fix_date": "2023-05-24",
+        "project": "openexr",
+        "sanitizer": "AddressSanitizer",
+        "tag": "7c40603-stack_buffer_overflow",
+        "vul_commit": "7c40603",
+        "vul_func": []
+    },
+    "openexr-139": {
+        "fix_commit": "043a50807eb19af844dd34281900b2ad8571325f",
+        "fix_date": "2022-10-24",
+        "project": "openexr",
+        "sanitizer": "AddressSanitizer",
+        "tag": "115e42e-heap_buffer_overflow_a",
+        "vul_commit": "115e42e",
+        "vul_func": []
+    },
+    "openexr-140": {
+        "fix_commit": "063a881e7a5cd57156dbd0c9b6ad4d30f7023e55",
+        "fix_date": "2023-02-02",
+        "project": "openexr",
+        "sanitizer": "AddressSanitizer",
+        "tag": "115e42e-heap_buffer_overflow_b",
+        "vul_commit": "115e42e",
+        "vul_func": []
+    },
+    "extractfix-binutils-141": {
+        "fix_commit": "d8010d3e75ec7194a4703774090b27486b742d48",
+        "fix_date": "2017-09-24",
+        "project": "extractfix-binutils",
+        "sanitizer": "AddressSanitizer",
+        "tag": "515f23e-divide_by_zero",
+        "vul_commit": "515f23e",
+        "vul_func": []
+    },
+    "extractfix-binutils-142": {
+        "fix_commit": "6aea08d9f3e3d6475a65454da488a0c51f5dc97d",
+        "fix_date": "2018-04-17",
+        "project": "extractfix-binutils",
+        "sanitizer": "AddressSanitizer",
+        "tag": "515f23e-divide_by_zero",
+        "vul_commit": "515f23e",
+        "vul_func": []
+    },
+    "zstd-143": {
+        "fix_commit": "05b6773fbcce1075edbe498a821f9a41249cf384",
+        "fix_date": "2021-06-14",
+        "project": "zstd",
+        "sanitizer": "AddressSanitizer",
+        "tag": "0a96d00-heap_buffer_overflow",
+        "vul_commit": "0a96d00",
+        "vul_func": []
+    },
+    "zstd-144": {
+        "fix_commit": "efd37a64eaff5a0a26ae2566fdb45dc4a0c91673",
+        "fix_date": "2019-09-20",
+        "project": "zstd",
+        "sanitizer": "AddressSanitizer",
+        "tag": "3cac061-heap_buffer_overflow",
+        "vul_commit": "3cac061",
+        "vul_func": []
+    },
+    "zstd-145": {
+        "fix_commit": "e6c8a5dd40359801bf297dca3be48e38c85ed6c2",
+        "fix_date": "2021-05-04",
+        "project": "zstd",
+        "sanitizer": "AddressSanitizer",
+        "tag": "6f40571-unknown_read",
+        "vul_commit": "6f40571",
+        "vul_func": []
+    },
+    "zstd-146": {
+        "fix_commit": "0677b26b6d15f35f027eaabf11cfaa0af541f8c8",
+        "fix_date": "2022-01-07",
+        "project": "zstd",
+        "sanitizer": "AddressSanitizer",
+        "tag": "2fabd37-global_buffer_overflow",
+        "vul_commit": "2fabd37",
+        "vul_func": []
+    },
+    "zstd-147": {
+        "fix_commit": "044c8b47224d7cfbbd57317906e91f2db5b30994",
+        "fix_date": "2021-09-22",
+        "project": "zstd",
+        "sanitizer": "AddressSanitizer",
+        "tag": "d68aa19-heap_buffer_overflow",
+        "vul_commit": "d68aa19",
+        "vul_func": []
+    },
+    "yasm-148": {
+        "project": "yasm",
+        "tag": "9defefa-heap_out_of_bound",
+        "sanitizer": "AddressSanitizer",
+        "vul_commit": "9defefa",
+        "vul_func": []
+    },
+    "yasm-149": {
+        "project": "yasm",
+        "tag": "ecb47f1-null_pointer_deref",
+        "sanitizer": "AddressSanitizer",
+        "vul_commit": "ecb47f1",
+        "vul_func": []
+    },
+    "yasm-150": {
+        "project": "yasm",
+        "tag": "84be2ee-heap_out_of_bound",
+        "sanitizer": "AddressSanitizer",
+        "vul_commit": "84be2ee",
+        "vul_func": []
+    },
+    "krb5-151": {
+        "fix_commit": "c5507dff5f5b2936937442b43f6c021b4f8a493d",
+        "fix_date": "2022-12-26",
+        "project": "krb5",
+        "sanitizer": "AddressSanitizer",
+        "tag": "d864d74-heap_buffer_overflow",
+        "vul_commit": "d864d74",
+        "vul_func": []
+    },
+    "hostap-152": {
+        "fix_commit": "ce11c281ad1de25a815d49a29043d127cbc6354d",
+        "fix_date": "2019-06-22",
+        "project": "hostap",
+        "sanitizer": "AddressSanitizer",
+        "tag": "a6ed414-heap_buffer_overflow_a",
+        "vul_commit": "a6ed414",
+        "vul_func": []
+    },
+    "hostap-153": {
+        "fix_commit": "947272febe24a8f0ea828b5b2f35f13c3821901e",
+        "fix_date": "2021-02-03",
+        "project": "hostap",
+        "sanitizer": "AddressSanitizer",
+        "tag": "8112131-unknown_read",
+        "vul_commit": "8112131",
+        "vul_func": []
+    },
+    "hostap-154": {
+        "fix_commit": "76162b18280b174cd5e7101c9678f69785409fa3",
+        "fix_date": "2020-01-28",
+        "project": "hostap",
+        "sanitizer": "AddressSanitizer",
+        "tag": "703c2b6-heap_buffer_overflow",
+        "vul_commit": "703c2b6",
+        "vul_func": []
+    },
+    "hostap-155": {
+        "fix_commit": "ce11c281ad1de25a815d49a29043d127cbc6354d",
+        "fix_date": "2019-06-22",
+        "project": "hostap",
+        "sanitizer": "AddressSanitizer",
+        "tag": "a6ed414-heap_buffer_overflow_b",
+        "vul_commit": "a6ed414",
+        "vul_func": []
+    },
+    "hunspell-156": {
+        "fix_commit": "cbaaf7fd814793c204398519821b4ef8139a23b4",
+        "fix_date": "2022-10-17",
+        "project": "hunspell",
+        "sanitizer": "AddressSanitizer",
+        "tag": "473241e-heap_buffer_overflow",
+        "vul_commit": "473241e",
+        "vul_func": []
+    },
+    "hunspell-157": {
+        "fix_commit": "e7c38b0f85d65a6ad6af47753228f4b0df335c8e",
+        "fix_date": "2022-09-16",
+        "project": "hunspell",
+        "sanitizer": "AddressSanitizer",
+        "tag": "6291cac-stack_buffer_overflow_a",
+        "vul_commit": "6291cac",
+        "vul_func": []
+    },
+    "hunspell-158": {
+        "fix_commit": "ebf0e2ce8d903815a6e8d828286394b6f8830860",
+        "fix_date": "2022-09-08",
+        "project": "hunspell",
+        "sanitizer": "AddressSanitizer",
+        "tag": "74b08bf-heap_buffer_overflow_a",
+        "vul_commit": "74b08bf",
+        "vul_func": []
+    },
+    "hunspell-159": {
+        "fix_commit": "35c3cad4d70b222e7c1d73211a79a96ff7bf3651",
+        "fix_date": "2022-09-17",
+        "project": "hunspell",
+        "sanitizer": "AddressSanitizer",
+        "tag": "6291cac-stack_buffer_overflow_b",
+        "vul_commit": "6291cac",
+        "vul_func": []
+    },
+    "hunspell-160": {
+        "fix_commit": "bf229433b9ba7131bd80b52b8c71399230e0dc12",
+        "fix_date": "2022-12-05",
+        "project": "hunspell",
+        "sanitizer": "AddressSanitizer",
+        "tag": "1c1f34f-heap_buffer_overflow",
+        "vul_commit": "1c1f34f",
+        "vul_func": []
+    },
+    "hunspell-161": {
+        "fix_commit": "ef41c16af9a7fe0df27f421bd90120363c60dbb9",
+        "fix_date": "2022-10-07",
+        "project": "hunspell",
+        "sanitizer": "AddressSanitizer",
+        "tag": "6291cac-heap_buffer_overflow_b",
+        "vul_commit": "6291cac",
+        "vul_func": []
+    },
+    "hunspell-162": {
+        "fix_commit": "7d1c7d46c7a7fcd9987fc2691712b0696ab6646c",
+        "fix_date": "2022-09-16",
+        "project": "hunspell",
+        "sanitizer": "AddressSanitizer",
+        "tag": "74b08bf-heap_double_free",
+        "vul_commit": "74b08bf",
+        "vul_func": []
+    },
+    "hunspell-163": {
+        "fix_commit": "7357713ba5d529f3ff70c654b703429fc9cb55a4",
+        "fix_date": "2022-10-03",
+        "project": "hunspell",
+        "sanitizer": "AddressSanitizer",
+        "tag": "74b08bf-heap_buffer_overflow_b",
+        "vul_commit": "74b08bf",
+        "vul_func": []
+    },
+    "hunspell-164": {
+        "fix_commit": "e7c38b0f85d65a6ad6af47753228f4b0df335c8e",
+        "fix_date": "2022-09-16",
+        "project": "hunspell",
+        "sanitizer": "AddressSanitizer",
+        "tag": "6291cac-heap_buffer_overflow_a",
+        "vul_commit": "6291cac",
+        "vul_func": []
+    },
+    "hunspell-165": {
+        "fix_commit": "ab3825969d2a78f9871242c9ce89fcd34a3ddafe",
+        "fix_date": "2023-06-24",
+        "project": "hunspell",
+        "sanitizer": "AddressSanitizer",
+        "tag": "ddec95b-heap_buffer_overflow",
+        "vul_commit": "ddec95b",
+        "vul_func": []
+    },
+    "hunspell-166": {
+        "fix_commit": "c6d900cfd5d10c428008dc40f804b9d9319cec87",
+        "fix_date": "2023-03-07",
+        "project": "hunspell",
+        "sanitizer": "AddressSanitizer",
+        "tag": "82b9212-heap_use_after_free",
+        "vul_commit": "82b9212",
+        "vul_func": []
+    },
+    "extractfix-coreutils-167": {
+        "fix_commit": "4954f79ad2e38e4198af301bf52c3562af39d482",
+        "fix_date": "2016-11-23",
+        "project": "extractfix-coreutils",
+        "sanitizer": "AddressSanitizer",
+        "tag": "68c5eec-negative_size_param",
+        "vul_commit": "68c5eec",
+        "vul_func": []
+    },
+    "extractfix-coreutils-168": {
+        "fix_commit": "d91aeef0527bf8ec0f83c3c3b69f3979c0b4c4a0",
+        "fix_date": "2016-11-25",
+        "project": "extractfix-coreutils",
+        "sanitizer": "AddressSanitizer",
+        "tag": "ca99c52-global_buffer_overflow",
+        "vul_commit": "ca99c52",
+        "vul_func": []
+    },
+    "extractfix-coreutils-169": {
+        "fix_commit": "1d0f1b7ce10807290715d0b7c4637ac9d4fc7821",
+        "fix_date": "2015-02-05",
+        "project": "extractfix-coreutils",
+        "sanitizer": "AddressSanitizer",
+        "tag": "658529a-heap_buffer_overflow",
+        "vul_commit": "658529a",
+        "vul_func": []
+    },
+    "extractfix-coreutils-170": {
+        "fix_commit": "f4570a9ed6a4a3d9698093d5c9388c59d454d1dd",
+        "fix_date": "2017-04-17",
+        "project": "extractfix-coreutils",
+        "sanitizer": "AddressSanitizer",
+        "tag": "8d34b45-memcpy_param-overlap",
+        "vul_commit": "8d34b45",
+        "vul_func": []
+    },
+    "libplist-171": {
+        "fix_commit": "85f5cbd3705b34fcc52009ca51d8167ab18764fa",
+        "fix_date": "2023-01-17",
+        "project": "libplist",
+        "sanitizer": "AddressSanitizer",
+        "tag": "491a3ac-heap_buffer_overflow_b",
+        "vul_commit": "491a3ac",
+        "vul_func": []
+    },
+    "libplist-172": {
+        "fix_commit": "62b03b85a56a7b98e6eef237deeff1a8b41f8fb8",
+        "fix_date": "2023-01-09",
+        "project": "libplist",
+        "sanitizer": "AddressSanitizer",
+        "tag": "491a3ac-heap_use_after_free",
+        "vul_commit": "491a3ac",
+        "vul_func": []
+    },
+    "libplist-173": {
+        "fix_commit": "5bdbd3fe620e66a65373524a0707909ca926a3a1",
+        "fix_date": "2023-01-09",
+        "project": "libplist",
+        "sanitizer": "AddressSanitizer",
+        "tag": "491a3ac-heap_buffer_overflow_a",
+        "vul_commit": "491a3ac",
+        "vul_func": []
+    },
+    "extractfix-libjpeg-turbo-174": {
+        "fix_commit": "dd2b651243125701dca2ed2f31b3d34056719b9c",
+        "fix_date": "2012-03-30",
+        "project": "extractfix-libjpeg-turbo",
+        "sanitizer": "AddressSanitizer",
+        "tag": "4f24016-stack_buffer_overflow",
+        "vul_commit": "4f24016",
+        "vul_func": []
+    },
+    "extractfix-libjpeg-turbo-175": {
+        "fix_commit": "cbe01e0c6757c918a220a63ce614fe77260a7a03",
+        "fix_date": "2017-06-20",
+        "project": "extractfix-libjpeg-turbo",
+        "sanitizer": "AddressSanitizer",
+        "tag": "ae8cdf5-heap_buffer_overflow",
+        "vul_commit": "ae8cdf5",
+        "vul_func": []
+    },
+    "extractfix-libjpeg-turbo-176": {
+        "fix_commit": "1ecd9a5729d78518397889a630e3534bd9d963a8",
+        "fix_date": "2017-10-02",
+        "project": "extractfix-libjpeg-turbo",
+        "sanitizer": "AddressSanitizer",
+        "tag": "3212005-null_ptr_dereference",
+        "vul_commit": "3212005",
+        "vul_func": []
+    },
+    "extractfix-libjpeg-turbo-177": {
+        "fix_commit": "11c98abd417c98cf05974c55c9f483e278950529",
+        "fix_date": "2020-06-03",
+        "project": "extractfix-libjpeg-turbo",
+        "sanitizer": "AddressSanitizer",
+        "tag": "208d927-heap_buffer_overflow",
+        "vul_commit": "208d927",
+        "vul_func": []
+    },
+    "wasm3-178": {
+        "project": "wasm3",
+        "tag": "139076a-use_after_free",
+        "sanitizer": "AddressSanitizer",
+        "vul_commit": "139076a",
+        "vul_func": []
+    }
+}
