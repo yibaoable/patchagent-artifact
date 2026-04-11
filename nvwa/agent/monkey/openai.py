@@ -42,6 +42,9 @@ class MonkeyOpenAIAgent(BaseAgent):
         self.llm = ChatOpenAI(temperature=self.temperature, model=self.model)
 
     def setup(self, context: Context):
+        issue_summary = getattr(context.task, "issue_summary")
+        issue_kind = getattr(context.task, "issue_kind", "bug context")
+
         lc_tools = [
             create_viewcode_tool(context, auto_hint=self.auto_hint),
             create_validate_tool(context, auto_hint=self.auto_hint),
@@ -71,7 +74,8 @@ class MonkeyOpenAIAgent(BaseAgent):
             MONKEY_USER_PROMPT_TEMPLATE.format(
                 project=context.task.project,
                 tag=context.task.tag,
-                report=context.task.sanitizer_report.summary,  # type: ignore
+                issue=issue_summary,
+                issue_kind=issue_kind,
                 error_cases=self.error_cases,
             )
         )
@@ -97,7 +101,8 @@ class MonkeyOpenAIAgent(BaseAgent):
             {
                 "project": lambda input: context.task.project,
                 "tag": lambda input: context.task.tag,
-                "report": lambda input: context.task.sanitizer_report.summary,  # type: ignore
+                "issue": lambda input: issue_summary,
+                "issue_kind": lambda input: issue_kind,
                 "error_cases": lambda input: self.error_cases,
                 "agent_scratchpad": lambda input: format_to_openai_tool_messages(input["intermediate_steps"]),
             }
@@ -133,4 +138,3 @@ class MonkeyOpenAIAgent(BaseAgent):
         with self.context_manager.new_context() as context:
             self.setup(context)
             _ = self.agent_executor.invoke({})
-

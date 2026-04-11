@@ -26,7 +26,14 @@ class CtagsServer(LanguageServer):
 
     @classmethod
     def supported_languages(cls) -> list[LanguageType]:
-        return [LanguageType.C]
+        return [
+            LanguageType.C,
+            LanguageType.JAVA,
+            LanguageType.GO,
+            LanguageType.PYTHON,
+            LanguageType.JAVASCRIPT,
+            LanguageType.TYPESCRIPT,
+        ]
 
     def _compile(self):
         ctag_dir = os.path.join(self.task.path, "ctags")

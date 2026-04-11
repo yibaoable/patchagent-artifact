@@ -9,7 +9,7 @@ class DefaultPolicy(BasePolicy):
     MONKEYOPENAI_ITERATION_NUM = 3
 
     def __init__(self, task: PatchTask, reset: bool = False, model: str = "gpt-4", log_path: Union[None, str] = None):
-        super().__init__(task, reset=reset, log_path=log_path)
+        super().__init__(task, reset=reset, log_path=log_path, model=model)
         self.model = model
         self.agent_list: List[BaseAgent] = []
 

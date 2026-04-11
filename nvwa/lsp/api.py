@@ -19,15 +19,21 @@ def viewcode(task: PatchTask, path: str, start_line: int, end_line: int) -> Unio
 
 def find_definition(task: PatchTask, path: str, line: int, column: int) -> List[str]:
     server = find_backend(task, find_definition.__name__)
+    if server is None:
+        return []
     return server.find_definition(path, line, column)  # type: ignore
 
 
 def locate_symbol(task: PatchTask, symbol: str) -> List[str]:
     server = find_backend(task, locate_symbol.__name__)
+    if server is None:
+        return []
     return server.locate_symbol(symbol)  # type: ignore
 
 def hover(task: PatchTask, path: str, line: int, column: int) -> Union[str, None]:
     server = find_backend(task, hover.__name__)
+    if server is None:
+        return None
     return server.hover(path, line, column)  # type: ignore
 
 @atexit.register

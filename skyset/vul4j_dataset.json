@@ -1,0 +1,3397 @@
+[
+  {
+    "CVE_id": "CVE-2017-18349",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "src/main/java/com/alibaba/fastjson/serializer/ObjectArrayCodec.java",
+    "buggy_line": [
+      [
+        177
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        127,
+        180
+      ]
+    ],
+    "human_patch": "https://github.com/alibaba/fastjson/commit/f5903fa56497c00ed0703ac875b511f9bd5f1d8e",
+    "vul_id": "VUL4J-1",
+    "package_name": "com.alibaba.fastjson.serializer",
+    "source_dir": "src/main/java/",
+    "buggy_code": "    @SuppressWarnings({ \"unchecked\", \"rawtypes\" })\n    public <T> T deserialze(DefaultJSONParser parser, Type type, Object fieldName) {\n        final JSONLexer lexer = parser.lexer;\n        if (lexer.token() == JSONToken.NULL) {\n            lexer.nextToken(JSONToken.COMMA);\n            return null;\n        }\n\n        if (lexer.token() == JSONToken.LITERAL_STRING) {\n            byte[] bytes = lexer.bytesValue();\n            lexer.nextToken(JSONToken.COMMA);\n            return (T) bytes;\n        }\n\n        Class componentClass;\n        Type componentType;\n        if (type instanceof GenericArrayType) {\n            GenericArrayType clazz = (GenericArrayType) type;\n            componentType = clazz.getGenericComponentType();\n            if (componentType instanceof TypeVariable) {\n                TypeVariable typeVar = (TypeVariable) componentType;\n                Type objType = parser.getContext().type;\n                if (objType instanceof ParameterizedType) {\n                    ParameterizedType objParamType = (ParameterizedType) objType;\n                    Type objRawType = objParamType.getRawType();\n                    Type actualType = null;\n                    if (objRawType instanceof Class) {\n                        TypeVariable[] objTypeParams = ((Class) objRawType).getTypeParameters();\n                        for (int i = 0; i < objTypeParams.length; ++i) {\n                            if (objTypeParams[i].getName().equals(typeVar.getName())) {\n                                actualType = objParamType.getActualTypeArguments()[i];\n                            }\n                        }\n                    }\n                    if (actualType instanceof Class) {\n                        componentClass = (Class) actualType;\n                    } else {\n                        componentClass = Object.class;\n                    }\n                } else {\n                    componentClass = TypeUtils.getClass(typeVar.getBounds()[0]);\n                }\n            } else {\n                componentClass = TypeUtils.getClass(componentType);\n            }\n        } else {\n            Class clazz = (Class) type;\n            componentType = componentClass = clazz.getComponentType();\n        }\n        JSONArray array = new JSONArray();\n        parser.parseArray(componentClass, array, fieldName);\n\n        return (T) toObjectArray(parser, componentClass, array);\n    }",
+    "cve_description": "parseObject in Fastjson before 1.2.25, as used in FastjsonEngine in Pippo 1.11.0 and other products, allows remote attackers to execute arbitrary code via a crafted JSON request, as demonstrated by a crafted rmi:// URI in the dataSourceName field of HTTP POST data to the Pippo /json URI, which is mishandled in AjaxApplication.java.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-20": {
+        "name": "CWE-20: Improper Input Validation",
+        "description": "The product receives input or data, but it does\n        not validate or incorrectly validates that the input has the\n        properties that are required to process the data safely and\n        correctly."
+      }
+    },
+    "project": "fastjson",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=com.alibaba.json.bvt.bug.Issue1005#test_for_issue",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2017-5662",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "batik-dom/src/main/java/org/apache/batik/dom/util/SAXDocumentFactory.java",
+    "buggy_line": [
+      [
+        405
+      ],
+      [
+        449
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        400,
+        412
+      ],
+      [
+        414,
+        467
+      ]
+    ],
+    "human_patch": "https://github.com/apache/xmlgraphics-batik/commit/660ef628d637af636ea113243fe73f170ac43958",
+    "vul_id": "VUL4J-2",
+    "cve_description": "In Apache Batik before 1.9, files lying on the filesystem of the server which uses batik can be revealed to arbitrary users who send maliciously formed SVG files. The file types that can be shown depend on the user context in which the exploitable application is running. If the user is root a full compromise of the server - including confidential or sensitive files - would be possible. XXE can also be used to attack the availability of the server via denial of service as the references within a xml document can trivially trigger an amplification attack.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-611": {
+        "name": "CWE-611: Improper Restriction of XML External Entity Reference",
+        "description": "The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output."
+      }
+    },
+    "project": "xmlgraphics-batik",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl batik-dom",
+    "test_cmd": "mvn test -pl batik-dom -Dtest=org.apache.batik.dom.util.TestCVE_2017_5662",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2015-0263",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "camel-core/src/main/java/org/apache/camel/converter/jaxp/XmlConverter.java",
+    "buggy_line": [
+      [
+        599
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        574,
+        607
+      ]
+    ],
+    "human_patch": "https://github.com/apache/camel/commit/7d19340bcdb42f7aae584d9c5003ac4f7ddaee36",
+    "vul_id": "VUL4J-3",
+    "package_name": "org.apache.camel.converter.jaxp",
+    "source_dir": "camel-core/src/main/java/",
+    "buggy_code": "    @Converter\n    public SAXSource toSAXSourceFromStream(StreamSource source, Exchange exchange) throws SAXException {\n        InputSource inputSource;\n        if (source.getReader() != null) {\n            inputSource = new InputSource(source.getReader());\n        } else {\n            inputSource = new InputSource(source.getInputStream());\n        }\n        inputSource.setSystemId(source.getSystemId());\n        inputSource.setPublicId(source.getPublicId());\n        XMLReader xmlReader = null;\n        SAXParserFactory sfactory = null;\n        //Need to setup XMLReader security feature by default\n        try {\n            // use the SAXPaserFactory which is set from exchange\n            if (exchange != null) {\n                sfactory = exchange.getProperty(Exchange.SAXPARSER_FACTORY, SAXParserFactory.class);\n            }\n            if (sfactory == null) {\n                sfactory = SAXParserFactory.newInstance();\n                try {\n                    sfactory.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, true);\n                } catch (Exception e) {\n                    LOG.warn(\"SAXParser doesn't support the feature {} with value {}, due to {}.\", new Object[]{javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, \"true\", e});\n                }\n            }\n            sfactory.setNamespaceAware(true);\n            SAXParser parser = sfactory.newSAXParser();\n            xmlReader = parser.getXMLReader();\n        } catch (Exception ex) {\n            LOG.warn(\"Cannot create the SAXParser XMLReader, due to {}\", ex);\n        }\n        return new SAXSource(xmlReader, inputSource);\n    }",
+    "cve_description": "XML external entity (XXE) vulnerability in the XML converter setup in converter/jaxp/XmlConverter.java in Apache Camel before 2.13.4 and 2.14.x before 2.14.2 allows remote attackers to read arbitrary files via an external entity in an SAXSource.",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "camel",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl camel-core",
+    "test_cmd": "mvn test -pl camel-core -Dtest=org.apache.camel.component.xslt.XsltDTDTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2015-0263",
+    "single_file": "1",
+    "bug_type": "deletion",
+    "buggy_file": "camel-core/src/main/java/org/apache/camel/builder/xml/XPathBuilder.java",
+    "buggy_line": [
+      [
+        1116,
+        1134
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        1097,
+        1148
+      ]
+    ],
+    "human_patch": "https://github.com/apache/camel/commit/1df559649a96a1ca0368373387e542f46e4820da",
+    "vul_id": "VUL4J-4",
+    "package_name": "org.apache.camel.builder.xml",
+    "source_dir": "camel-core/src/main/java/",
+    "buggy_code": "    protected Object doGetDocument(Exchange exchange, Object body) throws Exception {\n        if (body == null) {\n            return null;\n        }\n\n        Object answer = null;\n\n        Class<?> type = getDocumentType();\n        Exception cause = null;\n        if (type != null) {\n            // try to get the body as the desired type\n            try {\n                answer = exchange.getContext().getTypeConverter().convertTo(type, exchange, body);\n            } catch (Exception e) {\n                // we want to store the caused exception, if we could not convert\n                cause = e;\n            }\n        }\n\n        // okay we can try to remedy the failed conversion by some special types\n        if (answer == null) {\n            // let's try coercing some common types into something JAXP work with the best for special types\n            if (body instanceof WrappedFile) {\n                // special for files so we can work with them out of the box\n                InputStream is = exchange.getContext().getTypeConverter().convertTo(InputStream.class, exchange, body);\n                answer = new InputSource(is);\n            } else if (body instanceof BeanInvocation) {\n                // if its a null bean invocation then handle that specially\n                BeanInvocation bi = exchange.getContext().getTypeConverter().convertTo(BeanInvocation.class, exchange, body);\n                if (bi.getArgs() != null && bi.getArgs().length == 1 && bi.getArgs()[0] == null) {\n                    // its a null argument from the bean invocation so use null as answer\n                    answer = null;\n                }\n            } else if (body instanceof String) {\n                answer = new InputSource(new StringReader((String) body));\n            }\n        }\n\n        if (type == null && answer == null) {\n            // fallback to get the body as is\n            answer = body;\n        } else if (answer == null) {\n            // there was a type, and we could not convert to it, then fail\n            if (cause != null) {\n                throw cause;\n            } else {\n                throw new NoTypeConversionAvailableException(body, type);\n            }\n        }\n\n        return answer;\n    }",
+    "cve_description": "Multiple XML external entity (XXE) vulnerabilities in builder/xml/XPathBuilder.java in Apache Camel before 2.13.4 and 2.14.x before 2.14.2 allow remote attackers to read arbitrary files via an external entity in an invalid XML (1) String or (2) GenericFile object in an XPath query.",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "camel",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl camel-core",
+    "test_cmd": "mvn test -pl camel-core -Dtest=org.apache.camel.builder.xml.XPathFeatureTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "APACHE-COMMONS-001",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "src/main/java/org/apache/commons/compress/archivers/examples/Expander.java",
+    "buggy_line": [
+      [
+        241
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        239,
+        264
+      ]
+    ],
+    "human_patch": "https://github.com/apache/commons-compress/commit/a080293da69f3fe3d11d5214432e1469ee195870",
+    "vul_id": "VUL4J-5",
+    "package_name": "org.apache.commons.compress.archivers.examples",
+    "source_dir": "src/main/java/",
+    "buggy_code": "    private void expand(ArchiveEntrySupplier supplier, EntryWriter writer, File targetDirectory)\n        throws IOException {\n        String targetDirPath = targetDirectory.getCanonicalPath();\n        ArchiveEntry nextEntry = supplier.getNextReadableEntry();\n        while (nextEntry != null) {\n            File f = new File(targetDirectory, nextEntry.getName());\n            if (!f.getCanonicalPath().startsWith(targetDirPath)) {\n                throw new IOException(\"expanding \" + nextEntry.getName()\n                    + \" would create file outside of \" + targetDirectory);\n            }\n            if (nextEntry.isDirectory()) {\n                if (!f.isDirectory() && !f.mkdirs()) {\n                    throw new IOException(\"failed to create directory \" + f);\n                }\n            } else {\n                File parent = f.getParentFile();\n                if (!parent.isDirectory() && !parent.mkdirs()) {\n                    throw new IOException(\"failed to create directory \" + parent);\n                }\n                try (OutputStream o = Files.newOutputStream(f.toPath())) {\n                    writer.writeEntryDataTo(nextEntry, o);\n                }\n            }\n            nextEntry = supplier.getNextReadableEntry();\n        }\n    }",
+    "cve_description": "",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "commons-compress",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.apache.commons.compress.archivers.examples.ExpanderTest#fileCantEscapeDoubleDotPathWithSimilarSibling",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1324",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "src/main/java/org/apache/commons/compress/archivers/zip/X0017_StrongEncryptionHeader.java",
+    "buggy_line": [
+      [
+        313
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        295,
+        319
+      ]
+    ],
+    "human_patch": "https://github.com/apache/commons-compress/commit/2a2f1dc48e22a34ddb72321a4db211da91aa933b",
+    "vul_id": "VUL4J-6",
+    "package_name": "org.apache.commons.compress.archivers.zip",
+    "source_dir": "src/main/java/",
+    "buggy_code": "    /**\n     * Parse central directory format.\n     *\n     * @param data the buffer to read data from\n     * @param offset offset into buffer to read data\n     * @param length the length of data\n     */\n    public void parseCentralDirectoryFormat(final byte[] data, final int offset, final int length) {\n        this.format = ZipShort.getValue(data, offset);\n        this.algId = EncryptionAlgorithm.getAlgorithmByCode(ZipShort.getValue(data, offset + 2));\n        this.bitlen = ZipShort.getValue(data, offset + 4);\n        this.flags = ZipShort.getValue(data, offset + 6);\n        this.rcount = ZipLong.getValue(data, offset + 8);\n\n        if (rcount > 0) {\n            this.hashAlg = HashAlgorithm.getAlgorithmByCode(ZipShort.getValue(data, offset + 12));\n            this.hashSize = ZipShort.getValue(data, offset + 14);\n            // srlist... hashed public keys\n            for (int i = 0; i < this.rcount; i++) {\n                for (int j = 0; j < this.hashSize; j++) {\n                    //  ZipUtil.signedByteToUnsignedInt(data[offset + 16 + (i * this.hashSize) + j]));\n                }\n            }\n        }\n    }",
+    "cve_description": "A specially crafted ZIP archive can be used to cause an infinite loop inside of Apache Commons Compress' extra field parser used by the ZipFile and ZipArchiveInputStream classes in versions 1.11 to 1.15. This can be used to mount a denial of service attack against services that use Compress' zip package.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-835": {
+        "name": "CWE-835: Loop with Unreachable Exit Condition ('Infinite Loop')",
+        "description": "The product contains an iteration or loop with an exit condition that cannot be reached, i.e., an infinite loop."
+      }
+    },
+    "project": "commons-compress",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.apache.commons.compress.Test_CVE_2018_1324",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-11771",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "src/main/java/org/apache/commons/compress/archivers/zip/ZipArchiveInputStream.java",
+    "buggy_line": [
+      [
+        528
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        507,
+        544
+      ]
+    ],
+    "human_patch": "https://github.com/apache/commons-compress/commit/a41ce6892cb0590b2e658704434ac0dbcb6834c8",
+    "vul_id": "VUL4J-7",
+    "package_name": "org.apache.commons.compress.archivers.zip",
+    "source_dir": "src/main/java/",
+    "buggy_code": "    /**\n     * Implementation of read for STORED entries.\n     */\n    private int readStored(final byte[] buffer, final int offset, final int length) throws IOException {\n\n        if (current.hasDataDescriptor) {\n            if (lastStoredEntry == null) {\n                readStoredEntry();\n            }\n            return lastStoredEntry.read(buffer, offset, length);\n        }\n\n        final long csize = current.entry.getSize();\n        if (current.bytesRead >= csize) {\n            return -1;\n        }\n\n        if (buf.position() >= buf.limit()) {\n            buf.position(0);\n            final int l = in.read(buf.array());\n            if (l == -1) {\n                return -1;\n            }\n            buf.limit(l);\n\n            count(l);\n            current.bytesReadFromStream += l;\n        }\n\n        int toRead = Math.min(buf.remaining(), length);\n        if ((csize - current.bytesRead) < toRead) {\n            // if it is smaller than toRead then it fits into an int\n            toRead = (int) (csize - current.bytesRead);\n        }\n        buf.get(buffer, offset, toRead);\n        current.bytesRead += toRead;\n        return toRead;\n    }",
+    "cve_description": "When reading a specially crafted ZIP archive, the read method of Apache Commons Compress 1.7 to 1.17's ZipArchiveInputStream can fail to return the correct EOF indication after the end of the stream has been reached. When combined with a java.io.InputStreamReader this can lead to an infinite stream, which can be used to mount a denial of service attack against services that use Compress' zip package.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-835": {
+        "name": "CWE-835: Loop with Unreachable Exit Condition ('Infinite Loop')",
+        "description": "The product contains an iteration or loop with an exit condition that cannot be reached, i.e., an infinite loop."
+      }
+    },
+    "project": "commons-compress",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.apache.commons.compress.archivers.zip.ZipArchiveInputStreamTest#singleByteReadThrowsAtEofForCorruptedStoredEntry,org.apache.commons.compress.archivers.zip.ZipArchiveInputStreamTest#multiByteReadThrowsAtEofForCorruptedStoredEntry",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2019-12402",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "src/main/java/org/apache/commons/compress/archivers/zip/NioZipEncoding.java",
+    "buggy_line": [
+      [
+        114
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        74,
+        124
+      ]
+    ],
+    "human_patch": "https://github.com/apache/commons-compress/commit/4ad5d80a6272e007f64a6ac66829ca189a8093b9",
+    "vul_id": "VUL4J-8",
+    "package_name": "org.apache.commons.compress.archivers.zip",
+    "source_dir": "src/main/java/",
+    "buggy_code": "    /**\n     * @see ZipEncoding#encode(java.lang.String)\n     */\n    @Override\n    public ByteBuffer encode(final String name) {\n        final CharsetEncoder enc = newEncoder();\n\n        final CharBuffer cb = CharBuffer.wrap(name);\n        CharBuffer tmp = null;\n        ByteBuffer out = ByteBuffer.allocate(estimateInitialBufferSize(enc, cb.remaining()));\n\n        while (cb.remaining() > 0) {\n            final CoderResult res = enc.encode(cb, out, false);\n\n            if (res.isUnmappable() || res.isMalformed()) {\n\n                // write the unmappable characters in utf-16\n                // pseudo-URL encoding style to ByteBuffer.\n\n                int spaceForSurrogate = estimateIncrementalEncodingSize(enc, 6 * res.length());\n                if (spaceForSurrogate > out.remaining()) {\n                    // if the destination buffer isn't over sized, assume that the presence of one\n                    // unmappable character makes it likely that there will be more. Find all the\n                    // un-encoded characters and allocate space based on those estimates.\n                    int charCount = 0;\n                    for (int i = cb.position() ; i < cb.limit(); i++) {\n                        charCount += !enc.canEncode(cb.get(i)) ? 6 : 1;\n                    }\n                    int totalExtraSpace = estimateIncrementalEncodingSize(enc, charCount);\n                    out = ZipEncodingHelper.growBufferBy(out, totalExtraSpace - out.remaining());\n                }\n                if (tmp == null) {\n                    tmp = CharBuffer.allocate(6);\n                }\n                for (int i = 0; i < res.length(); ++i) {\n                    out = encodeFully(enc, encodeSurrogate(tmp, cb.get()), out);\n                }\n\n            } else if (res.isOverflow()) {\n                int increment = estimateIncrementalEncodingSize(enc, cb.remaining());\n                out = ZipEncodingHelper.growBufferBy(out, increment);\n            }\n        }\n        // tell the encoder we are done\n        enc.encode(cb, out, true);\n        // may have caused underflow, but that's been ignored traditionally\n\n        out.limit(out.position());\n        out.rewind();\n        return out;\n    }",
+    "cve_description": "The file name encoding algorithm used internally in Apache Commons Compress 1.15 to 1.18 can get into an infinite loop when faced with specially crafted inputs. This can lead to a denial of service attack if an attacker can choose the file names inside of an archive created by Compress.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-835": {
+        "name": "CWE-835: Loop with Unreachable Exit Condition ('Infinite Loop')",
+        "description": "The product contains an iteration or loop with an exit condition that cannot be reached, i.e., an infinite loop."
+      }
+    },
+    "project": "commons-compress",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.apache.commons.compress.archivers.zip.NioZipEncodingTest#partialSurrogatePair",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2020-1953",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "src/main/java/org/apache/commons/configuration2/YAMLConfiguration.java",
+    "buggy_line": [
+      [
+        68
+      ],
+      [
+        83
+      ],
+      [
+        120
+      ],
+      [
+        135
+      ],
+      [
+        144
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        63,
+        76
+      ],
+      [
+        78,
+        91
+      ],
+      [
+        109,
+        128
+      ],
+      [
+        130,
+        143
+      ]
+    ],
+    "human_patch": "https://github.com/apache/commons-configuration/commit/add7375cf37fd316d4838c6c56b054fc293b4641",
+    "vul_id": "VUL4J-9",
+    "cve_description": "Apache Commons Configuration uses a third-party library to parse YAML files which by default allows the instantiation of classes if the YAML includes special statements. Apache Commons Configuration versions 2.2, 2.3, 2.4, 2.5, 2.6 did not change the default settings of this library. So if a YAML file was loaded from an untrusted source, it could therefore load and execute code out of the control of the host application.",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "commons-configuration",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.apache.commons.configuration2.TestYAMLConfiguration#testObjectCreationFromStream,org.apache.commons.configuration2.TestYAMLConfiguration#testObjectCreationFromReader",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2013-2186",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "src/main/java/org/apache/commons/fileupload/disk/DiskFileItem.java",
+    "buggy_line": [
+      [
+        659
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        646,
+        671
+      ]
+    ],
+    "human_patch": "https://github.com/apache/commons-fileupload/commit/163a6061fbc077d4b6e4787d26857c2baba495d1",
+    "vul_id": "VUL4J-10",
+    "package_name": "org.apache.commons.fileupload.disk",
+    "source_dir": "src/main/java/",
+    "buggy_code": "    /**\n     * Reads the state of this object during deserialization.\n     *\n     * @param in The stream from which the state should be read.\n     *\n     * @throws IOException if an error occurs.\n     * @throws ClassNotFoundException if class cannot be found.\n     */\n    private void readObject(ObjectInputStream in)\n            throws IOException, ClassNotFoundException {\n        // read values\n        in.defaultReadObject();\n\n        OutputStream output = getOutputStream();\n        if (cachedContent != null) {\n            output.write(cachedContent);\n        } else {\n            FileInputStream input = new FileInputStream(dfosFile);\n            IOUtils.copy(input, output);\n            dfosFile.delete();\n            dfosFile = null;\n        }\n        output.close();\n\n        cachedContent = null;\n    }",
+    "cve_description": "The DiskFileItem class in Apache Commons FileUpload, as used in Red Hat JBoss BRMS 5.3.1; JBoss Portal 4.3 CP07, 5.2.2, and 6.0.0; and Red Hat JBoss Web Server 1.0.2 allows remote attackers to write to arbitrary files via a NULL byte in a file name in a serialized instance.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-20": {
+        "name": "CWE-20: Improper Input Validation",
+        "description": "The product receives input or data, but it does\n        not validate or incorrectly validates that the input has the\n        properties that are required to process the data safely and\n        correctly."
+      }
+    },
+    "project": "commons-fileupload",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.apache.commons.fileupload.DiskFileItemSerializeTest#testInvalidRepositoryWithNullChar,org.apache.commons.fileupload.DiskFileItemSerializeTest#testInvalidRepository",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2014-0050",
+    "single_file": "0",
+    "buggy_info": [
+      {
+        "buggy_file_path": "src/main/java/org/apache/commons/fileupload/FileUploadBase.java",
+        "buggy_method_with_comment": [
+          [
+            930,
+            999
+          ],
+          [
+            1181,
+            1187
+          ]
+        ],
+        "buggy_line": [
+          [
+            994
+          ],
+          [
+            1186
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "src/main/java/org/apache/commons/fileupload/MultipartStream.java",
+        "buggy_method_with_comment": [
+          [
+            305,
+            344
+          ]
+        ],
+        "buggy_line": [
+          [
+            334
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "human_patch": "https://github.com/apache/commons-fileupload/commit/c61ff05b3241cb14d989b67209e57aa71540417a",
+    "vul_id": "VUL4J-11",
+    "cve_description": "MultipartStream.java in Apache Commons FileUpload before 1.3.1, as used in Apache Tomcat, JBoss Web, and other products, allows remote attackers to cause a denial of service (infinite loop and CPU consumption) via a crafted Content-Type header that bypasses a loop's intended exit conditions.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-264": {
+        "name": "CWE CATEGORY: Permissions, Privileges, and Access Controls",
+        "description": "Weaknesses in this category are related to the management of permissions, privileges, and other security features that are used to perform access control."
+      }
+    },
+    "project": "commons-fileupload",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.apache.commons.fileupload.MultipartStreamTest#testSmallBuffer",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-17202",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "src/main/java/org/apache/commons/imaging/formats/jpeg/decoder/JpegDecoder.java",
+    "buggy_line": [
+      [
+        403
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        400,
+        408
+      ]
+    ],
+    "human_patch": "https://github.com/apache/commons-imaging/commit/6a79d35d6654d895d0a4b73b3a9282ec9aaeeb06",
+    "vul_id": "VUL4J-12",
+    "package_name": "org.apache.commons.imaging.formats.jpeg.decoder",
+    "source_dir": "src/main/java/",
+    "buggy_code": "    private int extend(int v, final int t) {\n        // \"EXTEND\", section F.2.2.1, figure F.12, page 105 of T.81\n        int vt = (1 << (t - 1));\n        while (v < vt) {\n            vt = (-1 << t) + 1;\n            v += vt;\n        }\n        return v;\n    }",
+    "cve_description": "Certain input files could make the code to enter into an infinite loop when Apache Sanselan 0.97-incubator was used to parse them, which could be used in a DoS attack. Note that Apache Sanselan (incubating) was renamed to Apache Commons Imaging.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-835": {
+        "name": "CWE-835: Loop with Unreachable Exit Condition ('Infinite Loop')",
+        "description": "The product contains an iteration or loop with an exit condition that cannot be reached, i.e., an infinite loop."
+      }
+    },
+    "project": "commons-imaging",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.apache.commons.imaging.formats.jpeg.decoder.JpegDecoderTest#testDecodeBadFile",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-17201",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "src/main/java/org/apache/commons/imaging/formats/rgbe/RgbeInfo.java",
+    "buggy_line": [
+      [
+        172
+      ],
+      [
+        179
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        171,
+        191
+      ]
+    ],
+    "human_patch": "https://github.com/apache/commons-imaging/commit/f5574bfe285edd79207fe8c30f53cb0af06e26bb",
+    "vul_id": "VUL4J-13",
+    "cve_description": "Certain input files could make the code hang when Apache Sanselan 0.97-incubator was used to parse them, which could be used in a DoS attack. Note that Apache Sanselan (incubating) was renamed to Apache Commons Imaging.",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "commons-imaging",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.apache.commons.imaging.formats.rgbe.RgbeReadTest#testErrorDecompressingInvalidFile",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2021-29425",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "src/main/java/org/apache/commons/io/FilenameUtils.java",
+    "buggy_line": [
+      [
+        679
+      ],
+      [
+        1492
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        591,
+        683
+      ]
+    ],
+    "human_patch": "https://github.com/apache/commons-io/commit/2736b6fe0b3fa22ec8e2b4184897ecadb021fc78",
+    "vul_id": "VUL4J-14",
+    "cve_description": "In Apache Commons IO before 2.7, When invoking the method FileNameUtils.normalize with an improper input string, like \"//../foo\", or \"\\\\..\\foo\", the result would be the same value, thus possibly providing access to files in the parent directory, but not further above (thus \"limited\" path traversal), if the calling code would use the result to construct a path value.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-20": {
+        "name": "Improper Input Validation",
+        "description": "The product receives input or data, but it does\n        not validate or incorrectly validates that the input has the\n        properties that are required to process the data safely and\n        correctly."
+      }
+    },
+    "project": "commons-io",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.apache.commons.io.FilenameUtilsTestCase#testGetPrefixLength,org.apache.commons.io.FilenameUtilsTestCase#testNormalize",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-8739",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "rt/rs/extensions/providers/src/main/java/org/apache/cxf/jaxrs/provider/atom/AbstractAtomProvider.java",
+    "buggy_line": [
+      [
+        92
+      ],
+      [
+        95
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        84,
+        97
+      ]
+    ],
+    "human_patch": "https://github.com/apache/cxf/commit/d9e2a6e7",
+    "vul_id": "VUL4J-15",
+    "cve_description": "The JAX-RS module in Apache CXF prior to 3.0.12 and 3.1.x prior to 3.1.9 provides a number of Atom JAX-RS MessageBodyReaders. These readers use Apache Abdera Parser which expands XML entities by default which represents a major XXE risk.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-611": {
+        "name": "CWE-611: Improper Restriction of XML External Entity Reference",
+        "description": "The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output."
+      }
+    },
+    "project": "cxf",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn -pl rt/rs/extensions/providers",
+    "test_cmd": "mvn -pl rt/rs/extensions/providers -Dtest=org.apache.cxf.jaxrs.provider.atom.AtomPojoProviderTest test",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2015-5253",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "rt/rs/security/sso/saml/src/main/java/org/apache/cxf/rs/security/saml/sso/SAMLSSOResponseValidator.java",
+    "buggy_line": [
+      [
+        95
+      ],
+      [
+        117
+      ],
+      [
+        129
+      ],
+      [
+        143
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        65,
+        149
+      ]
+    ],
+    "human_patch": "https://github.com/apache/cxf/commit/845eccb6484b43ba02875c71e824db23ae4f20c0",
+    "vul_id": "VUL4J-16",
+    "cve_description": "The SAML Web SSO module in Apache CXF before 2.7.18, 3.0.x before 3.0.7, and 3.1.x before 3.1.3 allows remote authenticated users to bypass authentication via a crafted SAML response with a valid signed assertion, related to a \"wrapping attack.\"",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-264": {
+        "name": "CWE CATEGORY: Permissions, Privileges, and Access Controls",
+        "description": "Weaknesses in this category are related to the management of permissions, privileges, and other security features that are used to perform access control."
+      }
+    },
+    "project": "cxf",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn -pl rt/rs/security/sso/saml",
+    "test_cmd": "mvn -pl rt/rs/security/sso/saml -Dtest=org.apache.cxf.rs.security.saml.sso.CombinedValidatorTest#testWrappingAttack3 test",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "HTTPCLIENT-1803",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "httpclient/src/main/java/org/apache/http/client/utils/URIBuilder.java",
+    "buggy_line": [
+      [
+        496
+      ],
+      [
+        507
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        493,
+        508
+      ]
+    ],
+    "human_patch": "https://github.com/apache/httpcomponents-client/commit/0554271750599756d4946c0d7ba43d04b1a7b22",
+    "vul_id": "VUL4J-17",
+    "cve_description": "",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "httpcomponents-client",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl httpclient",
+    "test_cmd": "mvn test -pl httpclient -Dtest=org.apache.http.client.utils.TestURIBuilder#testMalformedPath",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2019-0225",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "jspwiki-main/src/main/java/org/apache/wiki/url/DefaultURLConstructor.java",
+    "buggy_line": [
+      [
+        280
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        271,
+        281
+      ]
+    ],
+    "human_patch": "https://github.com/apache/jspwiki/commit/88d89d6523802c044cfcb7930cba40d8eeb21da2",
+    "vul_id": "VUL4J-18",
+    "package_name": "org.apache.wiki.url",
+    "source_dir": "jspwiki-main/src/main/java/",
+    "buggy_code": "    /**\n     *  This method is not needed for the DefaultURLConstructor.\n     *\n     * @param request The HTTP Request that was used to end up in this page.\n     * @return \"Wiki.jsp\", \"PageInfo.jsp\", etc.  Just return the name,\n     *         JSPWiki will figure out the page.\n     */\n    public String getForwardPage( HttpServletRequest request )\n    {\n        return request.getPathInfo();\n    }",
+    "cve_description": "A specially crafted url could be used to access files under the ROOT directory of the application on Apache JSPWiki 2.9.0 to 2.11.0.M2, which could be used by an attacker to obtain registered users' details.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-22": {
+        "name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "description": "The product uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the product does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory."
+      }
+    },
+    "project": "jspwiki",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl jspwiki-main",
+    "test_cmd": "mvn test -pl jspwiki-main -Dtest=org.apache.wiki.WikiServletTest#testNastyDoPost,org.apache.wiki.WikiServletTest#testDoGet",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "PDFBOX-3341",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "pdfbox/src/main/java/org/apache/pdfbox/pdmodel/encryption/StandardSecurityHandler.java",
+    "buggy_line": [
+      [
+        240
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        155,
+        276
+      ]
+    ],
+    "human_patch": "https://github.com/bqcuong/vul4j/commit/c90825da4d28d7b1ae9b1484b9a010206be3dec5",
+    "vul_id": "VUL4J-19",
+    "package_name": "org.apache.pdfbox.pdmodel.encryption",
+    "source_dir": "pdfbox/src/main/java/",
+    "buggy_code": "    /**\n     * Prepares everything to decrypt the document.\n     *\n     * Only if decryption of single objects is needed this should be called.\n     *\n     * @param encryption  encryption dictionary\n     * @param documentIDArray  document id\n     * @param decryptionMaterial Information used to decrypt the document.\n     *\n     * @throws IOException If there is an error accessing data.\n     */\n    @Override\n    public void prepareForDecryption(PDEncryption encryption, COSArray documentIDArray,\n                                     DecryptionMaterial decryptionMaterial)\n                                     throws IOException\n    {\n        if(!(decryptionMaterial instanceof StandardDecryptionMaterial))\n        {\n            throw new IOException(\"Decryption material is not compatible with the document\");\n        }\n        setDecryptMetadata(encryption.isEncryptMetaData());\n        StandardDecryptionMaterial material = (StandardDecryptionMaterial)decryptionMaterial;\n\n        String password = material.getPassword();\n        if(password == null)\n        {\n            password = \"\";\n        }\n\n        int dicPermissions = encryption.getPermissions();\n        int dicRevision = encryption.getRevision();\n        int dicLength = encryption.getVersion() == 1 ? 5 : encryption.getLength() / 8;\n\n        byte[] documentIDBytes = getDocumentIDBytes(documentIDArray);\n\n        // we need to know whether the meta data was encrypted for password calculation\n        boolean encryptMetadata = encryption.isEncryptMetaData();\n        \n        byte[] userKey = encryption.getUserKey();\n        byte[] ownerKey = encryption.getOwnerKey();\n        byte[] ue = null, oe = null;\n\n        Charset passwordCharset = Charsets.ISO_8859_1;\n        if (dicRevision == 6 || dicRevision == 5)\n        {\n            passwordCharset = Charsets.UTF_8;\n            ue = encryption.getUserEncryptionKey();\n            oe = encryption.getOwnerEncryptionKey();\n        }\n        \n        AccessPermission currentAccessPermission;\n\n        if( isOwnerPassword(password.getBytes(passwordCharset), userKey, ownerKey,\n                                 dicPermissions, documentIDBytes, dicRevision,\n                                 dicLength, encryptMetadata) )\n        {\n            currentAccessPermission = AccessPermission.getOwnerAccessPermission();\n            setCurrentAccessPermission(currentAccessPermission);\n            \n            byte[] computedPassword;\n            if (dicRevision == 6 || dicRevision == 5)\n            {\n                computedPassword = password.getBytes(passwordCharset);\n            }\n            else\n            {\n                computedPassword = getUserPassword(password.getBytes(passwordCharset),\n                        ownerKey, dicRevision, dicLength );\n            }\n            \n            encryptionKey =\n                computeEncryptedKey(\n                    computedPassword,\n                    ownerKey, userKey, oe, ue,\n                    dicPermissions,\n                    documentIDBytes,\n                    dicRevision,\n                    dicLength,\n                    encryptMetadata, true );\n        }\n        else if( isUserPassword(password.getBytes(passwordCharset), userKey, ownerKey,\n                           dicPermissions, documentIDBytes, dicRevision,\n                           dicLength, encryptMetadata) )\n        {\n            currentAccessPermission = new AccessPermission(dicPermissions);\n            setCurrentAccessPermission(currentAccessPermission);\n            \n            encryptionKey =\n                computeEncryptedKey(\n                    password.getBytes(passwordCharset),\n                    ownerKey, userKey, oe, ue,\n                    dicPermissions,\n                    documentIDBytes,\n                    dicRevision,\n                    dicLength,\n                    encryptMetadata, false );\n        }\n        else\n        {\n            throw new InvalidPasswordException(\"Cannot decrypt PDF, the password is incorrect\");\n        }\n\n        if (dicRevision == 6 || dicRevision == 5)\n        {\n            validatePerms(encryption, dicPermissions, encryptMetadata);\n        }\n\n        if (encryption.getVersion() == 4 || encryption.getVersion() == 5)\n        {\n            // detect whether AES encryption is used. This assumes that the encryption algo is \n            // stored in the PDCryptFilterDictionary\n            // However, crypt filters are used only when V is 4 or 5.\n            PDCryptFilterDictionary stdCryptFilterDictionary = encryption.getStdCryptFilterDictionary();\n\n            if (stdCryptFilterDictionary != null)\n            {\n                COSName cryptFilterMethod = stdCryptFilterDictionary.getCryptFilterMethod();\n                setAES(COSName.AESV2.equals(cryptFilterMethod) || \n                       COSName.AESV3.equals(cryptFilterMethod));\n            }\n        }\n    }",
+    "cve_description": "",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "vul4j",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl pdfbox",
+    "test_cmd": "mvn test -pl pdfbox -Dtest=org.apache.pdfbox.encryption.TestSymmetricKeyEncryption",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-11797",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "pdfbox/src/main/java/org/apache/pdfbox/cos/COSArray.java",
+    "buggy_line": [
+      [
+        539
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        529,
+        542
+      ]
+    ],
+    "human_patch": "https://github.com/apache/pdfbox/commit/f7dc8eed7df007c88421919932e2d4de44d2ae2",
+    "vul_id": "VUL4J-20",
+    "package_name": "org.apache.pdfbox.cos",
+    "source_dir": "pdfbox/src/main/java/",
+    "buggy_code": "    /**\n     * This will take an COSArray of numbers and convert it to a float[].\n     *\n     * @return This COSArray as an array of float numbers.\n     */\n    public float[] toFloatArray()\n    {\n        float[] retval = new float[size()];\n        for (int i = 0; i < size(); i++)\n        {\n            retval[i] = ((COSNumber)getObject( i )).floatValue();\n        }\n        return retval;\n    }",
+    "cve_description": "In Apache PDFBox 1.8.0 to 1.8.15 and 2.0.0RC1 to 2.0.11, a carefully crafted PDF file can trigger an extremely long running computation when parsing the page tree.",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "pdfbox",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl pdfbox",
+    "test_cmd": "mvn test -pl pdfbox -Dtest=org.apache.pdfbox.pdmodel.TestPDDocument#testCVE_2018_11797",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2014-8152",
+    "single_file": "0",
+    "buggy_info": [
+      {
+        "buggy_file_path": "src/main/java/org/apache/xml/security/stax/impl/InputProcessorChainImpl.java",
+        "buggy_method_with_comment": [
+          [
+            201,
+            211
+          ]
+        ],
+        "buggy_line": [
+          [
+            205
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "src/main/java/org/apache/xml/security/stax/impl/processor/input/XMLSecurityInputProcessor.java",
+        "buggy_method_with_comment": [
+          [
+            58,
+            151
+          ]
+        ],
+        "buggy_line": [
+          [
+            141
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "human_patch": "https://github.com/apache/santuario-java/commit/e50488044121cf01ffbc235ca53b9562031d69c5",
+    "vul_id": "VUL4J-21",
+    "cve_description": "Apache Santuario XML Security for Java 2.0.x before 2.0.3 allows remote attackers to bypass the streaming XML signature protection mechanism via a crafted XML document.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-254": {
+        "name": "CWE CATEGORY: 7PK - Security Features",
+        "description": "Software security is not security software. Here we're concerned with topics like authentication, access control, confidentiality, cryptography, and privilege management."
+      }
+    },
+    "project": "santuario-java",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.apache.xml.security.test.stax.signature.SignatureVerificationTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-6802",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "web/src/main/java/org/apache/shiro/web/util/WebUtils.java",
+    "buggy_line": [
+      [
+        251,
+        255
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        237,
+        256
+      ]
+    ],
+    "human_patch": "https://github.com/apache/shiro/commit/b15ab927709ca18ea4a02538be01919a19ab65af",
+    "vul_id": "VUL4J-22",
+    "package_name": "org.apache.shiro.web.util",
+    "source_dir": "web/src/main/java/",
+    "buggy_code": "    /**\n     * Return the context path for the given request, detecting an include request\n     * URL if called within a RequestDispatcher include.\n     * <p>As the value returned by <code>request.getContextPath()</code> is <i>not</i>\n     * decoded by the servlet container, this method will decode it.\n     *\n     * @param request current HTTP request\n     * @return the context path\n     */\n    public static String getContextPath(HttpServletRequest request) {\n        String contextPath = (String) request.getAttribute(INCLUDE_CONTEXT_PATH_ATTRIBUTE);\n        if (contextPath == null) {\n            contextPath = request.getContextPath();\n        }\n        if (\"/\".equals(contextPath)) {\n            // Invalid case, but happens for includes on Jetty: silently adapt it.\n            contextPath = \"\";\n        }\n        return decodeRequestString(request, contextPath);\n    }",
+    "cve_description": "Apache Shiro before 1.3.2 allows attackers to bypass intended servlet filters and gain access by leveraging use of a non-root servlet context path.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-284": {
+        "name": "CWE-284: Improper Access Control",
+        "description": "The product does not restrict or incorrectly restricts access to a resource from an unauthorized actor."
+      }
+    },
+    "project": "shiro",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl web",
+    "test_cmd": "mvn test -pl web -Dtest=org.apache.shiro.web.util.WebUtilsTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-5394",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "bundles/extensions/xss/src/main/java/org/apache/sling/xss/impl/XSSAPIImpl.java",
+    "buggy_line": [
+      [
+        432
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        427,
+        433
+      ]
+    ],
+    "human_patch": "https://github.com/apache/sling/commit/7d2365a248943071a44d8495655186e4f14ea294",
+    "vul_id": "VUL4J-23",
+    "package_name": "org.apache.sling.xss.impl",
+    "source_dir": "bundles/extensions/xss/src/main/java/",
+    "buggy_code": "    /**\n     * @see org.apache.sling.xss.XSSAPI#encodeForJSString(String)\n     */\n    @Override\n    public String encodeForJSString(String source) {\n        return source == null ? null : Encode.forJavaScriptSource(source);\n    }",
+    "cve_description": "In the XSS Protection API module before 1.0.12 in Apache Sling, the encoding done by the XSSAPI.encodeForJSString() method is not restrictive enough and for some input patterns allows script tags to pass through unencoded, leading to potential XSS vulnerabilities.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-79": {
+        "name": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The product does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users."
+      }
+    },
+    "project": "sling",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl bundles/extensions/xss",
+    "test_cmd": "mvn test -pl bundles/extensions/xss -Dtest=org.apache.sling.xss.impl.XSSAPIImplTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-6798",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "bundles/extensions/xss/src/main/java/org/apache/sling/xss/impl/XSSAPIImpl.java",
+    "buggy_line": [
+      [
+        67
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        62,
+        68
+      ]
+    ],
+    "human_patch": "https://github.com/apache/sling/commit/fb2719e8299fadddae62245482de112052a0e08c",
+    "vul_id": "VUL4J-24",
+    "package_name": "org.apache.sling.xss.impl",
+    "source_dir": "bundles/extensions/xss/src/main/java/",
+    "cve_description": "In the XSS Protection API module before 1.0.12 in Apache Sling, the method XSS.getValidXML() uses an insecure SAX parser to validate the input string, which allows for XXE attacks in all scripts which use this method to validate user input, potentially allowing an attacker to read sensitive data on the filesystem, perform same-site-request-forgery (SSRF), port-scanning behind the firewall or DoS the application.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-611": {
+        "name": "CWE-611: Improper Restriction of XML External Entity Reference",
+        "description": "The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output."
+      }
+    },
+    "project": "sling",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl bundles/extensions/xss",
+    "test_cmd": "mvn test -pl bundles/extensions/xss -Dtest=org.apache.sling.xss.impl.XSSAPIImplTest#testGetValidXML",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2017-15717",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "src/main/java/org/apache/sling/xss/impl/XSSAPIImpl.java",
+    "buggy_line": [
+      [
+        231,
+        258
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        224,
+        262
+      ]
+    ],
+    "human_patch": "https://github.com/apache/sling-org-apache-sling-xss/commit/ec6764d165abc4df8cffd8439761bb2228887db9",
+    "vul_id": "VUL4J-25",
+    "package_name": "org.apache.sling.xss.impl",
+    "source_dir": "src/main/java/",
+    "buggy_code": "    /**\n     * @see org.apache.sling.xss.XSSAPI#getValidHref(String)\n     */\n    @Override\n    @Nonnull\n    public String getValidHref(final String url) {\n        if (StringUtils.isNotEmpty(url)) {\n            try {\n                String unescapedURL = URLDecoder.decode(url, StandardCharsets.UTF_8.name());\n                /*\n                    StringEscapeUtils is deprecated starting with version 3.6 of commons-lang3, however the indicated replacement comes from\n                    commons-text, which is not an OSGi bundle\n                */\n                unescapedURL = StringEscapeUtils.unescapeXml(unescapedURL);\n                // Percent-encode characters that are not allowed in unquoted\n                // HTML attributes: \", ', >, <, ` and space. We don't encode =\n                // since this would break links with query parameters.\n                String encodedUrl = unescapedURL.replaceAll(\"\\\"\", \"%22\")\n                        .replaceAll(\"'\", \"%27\")\n                        .replaceAll(\">\", \"%3E\")\n                        .replaceAll(\"<\", \"%3C\")\n                        .replaceAll(\"`\", \"%60\")\n                        .replaceAll(\" \", \"%20\");\n                int qMarkIx = encodedUrl.indexOf('?');\n                if (qMarkIx > 0) {\n                    encodedUrl = encodedUrl.substring(0, qMarkIx) + encodedUrl.substring(qMarkIx).replaceAll(\":\", \"%3A\");\n                }\n\n                encodedUrl = mangleNamespaces(encodedUrl);\n                if (xssFilter.isValidHref(encodedUrl)) {\n                    return encodedUrl;\n                }\n            } catch (UnsupportedEncodingException e) {\n                LOGGER.error(\"Unable to decode url: {}.\", url);\n            }\n        }\n        // fall through to empty string\n        return \"\";\n    }",
+    "cve_description": "A flaw in the way URLs are escaped and encoded in the org.apache.sling.xss.impl.XSSAPIImpl#getValidHref and org.apache.sling.xss.impl.XSSFilterImpl#isValidHref allows special crafted URLs to pass as valid, although they carry XSS payloads. The affected versions are Apache Sling XSS Protection API 1.0.4 to 1.0.18, Apache Sling XSS Protection API Compat 1.1.0 and Apache Sling XSS Protection API 2.0.0.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-79": {
+        "name": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The product does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users."
+      }
+    },
+    "project": "sling-org-apache-sling-xss",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.apache.sling.xss.impl.XSSAPIImplTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-4465",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "core/src/main/java/com/opensymphony/xwork2/validator/validators/URLValidator.java",
+    "buggy_line": [
+      [
+        84
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        63,
+        90
+      ]
+    ],
+    "human_patch": "https://github.com/apache/struts/commit/a0fdca138feec2c2e94eb75ca1f8b76678b4d152",
+    "vul_id": "VUL4J-26",
+    "package_name": "com.opensymphony.xwork2.validator.validators",
+    "source_dir": "core/src/main/java/",
+    "buggy_code": "    /**\n     * This is used to support client-side validation, it's based on\n     * http://stackoverflow.com/questions/161738/what-is-the-best-regular-expression-to-check-if-a-string-is-a-valid-url\n     *\n     * @return regex to validate URLs\n     */\n    public String getUrlRegex() {\n        if (StringUtils.isNotEmpty(urlRegexExpression)) {\n            return (String) parse(urlRegexExpression, String.class);\n        } else if (StringUtils.isNotEmpty(urlRegex)) {\n            return urlRegex;\n        } else {\n            return \"^(https?|ftp):\\\\/\\\\/\" +\n                    \"(([a-z0-9$_\\\\.\\\\+!\\\\*\\\\'\\\\(\\\\),;\\\\?&=-]|%[0-9a-f]{2})+\" +\n                    \"(:([a-z0-9$_\\\\.\\\\+!\\\\*\\\\'\\\\(\\\\),;\\\\?&=-]|%[0-9a-f]{2})+)?\" +\n                    \"@)?(#?\" +\n                    \")((([a-z0-9]\\\\.|[a-z0-9][a-z0-9-]*[a-z0-9]\\\\.)*\" +\n                    \"[a-z][a-z0-9-]*[a-z0-9]\" +\n                    \"|((\\\\d|[1-9]\\\\d|1\\\\d{2}|2[0-4][0-9]|25[0-5])\\\\.){3}\" +\n                    \"(\\\\d|[1-9]\\\\d|1\\\\d{2}|2[0-4][0-9]|25[0-5])\" +\n                    \")(:\\\\d+)?\" +\n                    \")(((\\\\/+([a-z0-9$_\\\\.\\\\+!\\\\*\\\\'\\\\(\\\\),;:@&=-]|%[0-9a-f]{2})*)*\" +\n                    \"(\\\\?([a-z0-9$_\\\\.\\\\+!\\\\*\\\\'\\\\(\\\\),;:@&=-]|%[0-9a-f]{2})*)\" +\n                    \"?)?)?\" +\n                    \"(#([a-z0-9$_\\\\.\\\\+!\\\\*\\\\'\\\\(\\\\),;:@&=-]|%[0-9a-f]{2})*)?\" +\n                    \"$\";\n        }\n    }",
+    "cve_description": "The URLValidator class in Apache Struts 2 2.3.20 through 2.3.28.1 and 2.5.x before 2.5.1 allows remote attackers to cause a denial of service via a null value for a URL field.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-20": {
+        "name": "CWE-20: Improper Input Validation",
+        "description": "The product receives input or data, but it does\n        not validate or incorrectly validates that the input has the\n        properties that are required to process the data safely and\n        correctly."
+      }
+    },
+    "project": "struts",
+    "compile_cmd": "mvn -DskipTests -DskipAssembly clean install",
+    "test_all_cmd": "mvn test -pl core",
+    "test_cmd": "mvn test -pl core -Dtest=com.opensymphony.xwork2.validator.URLValidatorTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2014-0112",
+    "single_file": "0",
+    "buggy_info": [
+      {
+        "buggy_file_path": "core/src/main/java/org/apache/struts2/interceptor/CookieInterceptor.java",
+        "buggy_method_with_comment": [
+          [
+            210,
+            245
+          ]
+        ],
+        "buggy_line": [
+          [
+            226,
+            236
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "xwork-core/src/main/java/com/opensymphony/xwork2/interceptor/ParametersInterceptor.java",
+        "buggy_method_with_comment": [
+          [
+            497,
+            511
+          ]
+        ],
+        "buggy_line": [
+          [
+            506,
+            508
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "human_patch": "https://github.com/bqcuong/vul4j/compare/a2d0ecdcd3594c87265f483ecb3c202fec18937c..6315241719be167542962da436b38782ed730c62",
+    "vul_id": "VUL4J-27",
+    "cve_description": "ParametersInterceptor in Apache Struts before 2.3.20 does not properly restrict access to the getClass method, which allows remote attackers to \"manipulate\" the ClassLoader and execute arbitrary code via a crafted request. NOTE: this vulnerability exists because of an incomplete fix for CVE-2014-0094.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-264": {
+        "name": "CWE CATEGORY: Permissions, Privileges, and Access Controls",
+        "description": "Weaknesses in this category are related to the management of permissions, privileges, and other security features that are used to perform access control."
+      }
+    },
+    "project": "vul4j",
+    "compile_cmd": "mvn -DskipTests -DskipAssembly clean install",
+    "test_all_cmd": "mvn test -pl xwork-core",
+    "test_cmd": "mvn test -pl xwork-core -Dtest=com.opensymphony.xwork2.interceptor.ParametersInterceptorTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2014-0113",
+    "single_file": "0",
+    "buggy_info": [
+      {
+        "buggy_file_path": "core/src/main/java/org/apache/struts2/interceptor/CookieInterceptor.java",
+        "buggy_method_with_comment": [
+          [
+            210,
+            245
+          ]
+        ],
+        "buggy_line": [
+          [
+            226,
+            236
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "xwork-core/src/main/java/com/opensymphony/xwork2/interceptor/ParametersInterceptor.java",
+        "buggy_method_with_comment": [
+          [
+            497,
+            511
+          ]
+        ],
+        "buggy_line": [
+          [
+            506,
+            508
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "human_patch": "https://github.com/bqcuong/vul4j/compare/a2d0ecdcd3594c87265f483ecb3c202fec18937c..6315241719be167542962da436b38782ed730c62",
+    "vul_id": "VUL4J-28",
+    "cve_description": "CookieInterceptor in Apache Struts before 2.3.20, when a wildcard cookiesName value is used, does not properly restrict access to the getClass method, which allows remote attackers to \"manipulate\" the ClassLoader and execute arbitrary code via a crafted request. NOTE: this vulnerability exists because of an incomplete fix for CVE-2014-0094.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-264": {
+        "name": "CWE CATEGORY: Permissions, Privileges, and Access Controls",
+        "description": "Weaknesses in this category are related to the management of permissions, privileges, and other security features that are used to perform access control."
+      }
+    },
+    "project": "vul4j",
+    "compile_cmd": "mvn -DskipTests -DskipAssembly clean install",
+    "test_all_cmd": "mvn test -pl core",
+    "test_cmd": "mvn test -pl core -Dtest=org.apache.struts2.interceptor.CookieInterceptorTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2014-0116",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "core/src/main/java/org/apache/struts2/interceptor/CookieInterceptor.java",
+    "buggy_line": [
+      [
+        178
+      ],
+      [
+        256,
+        259
+      ],
+      [
+        262
+      ],
+      [
+        302,
+        309
+      ],
+      [
+        312
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        249,
+        263
+      ],
+      [
+        295,
+        313
+      ]
+    ],
+    "human_patch": "https://github.com/bqcuong/vul4j/commit/1a668af7f1ffccea4a3b46d8d8c1fe1c7331ff02",
+    "vul_id": "VUL4J-29",
+    "cve_description": "CookieInterceptor in Apache Struts 2.x before 2.3.20, when a wildcard cookiesName value is used, does not properly restrict access to the getClass method, which allows remote attackers to \"manipulate\" the ClassLoader and modify session state via a crafted request. NOTE: this vulnerability exists because of an incomplete fix for CVE-2014-0113.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-264": {
+        "name": "CWE CATEGORY: Permissions, Privileges, and Access Controls",
+        "description": "Weaknesses in this category are related to the management of permissions, privileges, and other security features that are used to perform access control."
+      }
+    },
+    "project": "vul4j",
+    "compile_cmd": "mvn -DskipTests -DskipAssembly clean install",
+    "test_all_cmd": "mvn test -pl core",
+    "test_cmd": "mvn test -pl core -Dtest=org.apache.struts2.interceptor.CookieInterceptorTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-8738",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "core/src/main/java/com/opensymphony/xwork2/validator/validators/URLValidator.java",
+    "buggy_line": [
+      [
+        58
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        48,
+        61
+      ]
+    ],
+    "human_patch": "https://github.com/apache/struts/commit/554b9dddb0fbd1e581ef577dd62a7c22955ad0f6",
+    "vul_id": "VUL4J-30",
+    "package_name": "com.opensymphony.xwork2.validator.validators",
+    "source_dir": "core/src/main/java/",
+    "buggy_code": "    public void validate(Object object) throws ValidationException {\n        String fieldName = getFieldName();\n        Object value = this.getFieldValue(fieldName, object);\n\n        // if there is no value - don't do comparison\n        // if a value is required, a required validator should be added to the field\n        if (value == null || value.toString().length() == 0) {\n            return;\n        }\n\n        if (!(value.getClass().equals(String.class)) || !Pattern.compile(getUrlRegex(), Pattern.CASE_INSENSITIVE).matcher(String.valueOf(value)).matches()) {\n            addFieldError(fieldName, object);\n        }\n    }",
+    "cve_description": "In Apache Struts 2.5 through 2.5.5, if an application allows entering a URL in a form field and the built-in URLValidator is used, it is possible to prepare a special URL which will be used to overload server process when performing validation of the URL.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-20": {
+        "name": "CWE-20: Improper Input Validation",
+        "description": "The product receives input or data, but it does\n        not validate or incorrectly validates that the input has the\n        properties that are required to process the data safely and\n        correctly."
+      }
+    },
+    "project": "struts",
+    "compile_cmd": "mvn -DskipTests -DskipAssembly clean install",
+    "test_all_cmd": "mvn test -pl core",
+    "test_cmd": "mvn test -pl core -Dtest=com.opensymphony.xwork2.validator.URLValidatorTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-4436",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "core/src/main/java/org/apache/struts2/dispatcher/mapper/DefaultActionMapper.java",
+    "buggy_line": [
+      [
+        387,
+        398
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        377,
+        400
+      ]
+    ],
+    "human_patch": "https://github.com/apache/struts/commit/237432512df0e27013f7c7b9ab59fdce44ca34a5",
+    "vul_id": "VUL4J-31",
+    "package_name": "org.apache.struts2.dispatcher.mapper",
+    "source_dir": "core/src/main/java/",
+    "cve_description": "Apache Struts 2 before 2.3.29 and 2.5.x before 2.5.1 allow attackers to have unspecified impact via vectors related to improper action name clean up.",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "struts",
+    "compile_cmd": "mvn -DskipTests -DskipAssembly clean install",
+    "test_all_cmd": "mvn test -pl core",
+    "test_cmd": "mvn test -pl core -Dtest=org.apache.struts2.dispatcher.mapper.DefaultActionMapperTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2015-1831",
+    "single_file": "0",
+    "buggy_info": [
+      {
+        "buggy_file_path": "core/src/test/java/org/apache/struts2/interceptor/CookieInterceptorTest.java",
+        "buggy_method_with_comment": [
+          [
+            330,
+            394
+          ]
+        ],
+        "buggy_line": [
+          [
+            373
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "xwork-core/src/main/java/com/opensymphony/xwork2/security/DefaultExcludedPatternsChecker.java",
+        "buggy_method_with_comment": [
+          [
+            18,
+            29
+          ]
+        ],
+        "buggy_line": [
+          [
+            18
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "human_patch": "https://github.com/apache/struts/commit/d832747d647df343ed07a58b1b5e540a05a4d51b",
+    "vul_id": "VUL4J-32",
+    "cve_description": "The default exclude patterns (excludeParams) in Apache Struts 2.3.20 allow remote attackers to \"compromise internal state of an application\" via unspecified vectors.",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "struts",
+    "compile_cmd": "mvn -DskipTests -DskipAssembly clean install",
+    "test_all_cmd": "mvn test -pl xwork-core",
+    "test_cmd": "mvn test -pl xwork-core -Dtest=com.opensymphony.xwork2.security.DefaultExcludedPatternsCheckerTest test",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-3081",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "core/src/main/java/com/opensymphony/xwork2/ognl/OgnlUtil.java",
+    "buggy_line": [
+      [
+        290
+      ],
+      [
+        306
+      ],
+      [
+        363
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        275,
+        296
+      ],
+      [
+        298,
+        309
+      ],
+      [
+        361,
+        365
+      ]
+    ],
+    "human_patch": "https://github.com/apache/struts/commit/f238cf4f1091be19fbcfd086b042c86a1bcaa7fc",
+    "vul_id": "VUL4J-33",
+    "cve_description": "Apache Struts 2.3.19 to 2.3.20.2, 2.3.21 to 2.3.24.1, and 2.3.25 to 2.3.28, when Dynamic Method Invocation is enabled, allow remote attackers to execute arbitrary code via method: prefix, related to chained expressions.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-77": {
+        "name": "CWE-77: Improper Neutralization of Special Elements used in a Command ('Command Injection')",
+        "description": "The product constructs all or part of a command using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify the intended command when it is sent to a downstream component."
+      }
+    },
+    "project": "struts",
+    "compile_cmd": "mvn -DskipTests -DskipAssembly clean install",
+    "test_all_cmd": "mvn test -pl core",
+    "test_cmd": "mvn test -pl core -Dtest=com.opensymphony.xwork2.ognl.OgnlUtilTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-2162",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "core/src/main/java/com/opensymphony/xwork2/interceptor/I18nInterceptor.java",
+    "buggy_line": [
+      [
+        221
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        204,
+        222
+      ]
+    ],
+    "human_patch": "https://github.com/apache/struts/commit/fc2179cf1ac9fbfb61e3430fa88b641d87253327",
+    "vul_id": "VUL4J-34",
+    "package_name": "com.opensymphony.xwork2.interceptor",
+    "source_dir": "core/src/main/java/",
+    "cve_description": "Apache Struts 2.x before 2.3.25 does not sanitize text in the Locale object constructed by I18NInterceptor, which might allow remote attackers to conduct cross-site scripting (XSS) attacks via unspecified vectors involving language display.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-79": {
+        "name": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The product does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users."
+      }
+    },
+    "project": "struts",
+    "compile_cmd": "mvn -DskipTests -DskipAssembly clean install",
+    "test_all_cmd": "mvn test -pl core",
+    "test_cmd": "mvn test -pl core -Dtest=com.opensymphony.xwork2.interceptor.I18nInterceptorTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2014-7809",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "core/src/main/java/org/apache/struts2/util/TokenHelper.java",
+    "buggy_line": [
+      [
+        54
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        33,
+        229
+      ]
+    ],
+    "human_patch": "https://github.com/apache/struts/commit/1f301038a751bf16e525607c3db513db835b2999",
+    "vul_id": "VUL4J-35",
+    "cve_description": "Apache Struts 2.0.0 through 2.3.x before 2.3.20 uses predictable <s:token/> values, which allows remote attackers to bypass the CSRF protection mechanism.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-352": {
+        "name": "CWE-352: Cross-Site Request Forgery (CSRF)",
+        "description": "The web application does not, or cannot, sufficiently verify whether a request was intentionally provided by the user who sent the request, which could have originated from an unauthorized actor. "
+      }
+    },
+    "project": "struts",
+    "compile_cmd": "mvn -DskipTests -DskipAssembly clean install",
+    "test_all_cmd": "mvn test -pl core",
+    "test_cmd": "mvn test -pl core -Dtest=org.apache.struts2.util.TokenHelperTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-8017",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "tika-parsers/src/main/java/org/apache/tika/parser/iptc/IptcAnpaParser.java",
+    "buggy_line": [
+      [
+        446
+      ],
+      [
+        511
+      ],
+      [
+        578
+      ],
+      [
+        677
+      ],
+      [
+        716
+      ],
+      [
+        723
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        443,
+        694
+      ],
+      [
+        697,
+        768
+      ]
+    ],
+    "human_patch": "https://github.com/apache/tika/commit/8a6a9e1344f5b10ebfa1a189dc3c30d0da2b9d4",
+    "vul_id": "VUL4J-36",
+    "cve_description": "In Apache Tika 1.2 to 1.18, a carefully crafted file can trigger an infinite loop in the IptcAnpaParser.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-835": {
+        "name": "CWE-835: Loop with Unreachable Exit Condition ('Infinite Loop')",
+        "description": "The product contains an iteration or loop with an exit condition that cannot be reached, i.e., an infinite loop."
+      }
+    },
+    "project": "tika",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl tika-parsers",
+    "test_cmd": "mvn test -pl tika-parsers -Dtest=org.apache.tika.parser.iptc.IptcParserTest#testCVE_2018_8017",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2015-8581",
+    "single_file": "0",
+    "buggy_info": [
+      {
+        "buggy_file_path": "container/openejb-core/src/main/java/org/apache/openejb/core/rmi/BlacklistClassResolver.java",
+        "buggy_method_with_comment": [
+          [
+            56,
+            65
+          ]
+        ],
+        "buggy_line": [
+          [
+            59
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "server/openejb-client/src/main/java/org/apache/openejb/client/EjbObjectInputStream.java",
+        "buggy_method_with_comment": [
+          [
+            123,
+            132
+          ]
+        ],
+        "buggy_line": [
+          [
+            126
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "tomee/tomee-common/src/main/java/org/apache/tomee/installer/Installer.java",
+        "buggy_method_with_comment": [
+          [
+            696,
+            781
+          ]
+        ],
+        "buggy_line": [
+          [
+            706
+          ]
+        ],
+        "bug_type": "insertion"
+      }
+    ],
+    "human_patch": "https://github.com/apache/tomee/commit/58cdbbef9c77ab2b44870f9d606593b49cde76d9",
+    "vul_id": "VUL4J-37",
+    "cve_description": "Rejected reason: DO NOT USE THIS CANDIDATE NUMBER. ConsultIDs: CVE-2016-0779. Reason: This candidate is a duplicate of CVE-2016-0779. Notes: All CVE users should reference CVE-2016-0779 instead of this candidate. All references and descriptions in this candidate have been removed to prevent accidental usage",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "tomee",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl container/openejb-core",
+    "test_cmd": "mvn test -pl container/openejb-core -Dtest=org.apache.openejb.core.rmi.BlacklistClassResolverTest#wildcard",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2014-4172",
+    "single_file": "0",
+    "buggy_info": [
+      {
+        "buggy_file_path": "cas-client-core/src/main/java/org/jasig/cas/client/validation/AbstractUrlBasedTicketValidator.java",
+        "buggy_method_with_comment": [
+          [
+            108,
+            153
+          ]
+        ],
+        "buggy_line": [
+          [
+            113,
+            147
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "cas-client-core/src/main/java/org/jasig/cas/client/validation/Cas20ServiceTicketValidator.java",
+        "buggy_method_with_comment": [
+          [
+            67,
+            74
+          ]
+        ],
+        "buggy_line": [
+          [
+            73
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "human_patch": "https://github.com/apereo/java-cas-client/commit/ab6cbdc3daa451b4fef89c0bd0f4e6568f3aa9ef",
+    "vul_id": "VUL4J-38",
+    "cve_description": "A URL parameter injection vulnerability was found in the back-channel ticket validation step of the CAS protocol in Jasig Java CAS Client before 3.3.2, .NET CAS Client before 1.0.2, and phpCAS before 1.3.3 that allow remote attackers to inject arbitrary web script or HTML via the (1) service parameter to validation/AbstractUrlBasedTicketValidator.java or (2) pgtUrl parameter to validation/Cas20ServiceTicketValidator.java.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-74": {
+        "name": "Improper Neutralization of Special Elements in Output Used by a Downstream Component ('Injection')",
+        "description": "The product constructs all or part of a command, data structure, or record using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify how it is parsed or interpreted when it is sent to a downstream component."
+      }
+    },
+    "project": "java-cas-client",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl cas-client-core",
+    "test_cmd": "mvn test -pl cas-client-core -Dtest=org.jasig.cas.client.validation.Cas10TicketValidatorTests",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1192",
+    "single_file": "1",
+    "bug_type": "deletion",
+    "buggy_file": "server/src/main/java/org/cloudfoundry/identity/uaa/authentication/UaaAuthenticationDetails.java",
+    "buggy_line": [
+      [
+        116,
+        121
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        104,
+        123
+      ]
+    ],
+    "human_patch": "https://github.com/cloudfoundry/uaa/commit/a61bfabbad22f646ecf1f00016b448b26a60daf",
+    "vul_id": "VUL4J-39",
+    "package_name": "org.cloudfoundry.identity.uaa.authentication",
+    "source_dir": "server/src/main/java/",
+    "buggy_code": "    @Override\n    public String toString() {\n        StringBuilder sb = new StringBuilder();\n        if (origin != null) {\n            sb.append(\"remoteAddress=\").append(origin);\n        }\n        if (clientId != null) {\n            if (sb.length() > 0) {\n                sb.append(\", \");\n            }\n            sb.append(\"clientId=\").append(clientId);\n        }\n        if (sessionId != null) {\n            if (sb.length() > 0) {\n                sb.append(\", \");\n            }\n            sb.append(\"sessionId=\").append(sessionId);\n        }\n        return sb.toString();\n    }",
+    "cve_description": "In Cloud Foundry Foundation cf-release versions prior to v285; cf-deployment versions prior to v1.7; UAA 4.5.x versions prior to 4.5.5, 4.8.x versions prior to 4.8.3, and 4.7.x versions prior to 4.7.4; and UAA-release 45.7.x versions prior to 45.7, 52.7.x versions prior to 52.7, and 53.3.x versions prior to 53.3, the SessionID is logged in audit event logs. An attacker can use the SessionID to impersonate a logged-in user.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-200": {
+        "name": "Exposure of Sensitive Information to an Unauthorized Actor",
+        "description": "The product exposes sensitive information to an actor that is not explicitly authorized to have access to that information."
+      }
+    },
+    "project": "uaa",
+    "compile_cmd": "./gradlew :cloudfoundry-identity-server:compileTestJava",
+    "test_all_cmd": "./gradlew :cloudfoundry-identity-server:test",
+    "test_cmd": "./gradlew :cloudfoundry-identity-server:test --tests org.cloudfoundry.identity.uaa.authentication.event.UserAuthenticationSuccessEventTests",
+    "cmd_options": "",
+    "env_info": {
+      "env_cmd": "./gradlew"
+    }
+  },
+  {
+    "CVE_id": "CVE-2019-3775",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "server/src/main/java/org/cloudfoundry/identity/uaa/security/ScimUserSelfUpdateAllowed.java",
+    "buggy_line": [
+      [
+        41
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        23,
+        59
+      ]
+    ],
+    "human_patch": "https://github.com/cloudfoundry/uaa/commit/daeedbe499453b06856556f5e9f7e80d2d1ceb03",
+    "vul_id": "VUL4J-40",
+    "package_name": "org.cloudfoundry.identity.uaa.security",
+    "source_dir": "server/src/main/java/",
+    "buggy_code": "    public boolean isAllowed(HttpServletRequest request) throws IOException {\n        String requestBody = IOUtils.toString(request.getReader());\n        ScimUser scimUserFromRequest = JsonUtils.readValue(requestBody, ScimUser.class);\n\n        String id = UaaUrlUtils.extractPathVariableFromUrl(USER_ID_PATH_PARAMETER_INDEX, UaaUrlUtils.getRequestPath(request));\n        String zoneId = IdentityZoneHolder.get().getId();\n        ScimUser scimUserFromDb;\n\n        try {\n            scimUserFromDb = scimUserProvisioning.retrieve(id, zoneId);\n        } catch (ScimResourceNotFoundException e) {\n            return true;\n        }\n\n        if (!scimUserFromDb.getPrimaryEmail().equals(scimUserFromRequest.getPrimaryEmail())) {\n            return false;\n        }\n\n        if (!scimUserFromDb.getUserName().equals(scimUserFromRequest.getUserName())) {\n            return false;\n        }\n\n        if (scimUserFromDb.isVerified() != scimUserFromRequest.isVerified()) {\n            return false;\n        }\n\n        if (scimUserFromDb.isActive() != (scimUserFromRequest.isActive())) {\n            return false;\n        }\n\n        if (!scimUserFromDb.getOrigin().equals(scimUserFromRequest.getOrigin())) {\n            return false;\n        }\n\n\n        return true;\n    }",
+    "cve_description": "Cloud Foundry UAA, versions prior to v70.0, allows a user to update their own email address. A remote authenticated user can impersonate a different user by changing their email address to that of a different user.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-290": {
+        "name": "Authentication Bypass by Spoofing",
+        "description": "This attack-focused weakness is caused by incorrectly implemented authentication schemes that are subject to spoofing attacks."
+      }
+    },
+    "project": "uaa",
+    "compile_cmd": "./gradlew :cloudfoundry-identity-server:compileTestJava",
+    "test_all_cmd": "./gradlew :cloudfoundry-identity-server:test",
+    "test_cmd": "./gradlew :cloudfoundry-identity-server:test --tests org.cloudfoundry.identity.uaa.security.ScimUserSelfUpdateAllowedTest",
+    "cmd_options": "",
+    "env_info": {
+      "env_cmd": "./gradlew"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1002200",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "src/main/java/org/codehaus/plexus/archiver/AbstractUnArchiver.java",
+    "buggy_line": [
+      [
+        311
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        303,
+        361
+      ]
+    ],
+    "human_patch": "https://github.com/codehaus-plexus/plexus-archiver/commit/58bc24e465c0842981692adbf6d75680298989de",
+    "vul_id": "VUL4J-41",
+    "package_name": "org.codehaus.plexus.archiver",
+    "source_dir": "src/main/java/",
+    "buggy_code": "    protected void extractFile( final File srcF, final File dir, final InputStream compressedInputStream,\n                                final String entryName, final Date entryDate, final boolean isDirectory,\n                                final Integer mode, String symlinkDestination )\n        throws IOException, ArchiverException\n    {\n        // Hmm. Symlinks re-evaluate back to the original file here. Unsure if this is a good thing...\n        final File f = FileUtils.resolveFile( dir, entryName );\n\n        try\n        {\n            if ( !isOverwrite() && f.exists() && ( f.lastModified() >= entryDate.getTime() ) )\n            {\n                return;\n            }\n\n            // create intermediary directories - sometimes zip don't add them\n            final File dirF = f.getParentFile();\n            if ( dirF != null )\n            {\n                dirF.mkdirs();\n            }\n\n            if ( !StringUtils.isEmpty( symlinkDestination ) )\n            {\n                SymlinkUtils.createSymbolicLink( f, new File( symlinkDestination ) );\n            }\n            else if ( isDirectory )\n            {\n                f.mkdirs();\n            }\n            else\n            {\n                OutputStream out = null;\n                try\n                {\n                    out = new FileOutputStream( f );\n\n                    IOUtil.copy( compressedInputStream, out );\n                    out.close();\n                    out = null;\n                }\n                finally\n                {\n                    IOUtil.close( out );\n                }\n            }\n\n            f.setLastModified( entryDate.getTime() );\n\n            if ( !isIgnorePermissions() && mode != null && !isDirectory )\n            {\n                ArchiveEntryUtils.chmod( f, mode );\n            }\n        }\n        catch ( final FileNotFoundException ex )\n        {\n            getLogger().warn( \"Unable to expand to file \" + f.getPath() );\n        }\n    }",
+    "cve_description": "plexus-archiver before 3.6.0 is vulnerable to directory traversal, allowing attackers to write to arbitrary files via a ../ (dot dot slash) in an archive entry that is mishandled during extraction. This vulnerability is also known as 'Zip-Slip'.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-22": {
+        "name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "description": "The product uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the product does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory."
+      }
+    },
+    "project": "plexus-archiver",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.codehaus.plexus.archiver.zip.ZipUnArchiverTest#testExtractingZipWithEntryOutsideDestDirThrowsException",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2017-1000487",
+    "single_file": "0",
+    "buggy_info": [
+      {
+        "buggy_file_path": "src/main/java/org/codehaus/plexus/util/cli/Commandline.java",
+        "buggy_method_with_comment": [
+          [
+            246,
+            264
+          ],
+          [
+            480,
+            496
+          ],
+          [
+            615,
+            660
+          ],
+          [
+            662,
+            676
+          ]
+        ],
+        "buggy_line": [
+          [
+            256
+          ],
+          [
+            486
+          ],
+          [
+            636,
+            651
+          ],
+          [
+            672
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "src/main/java/org/codehaus/plexus/util/cli/shell/BourneShell.java",
+        "buggy_method_with_comment": [
+          [
+            135,
+            138
+          ],
+          [
+            157,
+            170
+          ]
+        ],
+        "buggy_line": [
+          [
+            256
+          ],
+          [
+            164,
+            165,
+            166,
+            167
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "src/main/java/org/codehaus/plexus/util/cli/shell/Shell.java",
+        "buggy_method_with_comment": [
+          [
+            132,
+            178
+          ],
+          [
+            258,
+            285
+          ]
+        ],
+        "buggy_line": [
+          [
+            147,
+            148,
+            149,
+            165,
+            166,
+            167
+          ],
+          [
+            281
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "human_patch": "https://github.com/codehaus-plexus/plexus-utils/commit/b38a1b3a4352303e4312b2bb601a0d7ec6e28f41",
+    "vul_id": "VUL4J-42",
+    "cve_description": "Plexus-utils before 3.0.16 is vulnerable to command injection because it does not correctly process the contents of double quoted strings.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-78": {
+        "name": "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')",
+        "description": "The product constructs all or part of an OS command using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify the intended OS command when it is sent to a downstream component."
+      }
+    },
+    "project": "plexus-utils",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.codehaus.plexus.util.cli.CommandlineTest,org.codehaus.plexus.util.cli.shell.BourneShellTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-20227",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "util/src/main/java/org/eclipse/rdf4j/common/io/ZipUtil.java",
+    "buggy_line": [
+      [
+        95
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        78,
+        105
+      ]
+    ],
+    "human_patch": "https://github.com/eclipse/rdf4j/commit/df15a4d7a8f2789c043b27c9eafe1b30316cfa79",
+    "vul_id": "VUL4J-43",
+    "package_name": "org.eclipse.rdf4j.common.io",
+    "source_dir": "util/src/main/java/",
+    "buggy_code": "\t/**\n\t * Write an entry to a zip file.\n\t * \n\t * @param zipFile\n\t *        the zip file to read from\n\t * @param entry\n\t *        the entry to process\n\t * @param destDir\n\t *        the file to write to\n\t * @throws IOException\n\t *         if the entry could not be processed\n\t */\n\tpublic static void writeEntry(ZipFile zipFile, ZipEntry entry, File destDir)\n\t\tthrows IOException\n\t{\n\t\tFile outFile = new File(destDir, entry.getName());\n\n\t\tif (entry.isDirectory()) {\n\t\t\toutFile.mkdirs();\n\t\t}\n\t\telse {\n\t\t\toutFile.getParentFile().mkdirs();\n\n\t\t\ttry (InputStream in = zipFile.getInputStream(entry)) {\n\t\t\t\tIOUtil.writeStream(in, outFile);\n\t\t\t}\n\t\t}\n\t}",
+    "cve_description": "RDF4J 2.4.2 allows Directory Traversal via ../ in an entry in a ZIP archive.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-22": {
+        "name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "description": "The product uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the product does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory."
+      }
+    },
+    "project": "rdf4j",
+    "compile_cmd": "mvn -DskipTests clean install; mvn -pl util test-compile",
+    "test_all_cmd": "mvn test -pl util",
+    "test_cmd": "mvn test -pl util -Dtest=org.eclipse.rdf4j.common.io.ZipUtilTest#testWriteEntryPathTraversing",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2013-5960",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "src/main/java/org/owasp/esapi/codecs/PercentCodec.java",
+    "buggy_line": [
+      [
+        102
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        90,
+        110
+      ]
+    ],
+    "human_patch": "https://github.com/ESAPI/esapi-java-legacy/commit/b7cbc53f9cc967cf1a5a9463d8c6fef9ed6ef4f7",
+    "vul_id": "VUL4J-44",
+    "package_name": "org.owasp.esapi.codecs",
+    "source_dir": "src/main/java/",
+    "buggy_code": "\t/**\n\t * Encode a character for URLs\n\t * @param immune characters not to encode\n\t * @param c character to encode\n\t * @return the encoded string representing c\n\t */\n\tpublic String encodeCharacter( char[] immune, Character c )\n\t{\n\t\tString cStr = String.valueOf(c.charValue());\n\t\tbyte[] bytes;\n\t\tStringBuilder sb;\n\n\t\tif(UNENCODED_SET.contains(c))\n\t\t\treturn cStr;\n\n\t\tbytes = toUtf8Bytes(cStr);\n\t\tsb = new StringBuilder(bytes.length * 3);\n\t\tfor(byte b : bytes)\n\t\t\tappendTwoUpperHex(sb.append('%'), b);\n\t\treturn sb.toString();\n\t}",
+    "cve_description": "The authenticated-encryption feature in the symmetric-encryption implementation in the OWASP Enterprise Security API (ESAPI) for Java 2.x before 2.1.0.1 does not properly resist tampering with serialized ciphertext, which makes it easier for remote attackers to bypass intended cryptographic protection mechanisms via an attack against the intended cipher mode in a non-default configuration, a different vulnerability than CVE-2013-5679.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-310": {
+        "name": "CWE CATEGORY: Cryptographic Issues",
+        "description": "Weaknesses in this category are related to the use of cryptography."
+      }
+    },
+    "project": "esapi-java-legacy",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.owasp.esapi.codecs.CodecImmunityTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1000854",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "esigate-core/src/main/java/org/esigate/xml/XsltRenderer.java",
+    "buggy_line": [
+      [
+        91
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        89,
+        97
+      ]
+    ],
+    "human_patch": "https://github.com/esigate/esigate/commit/30cad23a8f282600c9b045e1af09f6f8a65357b1",
+    "vul_id": "VUL4J-45",
+    "package_name": "org.esigate.xml",
+    "source_dir": "esigate-core/src/main/java/",
+    "cve_description": "esigate.org esigate version 5.2 and earlier contains a CWE-74: Improper Neutralization of Special Elements in Output Used by a Downstream Component ('Injection') vulnerability in ESI directive with user specified XSLT that can result in Remote Code Execution. This attack appear to be exploitable via Use of another weakness in backend application to reflect ESI directives. This vulnerability appears to have been fixed in 5.3.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-74": {
+        "name": "Improper Neutralization of Special Elements in Output Used by a Downstream Component ('Injection')",
+        "description": "The product constructs all or part of a command, data structure, or record using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify how it is parsed or interpreted when it is sent to a downstream component."
+      }
+    },
+    "project": "esigate",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl esigate-core",
+    "test_cmd": "mvn test -pl esigate-core -Dtest=org.esigate.xml.XsltRendererTest#testSecureRendering",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-3720",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "src/main/java/com/fasterxml/jackson/dataformat/xml/XmlFactory.java",
+    "buggy_line": [
+      [
+        113
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        104,
+        121
+      ]
+    ],
+    "human_patch": "https://github.com/FasterXML/jackson-dataformat-xml/commit/f0f19a4c924d9db9a1e2830434061c8640092cc0",
+    "vul_id": "VUL4J-46",
+    "package_name": "com.fasterxml.jackson.dataformat.xml",
+    "source_dir": "src/main/java/",
+    "buggy_code": "    protected XmlFactory(ObjectCodec oc, int xpFeatures, int xgFeatures,\n            XMLInputFactory xmlIn, XMLOutputFactory xmlOut,\n            String nameForTextElem)\n    {\n        super(oc);\n        _xmlParserFeatures = xpFeatures;\n        _xmlGeneratorFeatures = xgFeatures;\n        _cfgNameForTextElement = nameForTextElem;\n        if (xmlIn == null) {\n            xmlIn = XMLInputFactory.newInstance();\n        }\n        if (xmlOut == null) {\n            xmlOut = XMLOutputFactory.newInstance();\n        }\n        _initFactories(xmlIn, xmlOut);\n        _xmlInputFactory = xmlIn;\n        _xmlOutputFactory = xmlOut;\n    }",
+    "cve_description": "XML external entity (XXE) vulnerability in XmlMapper in the Data format extension for Jackson (aka jackson-dataformat-xml) allows attackers to have unspecified impact via unknown vectors.",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "jackson-dataformat-xml",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=com.fasterxml.jackson.dataformat.xml.TestCVE_2016_3720",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-7051",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "src/main/java/com/fasterxml/jackson/dataformat/xml/XmlFactory.java",
+    "buggy_line": [
+      [
+        115
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        104,
+        123
+      ]
+    ],
+    "human_patch": "https://github.com/FasterXML/jackson-dataformat-xml/commit/eeff2c312e9d4caa8c9f27b8f740c7529d00524a",
+    "vul_id": "VUL4J-47",
+    "package_name": "com.fasterxml.jackson.dataformat.xml",
+    "source_dir": "src/main/java/",
+    "buggy_code": "    protected XmlFactory(ObjectCodec oc, int xpFeatures, int xgFeatures,\n            XMLInputFactory xmlIn, XMLOutputFactory xmlOut,\n            String nameForTextElem)\n    {\n        super(oc);\n        _xmlParserFeatures = xpFeatures;\n        _xmlGeneratorFeatures = xgFeatures;\n        _cfgNameForTextElement = nameForTextElem;\n        if (xmlIn == null) {\n            xmlIn = XMLInputFactory.newInstance();\n            // as per [dataformat-xml#190], disable external entity expansion by default\n            xmlIn.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);\n        }\n        if (xmlOut == null) {\n            xmlOut = XMLOutputFactory.newInstance();\n        }\n        _initFactories(xmlIn, xmlOut);\n        _xmlInputFactory = xmlIn;\n        _xmlOutputFactory = xmlOut;\n    }",
+    "cve_description": "XmlMapper in the Jackson XML dataformat component (aka jackson-dataformat-xml) before 2.7.8 and 2.8.x before 2.8.4 allows remote attackers to conduct server-side request forgery (SSRF) attacks via vectors related to a DTD.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-611": {
+        "name": "CWE-611: Improper Restriction of XML External Entity Reference",
+        "description": "The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output."
+      },
+      "CWE-918": {
+        "name": "Server-Side Request Forgery (SSRF)",
+        "description": "The web server receives a URL or similar request from an upstream component and retrieves the contents of this URL, but it does not sufficiently ensure that the request is being sent to the expected destination."
+      }
+    },
+    "project": "jackson-dataformat-xml",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=com.fasterxml.jackson.dataformat.xml.SupportDTDDefaultsTest#testDTDAttempt",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1000531",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "src/main/java/org/primeframework/jwt/JWTDecoder.java",
+    "buggy_line": [
+      [
+        154,
+        156
+      ],
+      [
+        168
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        153,
+        187
+      ]
+    ],
+    "human_patch": "https://github.com/inversoft/prime-jwt/commit/abb0d479389a2509f939452a6767dc424bb5e6ba",
+    "vul_id": "VUL4J-48",
+    "cve_description": "inversoft prime-jwt version prior to commit abb0d479389a2509f939452a6767dc424bb5e6ba contains a CWE-20 vulnerability in JWTDecoder.decode that can result in an incorrect signature validation of a JWT token. This attack can be exploitable when an attacker crafts a JWT token with a valid header using 'none' as algorithm and a body to requests it be validated. This vulnerability was fixed after commit abb0d479389a2509f939452a6767dc424bb5e6ba.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-20": {
+        "name": "CWE-20: Improper Input Validation",
+        "description": "The product receives input or data, but it does\n        not validate or incorrectly validates that the input has the\n        properties that are required to process the data safely and\n        correctly."
+      }
+    },
+    "project": "prime-jwt",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.primeframework.jwt.VulnerabilityTest#test_unsecuredJWT_validation",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1000125",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "src/main/java/org/primeframework/jwt/JWTDecoder.java",
+    "buggy_line": [
+      [
+        68,
+        70
+      ],
+      [
+        118,
+        120
+      ],
+      [
+        153
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        49,
+        82
+      ],
+      [
+        99,
+        133
+      ],
+      [
+        143,
+        172
+      ]
+    ],
+    "human_patch": "https://github.com/inversoft/prime-jwt/commit/0d94dcef0133d699f21d217e922564adbb83a227",
+    "vul_id": "VUL4J-49",
+    "cve_description": "inversoft prime-jwt version prior to version 1.3.0 or prior to commit 0d94dcef0133d699f21d217e922564adbb83a227 contains an input validation vulnerability in JWTDecoder.decode that can result in a JWT that is decoded and thus implicitly validated even if it lacks a valid signature. This attack appear to be exploitable via an attacker crafting a token with a valid header and body and then requests it to be validated. This vulnerability appears to have been fixed in 1.3.0 and later or after commit 0d94dcef0133d699f21d217e922564adbb83a227.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-20": {
+        "name": "CWE-20: Improper Input Validation",
+        "description": "The product receives input or data, but it does\n        not validate or incorrectly validates that the input has the\n        properties that are required to process the data safely and\n        correctly."
+      }
+    },
+    "project": "prime-jwt",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.primeframework.jwt.JWTTest#test_SingedWithoutSignature",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2013-4378",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "javamelody-core/src/main/java/net/bull/javamelody/HtmlSessionInformationsReport.java",
+    "buggy_line": [
+      [
+        162
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        131,
+        184
+      ]
+    ],
+    "human_patch": "https://github.com/javamelody/javamelody/commit/aacbc46151ff4ac1ca34ce0899c2a6113071c66e",
+    "vul_id": "VUL4J-50",
+    "package_name": "net.bull.javamelody",
+    "source_dir": "javamelody-core/src/main/java/",
+    "buggy_code": "\tprivate void writeSession(SessionInformations session, boolean displayUser) throws IOException {\n\t\tfinal String nextColumnAlignRight = \"</td><td align='right'>\";\n\t\tfinal String nextColumnAlignCenter = \"</td><td align='center'>\";\n\t\twrite(\"<td><a href='?part=sessions&amp;sessionId=\");\n\t\twrite(htmlEncodeButNotSpace(session.getId()));\n\t\twrite(\"'>\");\n\t\twrite(htmlEncodeButNotSpace(session.getId()));\n\t\twrite(\"</a>\");\n\t\twrite(nextColumnAlignRight);\n\t\twrite(durationFormat.format(session.getLastAccess()));\n\t\twrite(nextColumnAlignRight);\n\t\twrite(durationFormat.format(session.getAge()));\n\t\twrite(nextColumnAlignRight);\n\t\twrite(expiryFormat.format(session.getExpirationDate()));\n\n\t\twrite(nextColumnAlignRight);\n\t\twrite(integerFormat.format(session.getAttributeCount()));\n\t\twrite(nextColumnAlignCenter);\n\t\tif (session.isSerializable()) {\n\t\t\twrite(\"#oui#\");\n\t\t} else {\n\t\t\twrite(\"<span class='severe'>#non#</span>\");\n\t\t}\n\t\twrite(nextColumnAlignRight);\n\t\twrite(integerFormat.format(session.getSerializedSize()));\n\t\tfinal String nextColumn = \"</td><td>\";\n\t\twrite(nextColumn);\n\t\tfinal String remoteAddr = session.getRemoteAddr();\n\t\tif (remoteAddr == null) {\n\t\t\twrite(\"&nbsp;\");\n\t\t} else {\n\t\t\twrite(remoteAddr);\n\t\t}\n\t\twrite(nextColumnAlignCenter);\n\t\twriteCountry(session);\n\t\tif (displayUser) {\n\t\t\twrite(nextColumn);\n\t\t\tfinal String remoteUser = session.getRemoteUser();\n\t\t\tif (remoteUser == null) {\n\t\t\t\twrite(\"&nbsp;\");\n\t\t\t} else {\n\t\t\t\twriteDirectly(htmlEncodeButNotSpace(remoteUser));\n\t\t\t}\n\t\t}\n\t\twrite(\"</td><td align='center' class='noPrint'>\");\n\t\twrite(A_HREF_PART_SESSIONS);\n\t\twrite(\"&amp;action=invalidate_session&amp;sessionId=\");\n\t\twrite(urlEncode(session.getId()));\n\t\twrite(\"' onclick=\\\"javascript:return confirm('\"\n\t\t\t\t+ getStringForJavascript(\"confirm_invalidate_session\") + \"');\\\">\");\n\t\twrite(\"<img width='16' height='16' src='?resource=user-trash.png' alt='#invalidate_session#' title='#invalidate_session#' />\");\n\t\twrite(\"</a>\");\n\t\twrite(\"</td>\");\n\t}",
+    "cve_description": "Cross-site scripting (XSS) vulnerability in HtmlSessionInformationsReport.java in JavaMelody 1.46 and earlier allows remote attackers to inject arbitrary web script or HTML via a crafted X-Forwarded-For header.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-79": {
+        "name": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The product does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users."
+      }
+    },
+    "project": "javamelody",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl javamelody-core",
+    "test_cmd": "mvn test -pl javamelody-core -Dtest=net.bull.javamelody.TestHtmlSessionInformationsReport#testCVE_2013_4378",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1000054",
+    "single_file": "1",
+    "buggy_file": "src/main/java/hudson/plugins/ccm/parser/CcmParser.java",
+    "buggy_line": [
+      [
+        87,
+        89
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        86,
+        107
+      ]
+    ],
+    "human_patch": "https://github.com/jenkinsci/ccm-plugin/commit/066cb43b4413b3490d822ec8b8a32072ebd213ca",
+    "vul_id": "VUL4J-51",
+    "cve_description": "Jenkins CCM Plugin 3.1 and earlier processes XML external entities in files it parses as part of the build process, allowing attackers with user permissions in Jenkins to extract secrets from the Jenkins master, perform server-side request forgery, or denial-of-service attacks.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-611": {
+        "name": "CWE-611: Improper Restriction of XML External Entity Reference",
+        "description": "The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output."
+      },
+      "CWE-918": {
+        "name": "Server-Side Request Forgery (SSRF)",
+        "description": "The web server receives a URL or similar request from an upstream component and retrieves the contents of this URL, but it does not sufficiently ensure that the request is being sent to the expected destination."
+      }
+    },
+    "project": "ccm-plugin",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=hudson.plugins.ccm.CcmPublisherTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1000865",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "src/main/java/org/kohsuke/groovy/sandbox/SandboxTransformer.java",
+    "buggy_line": [
+      [
+        140
+      ],
+      [
+        150
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        130,
+        148
+      ]
+    ],
+    "human_patch": "https://github.com/jenkinsci/groovy-sandbox/commit/0cd7ec12b7c56cfa3167d99c5f43147ce05449d3",
+    "vul_id": "VUL4J-52",
+    "cve_description": "A sandbox bypass vulnerability exists in Script Security Plugin 1.47 and earlier in groovy-sandbox/src/main/java/org/kohsuke/groovy/sandbox/SandboxTransformer.java that allows attackers with Job/Configure permission to execute arbitrary code on the Jenkins master JVM, if plugins using the Groovy sandbox are installed.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-269": {
+        "name": "Improper Privilege Management",
+        "description": "The product does not properly assign, modify, track, or check privileges for an actor, creating an unintended sphere of control for that actor."
+      }
+    },
+    "project": "groovy-sandbox",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.kohsuke.groovy.sandbox.FinalizerTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1999044",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "core/src/main/java/hudson/scheduler/CronTab.java",
+    "buggy_line": [
+      [
+        207
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        206,
+        208
+      ]
+    ],
+    "human_patch": "https://github.com/jenkinsci/jenkins/commit/e5046911c57e60a1d6d8aca9b21bd9093b0f3763",
+    "vul_id": "VUL4J-53",
+    "package_name": "hudson.scheduler",
+    "source_dir": "core/src/main/java/",
+    "buggy_code": "        void setTo(Calendar c, int i) {\n            c.set(field,i-offset);\n        }",
+    "cve_description": "A denial of service vulnerability exists in Jenkins 2.137 and earlier, 2.121.2 and earlier in CronTab.java that allows attackers with Overall/Read permission to have a request handling thread enter an infinite loop.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-835": {
+        "name": "Loop with Unreachable Exit Condition ('Infinite Loop')",
+        "description": "The product contains an iteration or loop with an exit condition that cannot be reached, i.e., an infinite loop."
+      }
+    },
+    "project": "jenkins",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl core",
+    "test_cmd": "mvn test -pl core -Dtest=hudson.scheduler.CronTabTest#testLongMonths",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2017-1000355",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "core/src/main/java/hudson/util/XStream2.java",
+    "buggy_line": [
+      [
+        148
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        144,
+        173
+      ]
+    ],
+    "human_patch": "https://github.com/jenkinsci/jenkins/commit/701ea95a52afe53bee28f76a3f96eb0e578852e9",
+    "vul_id": "VUL4J-54",
+    "package_name": "hudson.util",
+    "source_dir": "core/src/main/java/",
+    "cve_description": "Jenkins versions 2.56 and earlier as well as 2.46.1 LTS and earlier are vulnerable to an XStream: Java crash when trying to instantiate void/Void.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-502": {
+        "name": "Deserialization of Untrusted Data",
+        "description": "The product deserializes untrusted data without sufficiently ensuring that the resulting data will be valid."
+      }
+    },
+    "project": "jenkins",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl core",
+    "test_cmd": "mvn test -pl core -Dtest=hudson.util.XStream2Test#crashXstream",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1000864",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "core/src/main/java/hudson/scheduler/CronTab.java",
+    "buggy_line": [
+      [
+        359
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        325,
+        365
+      ]
+    ],
+    "human_patch": "https://github.com/jenkinsci/jenkins/commit/73afa0ca786a87f05b5433e2e38f863826fcad17",
+    "vul_id": "VUL4J-55",
+    "package_name": "hudson.scheduler",
+    "source_dir": "core/src/main/java/",
+    "buggy_code": "    /**\n     * See {@link #ceil(long)}.\n     *\n     * This method modifies the given calendar and returns the same object.\n     *\n     * @throws RareOrImpossibleDateException if the date isn't hit in the 2 years after it indicates an impossible\n     * (e.g. Jun 31) date, or at least a date too rare to be useful. This addresses JENKINS-41864 and was added in 2.49\n     */\n    public Calendar ceil(Calendar cal) {\n        Calendar twoYearsFuture = (Calendar) cal.clone();\n        twoYearsFuture.add(Calendar.YEAR, 2);\n        OUTER:\n        while (true) {\n            if (cal.compareTo(twoYearsFuture) > 0) {\n                // we went too far into the future\n                throw new RareOrImpossibleDateException();\n            }\n            for (CalendarField f : CalendarField.ADJUST_ORDER) {\n                int cur = f.valueOf(cal);\n                int next = f.ceil(this,cur);\n                if (cur==next)  continue;   // this field is already in a good shape. move on to next\n\n                // we are modifying this field, so clear all the lower level fields\n                for (CalendarField l=f.lowerField; l!=null; l=l.lowerField)\n                    l.clear(cal);\n\n                if (next<0) {\n                    // we need to roll over to the next field.\n                    f.rollUp(cal, 1);\n                    f.setTo(cal,f.first(this));\n                    // since higher order field is affected by this, we need to restart from all over\n                    continue OUTER;\n                } else {\n                    f.setTo(cal,next);\n                    if (f.redoAdjustmentIfModified)\n                        continue OUTER; // when we modify DAY_OF_MONTH and DAY_OF_WEEK, do it all over from the top\n                }\n            }\n            return cal; // all fields adjusted\n        }\n    }",
+    "cve_description": "A denial of service vulnerability exists in Jenkins 2.153 and earlier, LTS 2.138.3 and earlier in CronTab.java that allows attackers with Overall/Read permission to have a request handling thread enter an infinite loop.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-835": {
+        "name": "Loop with Unreachable Exit Condition ('Infinite Loop')",
+        "description": "The product contains an iteration or loop with an exit condition that cannot be reached, i.e., an infinite loop."
+      }
+    },
+    "project": "jenkins",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl core",
+    "test_cmd": "mvn test -pl core -Dtest=hudson.scheduler.CronTabTest#testCeilLongMonths",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1000056",
+    "single_file": "0",
+    "buggy_info": [
+      {
+        "buggy_file_path": "src/main/java/hudson/tasks/junit/SuiteResult.java",
+        "buggy_method_with_comment": [
+          [
+            154,
+            178
+          ]
+        ],
+        "buggy_line": [
+          [
+            165
+          ]
+        ],
+        "bug_type": "insertion"
+      },
+      {
+        "buggy_file_path": "src/main/java/hudson/tasks/junit/XMLEntityResolver.java",
+        "buggy_method_with_comment": [
+          [
+            49,
+            71
+          ]
+        ],
+        "buggy_line": [
+          [
+            70
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "human_patch": "https://github.com/jenkinsci/junit-plugin/commit/15f39fc49d9f25bca872badb48e708a8bb815ea7",
+    "vul_id": "VUL4J-56",
+    "cve_description": "Jenkins JUnit Plugin 1.23 and earlier processes XML external entities in files it parses as part of the build process, allowing attackers with user permissions in Jenkins to extract secrets from the Jenkins master, perform server-side request forgery, or denial-of-service attacks.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-611": {
+        "name": "CWE-611: Improper Restriction of XML External Entity Reference",
+        "description": "The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output."
+      },
+      "CWE-918": {
+        "name": "Server-Side Request Forgery (SSRF)",
+        "description": "The web server receives a URL or similar request from an upstream component and retrieves the contents of this URL, but it does not sufficiently ensure that the request is being sent to the expected destination."
+      }
+    },
+    "project": "junit-plugin",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=hudson.tasks.junit.JUnitResultArchiverTest#testXxe",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1000089",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "src/main/java/org/jenkinsci/plugins/workflow/support/steps/build/BuildTriggerStepExecution.java",
+    "buggy_line": [
+      [
+        66
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        58,
+        148
+      ]
+    ],
+    "human_patch": "https://github.com/jenkinsci/pipeline-build-step-plugin/commit/3dfefdec1f7b2a4ee0ef8902afdea720b1572cb3",
+    "vul_id": "VUL4J-57",
+    "package_name": "org.jenkinsci.plugins.workflow.support.steps.build",
+    "source_dir": "src/main/java/",
+    "buggy_code": "    @SuppressWarnings({\"unchecked\", \"rawtypes\"}) // cannot get from ParameterizedJob back to ParameterizedJobMixIn trivially\n    @Override\n    public boolean start() throws Exception {\n        String job = step.getJob();\n        Item item = Jenkins.getActiveInstance().getItem(job, invokingRun.getParent(), Item.class);\n        if (item == null) {\n            throw new AbortException(\"No item named \" + job + \" found\");\n        }\n        if (step.getWait() && !(item instanceof Job)) {\n            // TODO find some way of allowing ComputedFolders to hook into the listener code\n            throw new AbortException(\"Waiting for non-job items is not supported\");\n        }\n        if (item instanceof ParameterizedJobMixIn.ParameterizedJob) {\n            final ParameterizedJobMixIn.ParameterizedJob project = (ParameterizedJobMixIn.ParameterizedJob) item;\n            listener.getLogger().println(\"Scheduling project: \" + ModelHyperlinkNote.encodeTo(project));\n\n            node.addAction(new LabelAction(Messages.BuildTriggerStepExecution_building_(project.getFullDisplayName())));\n            List<Action> actions = new ArrayList<>();\n            if (step.getWait()) {\n                StepContext context = getContext();\n                actions.add(new BuildTriggerAction(context, step.isPropagate()));\n                LOGGER.log(Level.FINER, \"scheduling a build of {0} from {1}\", new Object[]{project, context});\n            }\n            actions.add(new CauseAction(new Cause.UpstreamCause(invokingRun)));\n            List<ParameterValue> parameters = step.getParameters();\n            if (parameters != null) {\n                parameters = completeDefaultParameters(parameters, (Job) project);\n                actions.add(new ParametersAction(parameters));\n            }\n            Integer quietPeriod = step.getQuietPeriod();\n            // TODO use new convenience method in 1.621\n            if (quietPeriod == null) {\n                quietPeriod = project.getQuietPeriod();\n            }\n            QueueTaskFuture<?> f = new ParameterizedJobMixIn() {\n                @Override\n                protected Job asJob() {\n                    return (Job) project;\n                }\n            }.scheduleBuild2(quietPeriod, actions.toArray(new Action[actions.size()]));\n            if (f == null) {\n                throw new AbortException(\"Failed to trigger build of \" + project.getFullName());\n            }\n        } else if (item instanceof Queue.Task){\n            if (step.getParameters() != null && !step.getParameters().isEmpty()) {\n                throw new AbortException(\"Item type does not support parameters\");\n            }\n            Queue.Task task = (Queue.Task) item;\n            listener.getLogger().println(\"Scheduling item: \" + ModelHyperlinkNote.encodeTo(item));\n            node.addAction(new LabelAction(Messages.BuildTriggerStepExecution_building_(task.getFullDisplayName())));\n            List<Action> actions = new ArrayList<>();\n            if (step.getWait()) {\n                StepContext context = getContext();\n                actions.add(new BuildTriggerAction(context, step.isPropagate()));\n                LOGGER.log(Level.FINER, \"scheduling a build of {0} from {1}\", new Object[]{task, context});\n            }\n            actions.add(new CauseAction(new Cause.UpstreamCause(invokingRun)));\n            Integer quietPeriod = step.getQuietPeriod();\n            if (quietPeriod == null) {\n                try {\n                    Method getQuietPeriod = task.getClass().getMethod(\"getQuietPeriod\");\n                    if (getQuietPeriod.getReturnType().equals(int.class)) {\n                        quietPeriod = (Integer) getQuietPeriod.invoke(task);\n                    }\n                } catch (NoSuchMethodException e) {\n                    // ignore, best effort only\n                } catch (IllegalAccessError | IllegalArgumentException | InvocationTargetException e) {\n                    LOGGER.log(Level.WARNING, \"Could not determine quiet period of \" + item.getFullName(), e);\n                }\n            }\n            if (quietPeriod == null) {\n                quietPeriod = Jenkins.getActiveInstance().getQuietPeriod();\n            }\n            ScheduleResult scheduleResult = Jenkins.getActiveInstance().getQueue().schedule2(task, quietPeriod,actions);\n            if (scheduleResult.isRefused()) {\n                throw new AbortException(\"Failed to trigger build of \" + item.getFullName());\n            }\n        } else {\n            throw new AbortException(\"The item named \" + job + \" is a \"\n                    + (item instanceof Describable\n                    ? ((Describable) item).getDescriptor().getDisplayName()\n                    : item.getClass().getName())\n                    + \" which is not something that can be built\");\n        }\n        if (step.getWait()) {\n            return false;\n        } else {\n            getContext().onSuccess(null);\n            return true;\n        }\n    }",
+    "cve_description": "Anymail django-anymail version version 0.2 through 1.3 contains a CWE-532, CWE-209 vulnerability in WEBHOOK_AUTHORIZATION setting value that can result in An attacker with access to error logs could fabricate email tracking events. This attack appear to be exploitable via If you have exposed your Django error reports, an attacker could discover your ANYMAIL_WEBHOOK setting and use this to post fabricated or malicious Anymail tracking/inbound events to your app. This vulnerability appears to have been fixed in v1.4.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-532": {
+        "name": "Insertion of Sensitive Information into Log File",
+        "description": "The product writes sensitive information to a log file."
+      }
+    },
+    "project": "pipeline-build-step-plugin",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.jenkinsci.plugins.workflow.support.steps.build.BuildTriggerStepTest#permissions",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1000111",
+    "single_file": "0",
+    "buggy_info": [
+      {
+        "buggy_file_path": "src/main/java/hudson/scm/SubversionRepositoryStatus.java",
+        "buggy_method_with_comment": [
+          [
+            52,
+            52
+          ],
+          [
+            63,
+            65
+          ],
+          [
+            95,
+            150
+          ]
+        ],
+        "buggy_line": [
+          [
+            52
+          ],
+          [
+            63,
+            64,
+            65
+          ],
+          [
+            96
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "src/main/java/hudson/scm/SubversionStatus.java",
+        "buggy_method_with_comment": [
+          [
+            45,
+            47
+          ]
+        ],
+        "buggy_line": [
+          [
+            45,
+            46,
+            47
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "human_patch": "https://github.com/jenkinsci/subversion-plugin/commit/25f6afbb02a5863f363b0a2f664ac717ace743b4",
+    "vul_id": "VUL4J-58",
+    "cve_description": "An improper authorization vulnerability exists in Jenkins Subversion Plugin version 2.10.2 and earlier in SubversionStatus.java and SubversionRepositoryStatus.java that allows an attacker with network access to obtain a list of nodes and users.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-863": {
+        "name": "Incorrect Authorization",
+        "description": "The product performs an authorization check when an actor attempts to access a resource or perform an action, but it does not correctly perform the check."
+      }
+    },
+    "project": "subversion-plugin",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=hudson.scm.SubversionStatusTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2015-6748",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "src/main/java/org/jsoup/parser/TokeniserState.java",
+    "buggy_line": [
+      [
+        760
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        733,
+        778
+      ]
+    ],
+    "human_patch": "https://github.com/jhy/jsoup/commit/4edb78991f8d0bf87dafde5e01ccd8922065c9b2",
+    "vul_id": "VUL4J-59",
+    "package_name": "org.jsoup.parser",
+    "source_dir": "src/main/java/",
+    "buggy_code": "        void read(Tokeniser t, CharacterReader r) {\n            char c = r.consume();\n            switch (c) {\n                case '\\t':\n                case '\\n':\n                case '\\r':\n                case '\\f':\n                case ' ':\n                    // ignore\n                    break;\n                case '\"':\n                    t.transition(AttributeValue_doubleQuoted);\n                    break;\n                case '&':\n                    r.unconsume();\n                    t.transition(AttributeValue_unquoted);\n                    break;\n                case '\\'':\n                    t.transition(AttributeValue_singleQuoted);\n                    break;\n                case nullChar:\n                    t.error(this);\n                    t.tagPending.appendAttributeValue(replacementChar);\n                    t.transition(AttributeValue_unquoted);\n                    break;\n                case eof:\n                    t.eofError(this);\n                    t.transition(Data);\n                    break;\n                case '>':\n                    t.error(this);\n                    t.emitTagPending();\n                    t.transition(Data);\n                    break;\n                case '<':\n                case '=':\n                case '`':\n                    t.error(this);\n                    t.tagPending.appendAttributeValue(c);\n                    t.transition(AttributeValue_unquoted);\n                    break;\n                default:\n                    r.unconsume();\n                    t.transition(AttributeValue_unquoted);\n            }\n        }",
+    "cve_description": "Cross-site scripting (XSS) vulnerability in jsoup before 1.8.3.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-79": {
+        "name": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The product does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users."
+      }
+    },
+    "project": "jsoup",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.jsoup.parser.XmlTreeBuilderTest#testDoesHandleEOFInTag",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-10006",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "src/main/java/org/owasp/validator/html/scan/MagicSAXFilter.java",
+    "buggy_line": [
+      [
+        274,
+        278
+      ],
+      [
+        355
+      ],
+      [
+        371
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        224,
+        389
+      ]
+    ],
+    "human_patch": "https://github.com/nahsra/antisamy/commit/7313931dc3c0d1377b010f07faef2063dd359a36",
+    "vul_id": "VUL4J-60",
+    "cve_description": "In OWASP AntiSamy before 1.5.5, by submitting a specially crafted input (a tag that supports style with active content), you could bypass the library protections and supply executable code. The impact is XSS.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-79": {
+        "name": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The product does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users."
+      }
+    },
+    "project": "antisamy",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.owasp.validator.html.test.AntiSamyTest#testIssue2",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1000820",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "src/main/java/apoc/load/Xml.java",
+    "buggy_line": [
+      [
+        68
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        60,
+        105
+      ]
+    ],
+    "human_patch": "https://github.com/neo4j-contrib/neo4j-apoc-procedures/commit/45bc09c8bd7f17283e2a7e85ce3f02cb4be4fd1a",
+    "vul_id": "VUL4J-61",
+    "package_name": "apoc.load",
+    "source_dir": "src/main/java/",
+    "buggy_code": "    private Stream<MapResult> xmlXpathToMapResult(@Name(\"url\") String url, boolean simpleMode, String path, Map<String, Object> config) throws Exception {\n        if (config == null) config = Collections.emptyMap();\n        boolean failOnError = (boolean) config.getOrDefault(\"failOnError\", true);\n        List<MapResult> result = new ArrayList<>();\n        try {\n            DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();\n            documentBuilderFactory.setNamespaceAware(true);\n            documentBuilderFactory.setIgnoringElementContentWhitespace(true);\n            DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();\n\n            FileUtils.checkReadAllowed(url);\n\n            Map<String, Object> headers = (Map) config.getOrDefault( \"headers\", Collections.emptyMap() );\n\n            Document doc = documentBuilder.parse(Util.openInputStream(url, headers, null));\n            XPathFactory xPathFactory = XPathFactory.newInstance();\n\n            XPath xPath = xPathFactory.newXPath();\n\n            path = StringUtils.isEmpty(path) ? \"/\" : path;\n            XPathExpression xPathExpression = xPath.compile(path);\n            NodeList nodeList = (NodeList) xPathExpression.evaluate(doc, XPathConstants.NODESET);\n\n            for (int i = 0; i < nodeList.getLength(); i++) {\n                final Deque<Map<String, Object>> stack = new LinkedList<>();\n\n                handleNode(stack, nodeList.item(i), simpleMode);\n                for (int index = 0; index < stack.size(); index++) {\n                    result.add(new MapResult(stack.pollFirst()));\n                }\n            }\n        }\n        catch (FileNotFoundException e){\n            if(!failOnError)\n                return Stream.of(new MapResult(Collections.emptyMap()));\n            else\n                throw new FileNotFoundException(e.getMessage());\n        }\n        catch (Exception e){\n            if(!failOnError)\n                return Stream.of(new MapResult(Collections.emptyMap()));\n            else\n                throw new Exception(e);\n        }\n        return result.stream();\n    }",
+    "cve_description": "neo4j-contrib neo4j-apoc-procedures version before commit 45bc09c contains a XML External Entity (XXE) vulnerability in XML Parser that can result in Disclosure of confidential data, denial of service, SSRF, port scanning. This vulnerability appears to have been fixed in after commit 45bc09c.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-611": {
+        "name": "CWE-611: Improper Restriction of XML External Entity Reference",
+        "description": "The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output."
+      }
+    },
+    "project": "neo4j-apoc-procedures",
+    "compile_cmd": "./gradlew compileTestJava",
+    "test_all_cmd": "./gradlew test",
+    "test_cmd": "./gradlew test --tests apoc.load.XmlTest.testLoadXmlPreventXXEVulnerabilityThrowsQueryExecutionException",
+    "cmd_options": "",
+    "env_info": {
+      "env_cmd": "./gradlew"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-18389",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "enterprise/security/src/main/java/org/neo4j/server/security/enterprise/auth/LdapRealm.java",
+    "buggy_line": [
+      [
+        235
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        211,
+        251
+      ]
+    ],
+    "human_patch": "https://github.com/neo4j/neo4j/commit/46de5d01ae2741ffe04c36270fc62c6d490f65c9",
+    "vul_id": "VUL4J-62",
+    "package_name": "org.neo4j.server.security.enterprise.auth",
+    "source_dir": "enterprise/security/src/main/java/",
+    "cve_description": "Due to incorrect access control in Neo4j Enterprise Database Server 3.4.x before 3.4.9, the setting of LDAP for authentication with STARTTLS, and System Account for authorization, allows an attacker to log into the server by sending any valid username with an arbitrary password.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-287": {
+        "name": "CWE-287: Improper Authentication",
+        "description": "When an actor claims to have a given identity, the product does not prove or insufficiently proves that the claim is correct."
+      }
+    },
+    "project": "neo4j",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn failsafe:integration-test",
+    "test_cmd": "mvn test -pl enterprise/security -Dtest=org.neo4j.server.security.enterprise.auth.integration.bolt.LdapAuthIT#shouldFailLoginWrongPasswordWithLdapOnlyUsingStartTls",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1000615",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "protocols/ovsdb/rfc/src/main/java/org/onosproject/ovsdb/rfc/utils/VersionUtil.java",
+    "buggy_line": [
+      [
+        53
+      ],
+      [
+        55,
+        66
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        46,
+        68
+      ]
+    ],
+    "human_patch": "https://github.com/opennetworkinglab/onos/commit/1a783729a1d7e0cd59d59a8dd3a73cdd6ac0f30d",
+    "vul_id": "VUL4J-63",
+    "cve_description": "ONOS ONOS Controller version 1.13.1 and earlier contains a Denial of Service (Service crash) vulnerability in OVSDB component in ONOS that can result in An adversary can remotely crash OVSDB service ONOS controller via a normal switch.. This attack appear to be exploitable via the attacker should be able to control or forge a switch in the network..",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "onos",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl protocols/ovsdb/rfc",
+    "test_cmd": "mvn test -pl protocols/ovsdb/rfc -Dtest=org.onosproject.ovsdb.rfc.utils.VersionUtilTest#testVersionCompare",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-20157",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "main/src/com/google/refine/importers/XmlImporter.java",
+    "buggy_line": [
+      [
+        325
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        320,
+        326
+      ]
+    ],
+    "human_patch": "https://github.com/OpenRefine/OpenRefine/commit/6a0d7d56e4ffb420316ce7849fde881344fbf881",
+    "vul_id": "VUL4J-64",
+    "package_name": "com.google.refine.importers",
+    "source_dir": "main/src/",
+    "buggy_code": "    final static private XMLStreamReader createXMLStreamReader(InputStream inputStream) throws XMLStreamException, IOException {\n        XMLInputFactory factory = XMLInputFactory.newInstance();\n        factory.setProperty(XMLInputFactory.IS_COALESCING, true);\n        factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, true);\n \n        return factory.createXMLStreamReader(wrapPrefixRemovingInputStream(inputStream));\n    }",
+    "cve_description": "The data import functionality in OpenRefine through 3.1 allows an XML External Entity (XXE) attack through a crafted (zip) file, allowing attackers to read arbitrary files.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-611": {
+        "name": "CWE-611: Improper Restriction of XML External Entity Reference",
+        "description": "The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output."
+      }
+    },
+    "project": "OpenRefine",
+    "compile_cmd": "./refine build",
+    "test_all_cmd": "mvn test -pl main",
+    "test_cmd": "mvn test -pl main -Dtest=com.google.refine.tests.importers.XmlImporterTests#ignoresDtds",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-19859",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "main/src/com/google/refine/importing/ImportingUtilities.java",
+    "buggy_line": [
+      [
+        445
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        437,
+        456
+      ]
+    ],
+    "human_patch": "https://github.com/OpenRefine/OpenRefine/commit/e243e73e4064de87a913946bd320fbbe246da656",
+    "vul_id": "VUL4J-65",
+    "package_name": "com.google.refine.importing",
+    "source_dir": "main/src/",
+    "buggy_code": "    static public File allocateFile(File dir, String name) {\n        int q = name.indexOf('?');\n        if (q > 0) {\n            name = name.substring(0, q);\n        }\n        \n        File file = new File(dir, name);\n        \n        int dot = name.indexOf('.');\n        String prefix = dot < 0 ? name : name.substring(0, dot);\n        String suffix = dot < 0 ? \"\" : name.substring(dot);\n        int index = 2;\n        while (file.exists()) {\n            file = new File(dir, prefix + \"-\" + index++ + suffix);\n        }\n        \n        file.getParentFile().mkdirs();\n        \n        return file;\n    }",
+    "cve_description": "OpenRefine before 3.2 beta allows directory traversal via a relative pathname in a ZIP archive.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-22": {
+        "name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "description": "The product uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the product does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory."
+      }
+    },
+    "project": "OpenRefine",
+    "compile_cmd": "./refine build",
+    "test_all_cmd": "mvn test -pl main",
+    "test_cmd": "mvn test -pl main -Dtest=com.google.refine.tests.importing.ImportingUtilitiesTests#testZipSlip",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2020-1695",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "resteasy-core/src/main/java/org/jboss/resteasy/plugins/delegates/MediaTypeHeaderDelegate.java",
+    "buggy_line": [
+      [
+        52
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        32,
+        58
+      ]
+    ],
+    "human_patch": "https://github.com/resteasy/Resteasy/commit/acf15f2a8067f7e4cf5838342cecfa0b78a174fb",
+    "vul_id": "VUL4J-66",
+    "package_name": "org.jboss.resteasy.plugins.delegates",
+    "source_dir": "resteasy-core/src/main/java/",
+    "buggy_code": "   protected static boolean isValid(String str)\n   {\n      if (str == null || str.length() == 0) return false;\n      for (int i = 0; i < str.length(); i++) {\n         switch (str.charAt(i))\n         {\n            case '/':\n            case '\\\\':\n            case '?':\n            case ':':\n            case '<':\n            case '>':\n            case ';':\n            case '(':\n            case ')':\n            case '@':\n            case ',':\n            case '[':\n            case ']':\n            case '=':\n               return false;\n            default:\n               break;\n         }\n      }\n      return true;\n   }",
+    "cve_description": "A flaw was found in all resteasy 3.x.x versions prior to 3.12.0.Final and all resteasy 4.x.x versions prior to 4.6.0.Final, where an improper input validation results in returning an illegal header that integrates into the server's response. This flaw may result in an injection, which leads to unexpected behavior when the HTTP response is constructed.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-20": {
+        "name": "CWE-20: Improper Input Validation",
+        "description": "The product receives input or data, but it does\n        not validate or incorrectly validates that the input has the\n        properties that are required to process the data safely and\n        correctly."
+      }
+    },
+    "project": "Resteasy",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "cd testsuite;mvn test",
+    "test_cmd": "cd testsuite;mvn test -Dtest=org.jboss.resteasy.test.mediatype.MediaTypeHeaderTest#testNewLineInHeaderValueIsRejected",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1274",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "src/main/java/org/springframework/data/mapping/PropertyPath.java",
+    "buggy_line": [
+      [
+        324
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        312,
+        370
+      ]
+    ],
+    "human_patch": "https://github.com/spring-projects/spring-data-commons/commit/371f6590c509c72f8e600f3d05e110941607fba",
+    "vul_id": "VUL4J-67",
+    "package_name": "org.springframework.data.mapping",
+    "source_dir": "src/main/java/",
+    "cve_description": "Spring Data Commons, versions 1.13 to 1.13.10, 2.0 to 2.0.5, and older unsupported versions, contain a property path parser vulnerability caused by unlimited resource allocation. An unauthenticated remote malicious user (or attacker) can issue requests against Spring Data REST endpoints or endpoints using property path parsing which can cause a denial of service (CPU and memory consumption).",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-770": {
+        "name": "Allocation of Resources Without Limits or Throttling",
+        "description": "The product allocates a reusable resource or group of resources on behalf of an actor without imposing any restrictions on the size or number of resources that can be allocated, in violation of the intended security policy for that actor."
+      }
+    },
+    "project": "spring-data-commons",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.springframework.data.mapping.PropertyPathUnitTests#rejectsTooLongPath",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2017-8046",
+    "single_file": "0",
+    "buggy_info": [
+      {
+        "buggy_file_path": "spring-data-rest-webmvc/src/main/java/org/springframework/data/rest/webmvc/json/patch/AddOperation.java",
+        "buggy_method_with_comment": [
+          [
+            51,
+            72
+          ]
+        ],
+        "buggy_line": [
+          [
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "spring-data-rest-webmvc/src/main/java/org/springframework/data/rest/webmvc/json/patch/PatchOperation.java",
+        "buggy_method_with_comment": [
+          [
+            183,
+            196
+          ]
+        ],
+        "buggy_line": [
+          [
+            194,
+            195
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "human_patch": "https://github.com/spring-projects/spring-data-rest/commit/8f269e28fe8038a6c60f31a1c36cfda04795ab45",
+    "vul_id": "VUL4J-68",
+    "cve_description": "Malicious PATCH requests submitted to servers using Spring Data REST versions prior to 2.6.9 (Ingalls SR9), versions prior to 3.0.1 (Kay SR1) and Spring Boot versions prior to 1.5.9, 2.0 M6 can use specially crafted JSON data to run arbitrary Java code.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-20": {
+        "name": "CWE-20: Improper Input Validation",
+        "description": "The product receives input or data, but it does\n        not validate or incorrectly validates that the input has the\n        properties that are required to process the data safely and\n        correctly."
+      }
+    },
+    "project": "spring-data-rest",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl spring-data-rest-webmvc",
+    "test_cmd": "mvn test -pl spring-data-rest-webmvc -Dtest=org.springframework.data.rest.webmvc.json.patch.JsonPatchTests#rejectsInvalidPaths",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-9878",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "spring-webmvc/src/main/java/org/springframework/web/servlet/ResourceServlet.java",
+    "buggy_line": [
+      [
+        279,
+        281
+      ],
+      [
+        285
+      ],
+      [
+        287
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        262,
+        290
+      ]
+    ],
+    "human_patch": "https://github.com/spring-projects/spring-framework/commit/e2d6e709c3c65a4951eb096843ee75d5200cfcad",
+    "vul_id": "VUL4J-69",
+    "cve_description": "An issue was discovered in Pivotal Spring Framework before 3.2.18, 4.2.x before 4.2.9, and 4.3.x before 4.3.5. Paths provided to the ResourceServlet were not properly sanitized and as a result exposed to directory traversal attacks.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-22": {
+        "name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "description": "The product uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the product does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory."
+      }
+    },
+    "project": "spring-framework",
+    "compile_cmd": "./gradlew :spring-webmvc:compileTestJava",
+    "test_all_cmd": "./gradlew :spring-webmvc:test",
+    "test_cmd": "./gradlew :spring-webmvc:test --tests org.springframework.web.servlet.ResourceServletTests",
+    "cmd_options": "",
+    "env_info": {
+      "env_cmd": "./gradlew"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-15756",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "spring-web/src/main/java/org/springframework/http/HttpRange.java",
+    "buggy_line": [
+      [
+        62,
+        63
+      ],
+      [
+        65,
+        67
+      ],
+      [
+        70
+      ],
+      [
+        72
+      ],
+      [
+        137
+      ],
+      [
+        182
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        50,
+        72
+      ],
+      [
+        120,
+        142
+      ],
+      [
+        166,
+        183
+      ]
+    ],
+    "human_patch": "https://github.com/spring-projects/spring-framework/commit/423aa28ed584b4ff6e5bad218c09beef5e91951",
+    "vul_id": "VUL4J-70",
+    "cve_description": "Spring Framework, version 5.1, versions 5.0.x prior to 5.0.10, versions 4.3.x prior to 4.3.20, and older unsupported versions on the 4.2.x branch provide support for range requests when serving static resources through the ResourceHttpRequestHandler, or starting in 5.0 when an annotated controller returns an org.springframework.core.io.Resource. A malicious user (or attacker) can add a range header with a high number of ranges, or with wide ranges that overlap, or both, for a denial of service attack. This vulnerability affects applications that depend on either spring-webmvc or spring-webflux. Such applications must also have a registration for serving static resources (e.g. JS, CSS, images, and others), or have an annotated controller that returns an org.springframework.core.io.Resource. Spring Boot applications that depend on spring-boot-starter-web or spring-boot-starter-webflux are ready to serve static resources out of the box and are therefore vulnerable.",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "spring-framework",
+    "compile_cmd": "./gradlew :spring-web:compileTestJava",
+    "test_all_cmd": "./gradlew :spring-web:test",
+    "test_cmd": "./gradlew :spring-web:test --tests org.springframework.http.HttpRangeTests",
+    "cmd_options": "",
+    "env_info": {
+      "env_cmd": "./gradlew"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1272",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "spring-core/src/main/java/org/springframework/util/MimeTypeUtils.java",
+    "buggy_line": [
+      [
+        49
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        33,
+        396
+      ]
+    ],
+    "human_patch": "https://github.com/spring-projects/spring-framework/commit/e02ff3a0da50744b0980d5d665fd242eedea767",
+    "vul_id": "VUL4J-71",
+    "cve_description": "Spring Framework, versions 5.0 prior to 5.0.5 and versions 4.3 prior to 4.3.15 and older unsupported versions, provide client-side support for multipart requests. When Spring MVC or Spring WebFlux server application (server A) receives input from a remote client, and then uses that input to make a multipart request to another server (server B), it can be exposed to an attack, where an extra multipart is inserted in the content of the request from server A, causing server B to use the wrong value for a part it expects. This could to lead privilege escalation, for example, if the part content represents a username or user roles.",
+    "lang": "Java",
+    "cwe_info": {},
+    "project": "spring-framework",
+    "compile_cmd": "./gradlew :spring-core:compileTestJava",
+    "test_all_cmd": "./gradlew :spring-core:test",
+    "test_cmd": "./gradlew :spring-core:test --tests org.springframework.util.MimeTypeTests.testCVE_2018_1272",
+    "cmd_options": "",
+    "env_info": {
+      "env_cmd": "./gradlew"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-15801",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "oauth2/oauth2-jose/src/main/java/org/springframework/security/oauth2/jwt/JwtIssuerValidator.java",
+    "buggy_line": [
+      [
+        40
+      ],
+      [
+        51
+      ],
+      [
+        66
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        42,
+        57
+      ],
+      [
+        59,
+        71
+      ]
+    ],
+    "human_patch": "https://github.com/spring-projects/spring-security/commit/c70b65c5df0e170a2d34d812b83db0b7bc71ea25",
+    "vul_id": "VUL4J-72",
+    "cve_description": "Spring Security versions 5.1.x prior to 5.1.2 contain an authorization bypass vulnerability during JWT issuer validation. In order to be impacted, the same private key for an honest issuer and a malicious user must be used when signing JWTs. In that case, a malicious user could fashion signed JWTs with the malicious issuer URL that may be granted for the honest issuer.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-345": {
+        "name": "Insufficient Verification of Data Authenticity",
+        "description": "The product does not sufficiently verify the origin or authenticity of data, in a way that causes it to accept invalid data."
+      }
+    },
+    "project": "spring-security",
+    "compile_cmd": "./gradlew :spring-security-oauth2-jose:compileTestJava",
+    "test_all_cmd": "./gradlew :spring-security-oauth2-jose:test",
+    "test_cmd": "./gradlew :spring-security-oauth2-jose:test --tests org.springframework.security.oauth2.jwt.JwtIssuerValidatorTests.testCVE_2018_15801",
+    "cmd_options": "",
+    "env_info": {
+      "env_cmd": "./gradlew"
+    }
+  },
+  {
+    "CVE_id": "CVE-2019-11272",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "core/src/main/java/org/springframework/security/authentication/encoding/PlaintextPasswordEncoder.java",
+    "buggy_line": [
+      [
+        54
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        53,
+        68
+      ]
+    ],
+    "human_patch": "https://github.com/spring-projects/spring-security/commit/b2d4fec3617c497c5a8eb9c7e5270e0c7db293ee",
+    "vul_id": "VUL4J-73",
+    "package_name": "org.springframework.security.authentication.encoding",
+    "source_dir": "core/src/main/java/",
+    "buggy_code": "\tpublic boolean isPasswordValid(String encPass, String rawPass, Object salt) {\n\t\tString pass1 = encPass + \"\";\n\n\t\t// Strict delimiters is false because pass2 never persisted anywhere\n\t\t// and we want to avoid unnecessary exceptions as a result (the\n\t\t// authentication will fail as the encodePassword never allows them)\n\t\tString pass2 = mergePasswordAndSalt(rawPass, salt, false);\n\n\t\tif (ignorePasswordCase) {\n\t\t\t// Note: per String javadoc to get correct results for Locale insensitive, use\n\t\t\t// English\n\t\t\tpass1 = pass1.toLowerCase(Locale.ENGLISH);\n\t\t\tpass2 = pass2.toLowerCase(Locale.ENGLISH);\n\t\t}\n\t\treturn PasswordEncoderUtils.equals(pass1, pass2);\n\t}",
+    "cve_description": "Spring Security, versions 4.2.x up to 4.2.12, and older unsupported versions support plain text passwords using PlaintextPasswordEncoder. If an application using an affected version of Spring Security is leveraging PlaintextPasswordEncoder and a user has a null encoded password, a malicious user (or attacker) can authenticate using a password of \"null\".",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-287": {
+        "name": "Improper Authentication - Generic",
+        "description": "When an actor claims to have a given identity, the product does not prove or insufficiently proves that the claim is correct."
+      }
+    },
+    "project": "spring-security",
+    "compile_cmd": "./gradlew :spring-security-core:compileTestJava",
+    "test_all_cmd": "./gradlew :spring-security-core:test",
+    "test_cmd": "./gradlew :spring-security-core:test --tests org.springframework.security.authentication.encoding.PlaintextPasswordEncoderTests.testNull",
+    "cmd_options": "",
+    "env_info": {
+      "env_cmd": "./gradlew"
+    }
+  },
+  {
+    "CVE_id": "CVE-2019-3795",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "core/src/main/java/org/springframework/security/core/token/SecureRandomFactoryBean.java",
+    "buggy_line": [
+      [
+        40,
+        49
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        37,
+        52
+      ]
+    ],
+    "human_patch": "https://github.com/spring-projects/spring-security/commit/1304c958bf9c38940082f3ad1558d413ed82f2b",
+    "vul_id": "VUL4J-74",
+    "package_name": "org.springframework.security.core.token",
+    "source_dir": "core/src/main/java/",
+    "buggy_code": "\tpublic SecureRandom getObject() throws Exception {\n\t\tSecureRandom rnd = SecureRandom.getInstance(algorithm);\n\n\t\tif (seed != null) {\n\t\t\t// Seed specified, so use it\n\t\t\tbyte[] seedBytes = FileCopyUtils.copyToByteArray(seed.getInputStream());\n\t\t\trnd.setSeed(seedBytes);\n\t\t}\n\t\telse {\n\t\t\t// Request the next bytes, thus eagerly incurring the expense of default\n\t\t\t// seeding\n\t\t\trnd.nextBytes(new byte[1]);\n\t\t}\n\n\t\treturn rnd;\n\t}",
+    "cve_description": "Spring Security versions 4.2.x prior to 4.2.12, 5.0.x prior to 5.0.12, and 5.1.x prior to 5.1.5 contain an insecure randomness vulnerability when using SecureRandomFactoryBean#setSeed to configure a SecureRandom instance. In order to be impacted, an honest application must provide a seed and make the resulting random material available to an attacker for inspection.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-330": {
+        "name": "Use of Insufficiently Random Values",
+        "description": "The product uses insufficiently random numbers or values in a security context that depends on unpredictable numbers."
+      }
+    },
+    "project": "spring-security",
+    "compile_cmd": "./gradlew :spring-security-core:compileTestJava",
+    "test_all_cmd": "./gradlew :spring-security-core:test",
+    "test_cmd": "./gradlew :spring-security-core:test --tests org.springframework.security.core.token.SecureRandomFactoryBeanTests.testCreatesUsingSeed",
+    "cmd_options": "",
+    "env_info": {
+      "env_cmd": "./gradlew"
+    }
+  },
+  {
+    "CVE_id": "CVE-2016-4977",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "spring-security-oauth2/src/main/java/org/springframework/security/oauth2/provider/endpoint/SpelView.java",
+    "buggy_line": [
+      [
+        49,
+        50
+      ],
+      [
+        71
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        47,
+        58
+      ],
+      [
+        64,
+        74
+      ]
+    ],
+    "human_patch": "https://github.com/spring-projects/spring-security-oauth/commit/fff77d3fea477b566bcacfbfc95f85821a2bdc2d",
+    "vul_id": "VUL4J-75",
+    "cve_description": "When processing authorization requests using the whitelabel views in Spring Security OAuth 2.0.0 to 2.0.9 and 1.0.0 to 1.0.5, the response_type parameter value was executed as Spring SpEL which enabled a malicious user to trigger remote code execution via the crafting of the value for response_type.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-19": {
+        "name": "CWE CATEGORY: Data Processing Errors",
+        "description": "Weaknesses in this category are typically found in functionality that processes data. Data processing is the manipulation of input to retrieve or save information."
+      }
+    },
+    "project": "spring-security-oauth",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl spring-security-oauth2",
+    "test_cmd": "mvn test -pl spring-security-oauth2 -Dtest=org.springframework.security.oauth2.provider.endpoint.SpelViewTests",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1000850",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "retrofit/src/main/java/retrofit2/RequestBuilder.java",
+    "buggy_line": [
+      [
+        94
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        89,
+        95
+      ]
+    ],
+    "human_patch": "https://github.com/square/retrofit/commit/b9a7f6ad72073ddd40254c0058710e87a073047d",
+    "vul_id": "VUL4J-76",
+    "package_name": "retrofit2",
+    "source_dir": "retrofit/src/main/java/",
+    "cve_description": "Square Retrofit version versions from (including) 2.0 and 2.5.0 (excluding) contains a Directory Traversal vulnerability in RequestBuilder class, method addPathParameter that can result in By manipulating the URL an attacker could add or delete resources otherwise unavailable to her.. This attack appear to be exploitable via An attacker should have access to an encoded path parameter on POST, PUT or DELETE request.. This vulnerability appears to have been fixed in 2.5.0 and later.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-22": {
+        "name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "description": "The product uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the product does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory."
+      }
+    },
+    "project": "retrofit",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl retrofit",
+    "test_cmd": "mvn test -pl retrofit -Dtest=retrofit2.RequestFactoryTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2017-1000207",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "modules/swagger-parser/src/main/java/io/swagger/parser/util/DeserializationUtils.java",
+    "buggy_line": [
+      [
+        60
+      ],
+      [
+        65
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        59,
+        62
+      ],
+      [
+        64,
+        67
+      ]
+    ],
+    "human_patch": "https://github.com/swagger-api/swagger-parser/commit/4c6584306b40de9b2dfa9065c3a438cd918534af",
+    "vul_id": "VUL4J-77",
+    "cve_description": "A vulnerability in Swagger-Parser's version <= 1.0.30 and Swagger codegen version <= 2.2.2 yaml parsing functionality results in arbitrary code being executed when a maliciously crafted yaml Open-API specification is parsed. This in particular, affects the 'generate' and 'validate' command in swagger-codegen (<= 2.2.2) and can lead to arbitrary code being executed when these commands are used on a well-crafted yaml specification.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-502": {
+        "name": "Deserialization of Untrusted Data",
+        "description": "The product deserializes untrusted data without sufficiently ensuring that the resulting data will be valid."
+      }
+    },
+    "project": "swagger-parser",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl modules/swagger-parser",
+    "test_cmd": "mvn -pl modules/swagger-parser -Dtest=\"io.swagger.parser.util.*\"",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2019-10173",
+    "single_file": "1",
+    "bug_type": "replace",
+    "buggy_file": "xstream/src/java/com/thoughtworks/xstream/XStream.java",
+    "buggy_line": [
+      [
+        341
+      ],
+      [
+        699
+      ],
+      [
+        714
+      ],
+      [
+        1482,
+        1483
+      ],
+      [
+        2362
+      ],
+      [
+        2541
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        693,
+        700
+      ],
+      [
+        702,
+        798
+      ],
+      [
+        1469,
+        1495
+      ],
+      [
+        2349,
+        2365
+      ],
+      [
+        2539,
+        2546
+      ]
+    ],
+    "human_patch": "https://github.com/x-stream/xstream/commit/f38a1da3ae9491930c2067c12cd2506738b21dab",
+    "vul_id": "VUL4J-78",
+    "cve_description": "It was found that xstream API version 1.4.10 before 1.4.11 introduced a regression for a previous deserialization flaw. If the security framework has not been initialized, it may allow a remote attacker to run arbitrary shell commands when unmarshalling XML or any supported format. e.g. JSON. (regression of CVE-2013-7285)",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-94": {
+        "name": "Improper Control of Generation of Code ('Code Injection')",
+        "description": "The product constructs all or part of a code segment using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify the syntax or behavior of the intended code segment."
+      }
+    },
+    "project": "xstream",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test -pl xstream",
+    "test_cmd": "mvn test -pl xstream -Dtest=com.thoughtworks.acceptance.SecurityVulnerabilityTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  {
+    "CVE_id": "CVE-2018-1002201",
+    "single_file": "1",
+    "bug_type": "insertion",
+    "buggy_file": "src/main/java/org/zeroturnaround/zip/ZipUtil.java",
+    "buggy_line": [
+      [
+        1153
+      ],
+      [
+        1221
+      ],
+      [
+        1226
+      ],
+      [
+        1261
+      ]
+    ],
+    "buggy_method_with_comment": [
+      [
+        1149,
+        1172
+      ],
+      [
+        1195,
+        1230
+      ],
+      [
+        1249,
+        1274
+      ]
+    ],
+    "human_patch": "https://github.com/zeroturnaround/zt-zip/commit/759b72f33bc8f4d69f84f09fcb7f010ad45d6fff",
+    "vul_id": "VUL4J-79",
+    "cve_description": "zt-zip before 1.13 is vulnerable to directory traversal, allowing attackers to write to arbitrary files via a ../ (dot dot slash) in a Zip archive entry that is mishandled during extraction. This vulnerability is also known as 'Zip-Slip'.",
+    "lang": "Java",
+    "cwe_info": {
+      "CWE-22": {
+        "name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "description": "The product uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the product does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory."
+      }
+    },
+    "project": "zt-zip",
+    "compile_cmd": "mvn -DskipTests clean install",
+    "test_all_cmd": "mvn test",
+    "test_cmd": "mvn test -Dtest=org.zeroturnaround.zip.DirectoryTraversalMaliciousTest",
+    "cmd_options": "-Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  }
+]

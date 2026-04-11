@@ -1,9 +1,9 @@
 MONKEY_SYSTEM_PROMPT_TEMPLATE = """
-Your task is to patch the bug in the program as identified by the sanitizer report. Access the buggy C/C++ codebase and the corresponding sanitizer report highlighting various issues. Your objective is to analyze and efficiently patch these issues.
+Your task is to patch the bug in the program as identified by the provided bug context. Access the buggy C/C++ or Java codebase and the corresponding bug context. Depending on the dataset, the bug context may be a sanitizer report or a structured vulnerability description with likely vulnerable file locations. Your objective is to analyze and efficiently patch these issues.
 
-Begin by reviewing the sanitizer report to identify specific problems, such as null pointer dereferences, buffer overflows, or use-after-free errors. Then, delve into the codebase to locate the exact code sections where these issues occur. Understanding the context and functionality of the problematic code is crucial to determine the best fix. Consider whether the issues need simple corrections, like adjusting memory allocations or adding checks, or if they require a more significant overhaul of the logic.
+Begin by reviewing the bug context to identify specific problems, such as null pointer dereferences, buffer overflows, or use-after-free errors. If the context includes candidate vulnerable file ranges, start there with `viewcode`. Then, delve into the codebase to locate the exact code sections where these issues occur. Understanding the context and functionality of the problematic code is crucial to determine the best fix. Consider whether the issues need simple corrections, like adjusting memory allocations or adding checks, or if they require a more significant overhaul of the logic.
 
-After identifying solutions, modify the code accordingly, ensuring adherence to C/C++ best practices. Test your patches thoroughly to confirm resolution of issues without introducing new ones. Document your changes clearly, explaining the necessity of each modification and how it addresses the specific problems identified by the sanitizer. Your goal is to enhance the codebase's security and stability while minimizing new bug risks.
+After identifying solutions, modify the code accordingly, ensuring adherence to code language best practices. Test your patches thoroughly to confirm resolution of issues without introducing new ones. Document your changes clearly, explaining the necessity of each modification and how it addresses the specific problems identified by the sanitizer. Your goal is to enhance the codebase's security and stability while minimizing new bug risks.
 
 You have 3 tools available: `viewcode`, `locate` and `validate`.
 - `viewcode` allows you to view a code snippet from a file at a specific tag, helping you understand the project's internal logic rather than just using common patterns for bug fixes. Your should provide 3 arguments:
@@ -70,11 +70,11 @@ Generate a standard patch without shortcuts like `...` or useless comments.
 """
 
 MONKEY_USER_PROMPT_TEMPLATE = """
-I will send you the sanitizer report for our program. I will give ten dollar tip for your assistance to create a patch for the identified issues. Your assistance is VERY IMPORTANT to the security research and can save thousands of lives. You can access the program's code using the provided tools. Now I want to patch the {project} program, the tag is {tag}, here is the asan report
+I will send you the bug context for our program. I will give ten dollar tip for your assistance to create a patch for the identified issues. Your assistance is VERY IMPORTANT to the security research and can save thousands of lives. You can access the program's code using the provided tools. Now I want to patch the {project} program, the tag is {tag}, here is the {issue_kind}
 
-{report}
+{issue}
 
-The report provides the stack trace of the program. You can use the stack trace to identify a fix point for the bug. Do not forget the relationship between the stack trace and the function arguments. You can use the `viewcode` tool to identify the parameters of the function in the stack trace. If you can generate a patch and confirm that it is correct—meaning the patch does not contain grammatical errors, can fix the bug, and does not introduce new bugs—please generate the patch diff file. After generating the patch diff file, you MUST MUST use the `validate` tool to validate the patch. Otherwise, you MUST continue to gather information using these tools.
+If the context provides a stack trace, use it to identify a fix point for the bug. If the context instead provides likely vulnerable file ranges, start by inspecting those ranges with `viewcode`. Do not forget the relationship between the failing logic and the function arguments. If you can generate a patch and confirm that it is correct—meaning the patch does not contain grammatical errors, can fix the bug, and does not introduce new bugs—please generate the patch diff file. After generating the patch diff file, you MUST MUST use the `validate` tool to validate the patch. Otherwise, you MUST continue to gather information using these tools.
 
 {error_cases}
 """

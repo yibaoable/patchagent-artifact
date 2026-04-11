@@ -1,0 +1,2122 @@
+{
+  "Halo-1": {
+    "buggy_file_path": "src/main/java/run/halo/app/utils/FileUtils.java",
+    "comment_buggy_method": [
+      [
+        289,
+        304
+      ]
+    ],
+    "buggy_method": [
+      [
+        289,
+        304
+      ]
+    ],
+    "buggy_line": [
+      [
+        299
+      ]
+    ],
+    "bug_type": "replace",
+    "compile_cmd": "./gradlew clean build -x test",
+    "test_cmd": "./gradlew clean test",
+    "lang": "Java",
+    "CVE": "CVE-2020-21522",
+    "skip_compile_cmd": true,
+    "github_url": "https://github.com/halo-dev/halo",
+    "fix_commit": "https://github.com/halo-dev/halo/commit/d59877a9ce82b53ec27c7f012a5703280e2cfd4f",
+    "github_url_cve": "https://github.com/VJBench/Halo-1",
+    "github_url_cve_branch": "",
+    "introducing_files": [
+      "src/main/java/run/halo/app/utils/FileUtils.java"
+    ],
+    "build_gradle": "test {\n exclude '**/AttachmentTypeTest**'\n exclude '**/SheetRepositoryTest**'\n exclude '**/PostServiceImplTest**'\n}",
+    "buggy_code": "    /**\n     * Checks directory traversal vulnerability.\n     *\n     * @param parentPath  parent path must not be null.\n     * @param pathToCheck path to check must not be null\n     */\n    public static void checkDirectoryTraversal(@NonNull Path parentPath, @NonNull Path pathToCheck) {\n        Assert.notNull(parentPath, \"Parent path must not be null\");\n        Assert.notNull(pathToCheck, \"Path to check must not be null\");\n\n        if (pathToCheck.startsWith(parentPath.normalize())) {\n            return;\n        }\n\n        throw new ForbiddenException(\"你没有权限访问 \" + pathToCheck).setErrorData(pathToCheck);\n    }",
+    "cve_description": "An issue was discovered in halo V1.1.3. A Zip Slip Directory Traversal Vulnerability in the backend,the attacker can overwrite some files, such as ftl files, .bashrc files in the user directory, and finally get the permissions of the operating system.",
+    "cwe_info": {
+      "CWE-22": {
+        "name": "CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "description": "The product uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the product does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory."
+      }
+    },
+    "env_info": {
+      "env_cmd": "./gradlew"
+    }
+  },
+  "Jenkins-3": {
+    "buggy_file_path": "core/src/main/java/jenkins/model/Jenkins.java",
+    "buggy_method": [
+      [
+        1869,
+        1892
+      ]
+    ],
+    "buggy_line": [
+      [
+        1890
+      ]
+    ],
+    "bug_type": "replace",
+    "compile_cmd": "mvn clean install -DskipTests",
+    "test_cmd": "mvn clean test -pl test -Dtest=SearchTest",
+    "lang": "Java",
+    "CVE": "CVE-2017-2609",
+    "github_url": "https://github.com/jenkinsci/jenkins",
+    "github_url_cve": "https://github.com/VJBench/Jenkins-3",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/jenkinsci/jenkins/commit/13905d8224899ba7332fe9af4e330ea96a2ae319",
+    "introducing_files": [
+      "core/src/main/java/jenkins/model/Jenkins.java"
+    ],
+    "buggy_code": "    @Override\n    public SearchIndexBuilder makeSearchIndex() {\n        return super.makeSearchIndex()\n            .add(\"configure\", \"config\",\"configure\")\n            .add(\"manage\")\n            .add(\"log\")\n            .add(new CollectionSearchIndex<TopLevelItem>() {\n                protected SearchItem get(String key) { return getItemByFullName(key, TopLevelItem.class); }\n                protected Collection<TopLevelItem> all() { return getAllItems(TopLevelItem.class); }\n            })\n            .add(getPrimaryView().makeSearchIndex())\n            .add(new CollectionSearchIndex() {// for computers\n                protected Computer get(String key) { return getComputer(key); }\n                protected Collection<Computer> all() { return computers.values(); }\n            })\n            .add(new CollectionSearchIndex() {// for users\n                protected User get(String key) { return User.get(key,false); }\n                protected Collection<User> all() { return User.getAll(); }\n            })\n            .add(new CollectionSearchIndex() {// for views\n                protected View get(String key) { return getView(key); }\n                protected Collection<View> all() { return views; }\n            });\n    }",
+    "cve_description": "jenkins before versions 2.44, 2.32.2 is vulnerable to an information disclosure vulnerability in search suggestions (SECURITY-385). The autocomplete feature on the search box discloses the names of the views in its suggestions, including the ones for which the current user does not have access to.",
+    "cwe_info": {
+      "CWE-200": {
+        "name": "CWE-200: Exposure of Sensitive Information to an Unauthorized Actor",
+        "description": "The product exposes sensitive information to an actor that is not explicitly authorized to have access to that information."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Jenkins-2": {
+    "buggy_file_path": "core/src/main/java/jenkins/model/Jenkins.java",
+    "buggy_method": [
+      [
+        1475,
+        1494
+      ]
+    ],
+    "buggy_line": [
+      [
+        1482,
+        1485
+      ]
+    ],
+    "bug_type": "deletion",
+    "compile_cmd": "mvn clean install -DskipTests",
+    "test_cmd": "mvn clean test -pl test -Dtest=Security380Test",
+    "lang": "Java",
+    "CVE": "CVE-2017-2606",
+    "github_url": "https://github.com/jenkinsci/jenkins",
+    "github_url_cve": "https://github.com/VJBench/Jenkins-2",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/jenkinsci/jenkins/commit/09cfbc9cd5c9df7c763bc976b7f5c51266b63719",
+    "introducing_files": [
+      "core/src/main/java/jenkins/model/Jenkins.java"
+    ],
+    "buggy_code": "    /**\n     * Gets just the immediate children of {@link Jenkins}.\n     *\n     * @see #getAllItems(Class)\n     */\n    @Exported(name=\"jobs\")\n    public List<TopLevelItem> getItems() {\n        if (authorizationStrategy instanceof AuthorizationStrategy.Unsecured ||\n            authorizationStrategy instanceof FullControlOnceLoggedInAuthorizationStrategy) {\n            return new ArrayList(items.values());\n        }\n\n        List<TopLevelItem> viewableItems = new ArrayList<TopLevelItem>();\n        for (TopLevelItem item : items.values()) {\n            if (item.hasPermission(Item.READ))\n                viewableItems.add(item);\n        }\n\n        return viewableItems;\n    }",
+    "cve_description": "Jenkins before versions 2.44, 2.32.2 is vulnerable to an information exposure in the internal API that allows access to item names that should not be visible (SECURITY-380). This only affects anonymous users (other users legitimately have access) that were able to get a list of items via an UnprotectedRootAction.",
+    "cwe_info": {
+      "CWE-200": {
+        "name": "CWE-200: Exposure of Sensitive Information to an Unauthorized Actor",
+        "description": "The product exposes sensitive information to an actor that is not explicitly authorized to have access to that information."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Jenkins-1": {
+    "buggy_file_path": "core/src/main/java/hudson/model/Computer.java",
+    "buggy_method": [
+      [
+        1069,
+        1078
+      ]
+    ],
+    "buggy_line": [
+      [
+        1075,
+        1076
+      ]
+    ],
+    "bug_type": "replace",
+    "compile_cmd": "mvn clean install -DskipTests",
+    "test_cmd": "mvn clean test -pl test -Dtest=ComputerConfigDotXmlTest",
+    "lang": "Java",
+    "CVE": "CVE-2017-2600",
+    "skip_compile_cmd": false,
+    "github_url": "https://github.com/jenkinsci/jenkins",
+    "github_url_cve": "https://github.com/VJBench/Jenkins-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/jenkinsci/jenkins/commit/0f92cd08a19207de2cceb6a2f4e3e9f92fdc0899",
+    "introducing_files": [
+      "core/src/main/java/hudson/model/Computer.java"
+    ],
+    "buggy_code": "    /**\n     * Expose monitoring data for the remote API.\n     */\n    @Exported(inline=true)\n    public Map<String/*monitor name*/,Object> getMonitorData() {\n        Map<String,Object> r = new HashMap<String, Object>();\n        for (NodeMonitor monitor : NodeMonitor.getAll())\n            r.put(monitor.getClass().getName(),monitor.data(this));\n        return r;\n    }",
+    "cve_description": "In jenkins before versions 2.44, 2.32.2 node monitor data could be viewed by low privilege users via the remote API. These included system configuration and runtime information of these nodes (SECURITY-343).",
+    "cwe_info": {
+      "CWE-325": {
+        "name": "CWE-325: Missing Cryptographic Step",
+        "description": "The product does not implement a required step in a cryptographic algorithm, resulting in weaker encryption than advertised by the algorithm."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Jinjava-1": {
+    "buggy_file_path": "src/main/java/com/hubspot/jinjava/el/ext/JinjavaBeanELResolver.java",
+    "buggy_method": [
+      [
+        20,
+        26
+      ]
+    ],
+    "buggy_line": [
+      [
+        23
+      ]
+    ],
+    "bug_type": "insertion",
+    "compile_cmd": "mvn clean compile",
+    "test_cmd": "mvn clean test",
+    "lang": "Java",
+    "CVE": "CVE-2018-18893",
+    "github_url": "https://github.com/HubSpot/jinjava",
+    "github_url_cve": "https://github.com/VJBench/Jinjava-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/HubSpot/jinjava/commit/4f28830ef9883e2c4e2a92a0d37b93c8620de2f7",
+    "introducing_files": [
+      "src/main/java/com/hubspot/jinjava/el/ext/JinjavaBeanELResolver.java"
+    ],
+    "buggy_code": "  private static final Set<String> RESTRICTED_METHODS = ImmutableSet.<String> builder()\n      .add(\"clone\")\n      .add(\"hashCode\")\n      .add(\"notify\")\n      .add(\"notifyAll\")\n      .add(\"wait\")\n      .build();",
+    "cve_description": "Jinjava before 2.4.6 does not block the getClass method, related to com/hubspot/jinjava/el/ext/JinjavaBeanELResolver.java.",
+    "cwe_info": {},
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Retrofit-1": {
+    "buggy_file_path": "retrofit-converters/jaxb/src/main/java/retrofit2/converter/jaxb/JaxbResponseConverter.java",
+    "buggy_method": [
+      [
+        33,
+        36
+      ]
+    ],
+    "buggy_line": [
+      [
+        35
+      ]
+    ],
+    "bug_type": "insertion",
+    "compile_cmd": "mvn clean compile",
+    "test_cmd": "mvn clean test",
+    "lang": "Java",
+    "CVE": "CVE-2018-1000844",
+    "github_url": "https://github.com/square/retrofit",
+    "github_url_cve": "https://github.com/VJBench/Retrofit-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/square/retrofit/commit/4a693c5aeeef2be6c7ecf80e7b5ec79f6ab59437",
+    "introducing_files": [
+      "retrofit-converters/jaxb/src/main/java/retrofit2/converter/jaxb/JaxbResponseConverter.java"
+    ],
+    "buggy_code": "  JaxbResponseConverter(JAXBContext context, Class<T> type) {\n    this.context = context;\n    this.type = type;\n  }",
+    "cve_description": "Square Open Source Retrofit version Prior to commit 4a693c5aeeef2be6c7ecf80e7b5ec79f6ab59437 contains a XML External Entity (XXE) vulnerability in JAXB that can result in An attacker could use this to remotely read files from the file system or to perform SSRF.. This vulnerability appears to have been fixed in After commit 4a693c5aeeef2be6c7ecf80e7b5ec79f6ab59437.",
+    "cwe_info": {
+      "CWE-611": {
+        "name": "CWE-611: Improper Restriction of XML External Entity Reference",
+        "description": "The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Quartz-1": {
+    "buggy_file_path": "quartz-core/src/main/java/org/quartz/xml/XMLSchedulingDataProcessor.java",
+    "buggy_method": [
+      [
+        162,
+        214
+      ]
+    ],
+    "buggy_line": [
+      [
+        177
+      ]
+    ],
+    "bug_type": "insertion",
+    "compile_cmd": "./mvnw clean compile -pl quartz-core",
+    "test_cmd": "./mvnw clean test -pl quartz-core -Dtest=/XMLSchedulingDataProcessorTest",
+    "lang": "Java",
+    "CVE": "CVE-2019-13990",
+    "github_url": "https://github.com/quartz-scheduler/quartz",
+    "github_url_cve": "https://github.com/VJBench/Quartz-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/quartz-scheduler/quartz/commit/c71ebec8ad17580a605d91acba6bc0a230144cc6",
+    "introducing_files": [
+      "quartz-core/src/main/java/org/quartz/xml/XMLSchedulingDataProcessor.java"
+    ],
+    "buggy_code": "    /**\n     * Initializes the XML parser.\n     * @throws ParserConfigurationException \n     */\n    protected void initDocumentParser() throws ParserConfigurationException  {\n\n        DocumentBuilderFactory docBuilderFactory = DocumentBuilderFactory.newInstance();\n\n        docBuilderFactory.setNamespaceAware(true);\n        docBuilderFactory.setValidating(true);\n        \n        docBuilderFactory.setAttribute(\"http://java.sun.com/xml/jaxp/properties/schemaLanguage\", \"http://www.w3.org/2001/XMLSchema\");\n        \n        docBuilderFactory.setAttribute(\"http://java.sun.com/xml/jaxp/properties/schemaSource\", resolveSchemaSource());\n        \n        docBuilder = docBuilderFactory.newDocumentBuilder();\n        \n        docBuilder.setErrorHandler(this);\n        \n        NamespaceContext nsContext = new NamespaceContext()\n        {\n          public String getNamespaceURI(String prefix)\n          {\n              if (prefix == null)\n                  throw new IllegalArgumentException(\"Null prefix\");\n              if (XMLConstants.XML_NS_PREFIX.equals(prefix))\n                  return XMLConstants.XML_NS_URI;\n              if (XMLConstants.XMLNS_ATTRIBUTE.equals(prefix))\n                  return XMLConstants.XMLNS_ATTRIBUTE_NS_URI;\n        \n              if (\"q\".equals(prefix))\n                  return QUARTZ_NS;\n        \n              return XMLConstants.NULL_NS_URI;\n          }\n        \n          public Iterator<?> getPrefixes(String namespaceURI)\n          {\n              // This method isn't necessary for XPath processing.\n              throw new UnsupportedOperationException();\n          }\n        \n          public String getPrefix(String namespaceURI)\n          {\n              // This method isn't necessary for XPath processing.\n              throw new UnsupportedOperationException();\n          }\n        \n        }; \n        \n        xpath = XPathFactory.newInstance().newXPath();\n        xpath.setNamespaceContext(nsContext);\n    }",
+    "cve_description": "initDocumentParser in xml/XMLSchedulingDataProcessor.java in Terracotta Quartz Scheduler through 2.3.0 allows XXE attacks via a job description.",
+    "cwe_info": {
+      "CWE-611": {
+        "name": "CWE-611: Improper Restriction of XML External Entity Reference",
+        "description": "The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output."
+      }
+    },
+    "env_info": {
+      "env_cmd": "./mvnw"
+    }
+  },
+  "BC-Java-1": {
+    "buggy_file_path": "prov/src/main/java/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java",
+    "buggy_method": [
+      [
+        177,
+        186
+      ]
+    ],
+    "buggy_line": [
+      [
+        182
+      ]
+    ],
+    "bug_type": "insertion",
+    "compile_cmd": "gradle clean build -x test",
+    "test_cmd": "gradle prov:test",
+    "lang": "Java",
+    "CVE": "CVE-2016-1000338",
+    "skip_compile_cmd": true,
+    "github_url": "https://github.com/bcgit/bc-java",
+    "fix_commit": "https://github.com/bcgit/bc-java/commit/b0c3ce99d43d73a096268831d0d120ffc89eac7f",
+    "github_url_cve": "https://github.com/VJBench/BC-Java-1",
+    "github_url_cve_branch": "",
+    "introducing_files": [
+      "prov/src/main/java/org/bouncycastle/jcajce/provider/asymmetric/dsa/DSASigner.java"
+    ],
+    "buggy_code": "    private BigInteger[] derDecode(\n        byte[]  encoding)\n        throws IOException\n    {\n        ASN1Sequence s = (ASN1Sequence)ASN1Primitive.fromByteArray(encoding);\n        return new BigInteger[]{\n            ((ASN1Integer)s.getObjectAt(0)).getValue(),\n            ((ASN1Integer)s.getObjectAt(1)).getValue()\n        };\n    }",
+    "cve_description": "In Bouncy Castle JCE Provider version 1.55 and earlier the DSA does not fully validate ASN.1 encoding of signature on verification. It is possible to inject extra elements in the sequence making up the signature and still have it validate, which in some cases may allow the introduction of 'invisible' data into a signed structure.",
+    "cwe_info": {
+      "CWE-347": {
+        "name": "CWE-347: Improper Verification of Cryptographic Signature",
+        "description": "The product does not verify, or incorrectly verifies, the cryptographic signature for data."
+      }
+    },
+    "env_info": {
+      "env_cmd": "gradle"
+    }
+  },
+  "Pulsar-1": {
+    "buggy_file_path": "pulsar-broker/src/main/java/org/apache/pulsar/broker/admin/impl/PersistentTopicsBase.java",
+    "buggy_method": [
+      [
+        2291,
+        2329
+      ]
+    ],
+    "buggy_line": [
+      [
+        2303
+      ]
+    ],
+    "bug_type": "insertion",
+    "compile_cmd": "mvn -pl pulsar-broker install -DskipTests -am",
+    "test_cmd": "mvn -pl pulsar-broker test -Dtest=PersistentTopicsTest",
+    "lang": "Java",
+    "CVE": "CVE-2021-41571",
+    "github_url": "https://github.com/apache/pulsar",
+    "github_url_cve": "https://github.com/VJBench/Pulsar-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/apache/pulsar/commit/9bfb3dba7c13e8250e1002efdeb39eec56f7e2da#diff-66aeb65a64cbe7c541f013ae807c5bcbeab567bef77706c7ff2e0cbfe0d77eb1L2331",
+    "introducing_files": [
+      "pulsar-broker/src/main/java/org/apache/pulsar/broker/admin/impl/PersistentTopicsBase.java"
+    ],
+    "buggy_code": "    protected void internalGetMessageById(AsyncResponse asyncResponse, long ledgerId, long entryId,\n                                              boolean authoritative) {\n        try {\n            // will redirect if the topic not owned by current broker\n            validateTopicOwnership(topicName, authoritative);\n            validateTopicOperation(topicName, TopicOperation.PEEK_MESSAGES);\n\n            if (topicName.isGlobal()) {\n                validateGlobalNamespaceOwnership(namespaceName);\n            }\n            PersistentTopic topic = (PersistentTopic) getTopicReference(topicName);\n            ManagedLedgerImpl ledger = (ManagedLedgerImpl) topic.getManagedLedger();\n            ledger.asyncReadEntry(new PositionImpl(ledgerId, entryId), new AsyncCallbacks.ReadEntryCallback() {\n                @Override\n                public void readEntryFailed(ManagedLedgerException exception, Object ctx) {\n                    asyncResponse.resume(new RestException(exception));\n                }\n\n                @Override\n                public void readEntryComplete(Entry entry, Object ctx) {\n                    try {\n                        asyncResponse.resume(generateResponseWithEntry(entry));\n                    } catch (IOException exception) {\n                        asyncResponse.resume(new RestException(exception));\n                    } finally {\n                        if (entry != null) {\n                            entry.release();\n                        }\n                    }\n                }\n            }, null);\n        } catch (NullPointerException npe) {\n            asyncResponse.resume(new RestException(Status.NOT_FOUND, \"Message not found\"));\n        } catch (Exception exception) {\n            log.error(\"[{}] Failed to get message with ledgerId {} entryId {} from {}\",\n                    clientAppId(), ledgerId, entryId, topicName, exception);\n            asyncResponse.resume(new RestException(exception));\n        }\n    }",
+    "cve_description": "In Apache Pulsar it is possible to access data from BookKeeper that does not belong to the topics accessible by the authenticated user. The Admin API get-message-by-id requires the user to input a topic and a ledger id. The ledger id is a pointer to the data, and it is supposed to be a valid it for the topic. Authorisation controls are performed against the topic name and there is not proper validation the that ledger id is valid in the context of such ledger. So it may happen that the user is able to read from a ledger that contains data owned by another tenant. This issue affects Apache Pulsar Apache Pulsar version 2.8.0 and prior versions; Apache Pulsar version 2.7.3 and prior versions; Apache Pulsar version 2.6.4 and prior versions.",
+    "cwe_info": {
+      "CWE-863": {
+        "name": "Incorrect Authorization",
+        "description": "The product performs an authorization check when an actor attempts to access a resource or perform an action, but it does not correctly perform the check."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Ratpack-1": {
+    "buggy_file_path": "ratpack-core/src/main/java/ratpack/server/internal/NettyHandlerAdapter.java",
+    "buggy_method": [
+      [
+        117,
+        222
+      ]
+    ],
+    "buggy_line": [
+      [
+        159
+      ]
+    ],
+    "bug_type": "replace",
+    "compile_cmd": "./gradlew clean :ratpack-core:build -x test",
+    "test_cmd": "./gradlew clean :ratpack-core:test",
+    "lang": "Java",
+    "CVE": "CVE-2019-17513",
+    "skip_compile_cmd": false,
+    "github_url": "https://github.com/ratpack/ratpack",
+    "github_url_cve": "https://github.com/VJBench/Ratpack-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/ratpack/ratpack/commit/efb910d38a96494256f36675ef0e5061097dd77d",
+    "introducing_files": [
+      "ratpack-core/src/main/java/ratpack/server/internal/NettyHandlerAdapter.java"
+    ],
+    "buggy_code": "  private void newRequest(ChannelHandlerContext ctx, HttpRequest nettyRequest) throws Exception {\n    if (!nettyRequest.decoderResult().isSuccess()) {\n      LOGGER.debug(\"Failed to decode HTTP request.\", nettyRequest.decoderResult().cause());\n      sendError(ctx, HttpResponseStatus.BAD_REQUEST);\n      return;\n    }\n\n    Headers requestHeaders = new NettyHeadersBackedHeaders(nettyRequest.headers());\n\n    //Find the content length we will use this as an indicator of a body\n    Long contentLength = HttpUtil.getContentLength(nettyRequest, -1L);\n    String transferEncoding = requestHeaders.get(HttpHeaderNames.TRANSFER_ENCODING);\n\n    //If there is a content length or transfer encoding that indicates there is a body\n    boolean hasBody = (contentLength > 0) || (transferEncoding != null);\n\n    RequestBody requestBody = hasBody ? new RequestBody(contentLength, nettyRequest, ctx) : null;\n\n    Channel channel = ctx.channel();\n\n    if (requestBody != null) {\n      channel.attr(BODY_ACCUMULATOR_KEY).set(requestBody);\n    }\n    InetSocketAddress remoteAddress = (InetSocketAddress) channel.remoteAddress();\n    InetSocketAddress socketAddress = (InetSocketAddress) channel.localAddress();\n\n    ConnectionIdleTimeout connectionIdleTimeout = ConnectionIdleTimeout.of(channel);\n\n    DefaultRequest request = new DefaultRequest(\n      clock.instant(),\n      requestHeaders,\n      nettyRequest.method(),\n      nettyRequest.protocolVersion(),\n      nettyRequest.uri(),\n      remoteAddress,\n      socketAddress,\n      serverRegistry.get(ServerConfig.class),\n      requestBody,\n      connectionIdleTimeout,\n      channel.attr(CLIENT_CERT_KEY).get()\n    );\n\n    HttpHeaders nettyHeaders = new DefaultHttpHeaders(false);\n    MutableHeaders responseHeaders = new NettyHeadersBackedMutableHeaders(nettyHeaders);\n    AtomicBoolean transmitted = new AtomicBoolean(false);\n\n    DefaultResponseTransmitter responseTransmitter = new DefaultResponseTransmitter(transmitted, channel, clock, nettyRequest, request, nettyHeaders, requestBody);\n\n    ctx.channel().attr(DefaultResponseTransmitter.ATTRIBUTE_KEY).set(responseTransmitter);\n\n    Action<Action<Object>> subscribeHandler = thing -> {\n      transmitted.set(true);\n      ctx.channel().attr(CHANNEL_SUBSCRIBER_ATTRIBUTE_KEY).set(thing);\n    };\n\n    DefaultContext.RequestConstants requestConstants = new DefaultContext.RequestConstants(\n      applicationConstants,\n      request,\n      channel,\n      responseTransmitter,\n      subscribeHandler\n    );\n\n    Response response = new DefaultResponse(responseHeaders, ctx.alloc(), responseTransmitter);\n    requestConstants.response = response;\n\n    DefaultContext.start(channel.eventLoop(), requestConstants, serverRegistry, handlers, execution -> {\n      if (!transmitted.get()) {\n        Handler lastHandler = requestConstants.handler;\n        StringBuilder description = new StringBuilder();\n        description\n          .append(\"No response sent for \")\n          .append(request.getMethod().getName())\n          .append(\" request to \")\n          .append(request.getUri());\n\n        if (lastHandler != null) {\n          description.append(\" (last handler: \");\n\n          if (lastHandler instanceof DescribingHandler) {\n            ((DescribingHandler) lastHandler).describeTo(description);\n          } else {\n            DescribingHandlers.describeTo(lastHandler, description);\n          }\n          description.append(\")\");\n        }\n\n        String message = description.toString();\n        LOGGER.warn(message);\n\n        response.getHeaders().clear();\n\n        ByteBuf body;\n        if (development) {\n          CharBuffer charBuffer = CharBuffer.wrap(message);\n          body = ByteBufUtil.encodeString(ctx.alloc(), charBuffer, CharsetUtil.UTF_8);\n          response.contentType(HttpHeaderConstants.PLAIN_TEXT_UTF8);\n        } else {\n          body = Unpooled.EMPTY_BUFFER;\n        }\n\n        response.getHeaders().set(HttpHeaderConstants.CONTENT_LENGTH, body.readableBytes());\n        responseTransmitter.transmit(HttpResponseStatus.INTERNAL_SERVER_ERROR, body);\n      }\n    });\n  }",
+    "cve_description": "An issue was discovered in Ratpack before 1.7.5. Due to a misuse of the Netty library class DefaultHttpHeaders, there is no validation that headers lack HTTP control characters. Thus, if untrusted data is used to construct HTTP headers with Ratpack, HTTP Response Splitting can occur.",
+    "cwe_info": {
+      "CWE-74": {
+        "name": "Improper Neutralization of Special Elements in Output Used by a Downstream Component ('Injection')",
+        "description": "The product constructs all or part of a command, data structure, or record using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify how it is parsed or interpreted when it is sent to a downstream component."
+      }
+    },
+    "env_info": {
+      "env_cmd": "./gradlew"
+    }
+  },
+  "Json-sanitizer-1": {
+    "buggy_file_path": "src/main/java/com/google/json/JsonSanitizer.java",
+    "buggy_method": [
+      [
+        511,
+        645
+      ]
+    ],
+    "buggy_line": [
+      [
+        547,
+        553
+      ]
+    ],
+    "bug_type": "insertion",
+    "compile_cmd": "mvn clean compile",
+    "test_cmd": "mvn clean test",
+    "lang": "Java",
+    "CVE": "CVE-2020-13973",
+    "skip_compile_cmd": false,
+    "github_url": "https://github.com/OWASP/json-sanitizer",
+    "github_url_cve": "https://github.com/VJBench/Json-sanitizer-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/OWASP/json-sanitizer/commit/f3512bab078af3f5c533dacc2d410add8c0c1124",
+    "introducing_files": [
+      "src/main/java/com/google/json/JsonSanitizer.java"
+    ],
+    "buggy_code": "  private void sanitizeString(int start, int end) {\n    boolean closed = false;\n    for (int i = start; i < end; ++i) {\n      char ch = jsonish.charAt(i);\n      switch (ch) {\n        // Fixup newlines.\n        case '\\n': replace(i, i + 1, \"\\\\n\"); break;\n        case '\\r': replace(i, i + 1, \"\\\\r\"); break;\n        // Not newlines in JSON but unparseable by JS eval.\n        case '\\u2028': replace(i, i + 1, \"\\\\u2028\"); break;\n        case '\\u2029': replace(i, i + 1, \"\\\\u2029\"); break;\n        // String delimiting quotes that need to be converted : 'foo' -> \"foo\"\n        // or internal quotes that might need to be escaped : f\"o -> f\\\"o.\n        case '\"': case '\\'':\n          if (i == start) {\n            if (ch == '\\'') { replace(i, i + 1, '\"'); }\n          } else {\n            if (i + 1 == end) {\n              char startDelim = jsonish.charAt(start);\n              if (startDelim != '\\'') {\n                // If we're sanitizing a string whose start was inferred, then\n                // treat '\"' as closing regardless.\n                startDelim = '\"';\n              }\n              closed = startDelim == ch;\n            }\n            if (closed) {\n              if (ch == '\\'') { replace(i, i + 1, '\"'); }\n            } else if (ch == '\"') {\n              insert(i, '\\\\');\n            }\n          }\n          break;\n        // Embedding.  Disallow </script and ]]> in string literals so that\n        // the output can be embedded in HTML script elements and in XML CDATA\n        // sections.\n        case '/':\n          // Don't over escape.  Many JSON bodies contain innocuous HTML\n          // that can be safely embedded.\n          if (i > start && i + 2 < end && '<' == jsonish.charAt(i - 1)\n              && 's' == (jsonish.charAt(i + 1) | 32)\n              && 'c' == (jsonish.charAt(i + 2) | 32)) {\n            insert(i, '\\\\');\n          }\n          break;\n        case ']':\n          if (i + 2 < end && ']' == jsonish.charAt(i + 1)\n              && '>' == jsonish.charAt(i + 2)) {\n            replace(i, i + 1, \"\\\\u005d\");\n          }\n          break;\n        // Normalize escape sequences.\n        case '\\\\':\n          if (i + 1 == end) {\n            elide(i, i + 1);\n            break;\n          }\n          char sch = jsonish.charAt(i + 1);\n          switch (sch) {\n            case 'b': case 'f': case 'n': case 'r': case 't': case '\\\\':\n            case '/': case '\"':\n              ++i;\n              break;\n            case 'v':  // Recognized by JS but not by JSON.\n              replace(i, i + 2, \"\\\\u0008\");\n              ++i;\n              break;\n            case 'x':\n              if (i + 4 < end && isHexAt(i+2) && isHexAt(i+3)) {\n                replace(i, i + 2, \"\\\\u00\");  // \\xab -> \\u00ab\n                i += 3;\n                break;\n              }\n              elide(i, i + 1);\n              break;\n            case 'u':\n              if (i + 6 < end && isHexAt(i + 2) && isHexAt(i + 3)\n                  && isHexAt(i + 4) && isHexAt(i + 5)) {\n                i += 5;\n                break;\n              }\n              elide(i, i + 1);\n              break;\n            case '0': case '1': case '2': case '3':\n            case '4': case '5': case '6': case '7':\n              int octalEnd = i + 1;\n              if (octalEnd + 1 < end && isOctAt(octalEnd + 1)) {\n                ++octalEnd;\n                if (ch <= '3' && octalEnd + 1 < end && isOctAt(octalEnd + 1)) {\n                  ++octalEnd;\n                }\n                int value = 0;\n                for (int j = i; j < octalEnd; ++j) {\n                  value = (value << 3) | (jsonish.charAt(j) - '0');\n                }\n                replace(i + 1, octalEnd, \"u00\");\n                appendHex(value, 2);\n              }\n              i = octalEnd - 1;\n              break;\n            default:\n              // Literal char that is recognized by JS but not by JSON.\n              // \"\\-\" is valid JS but not valid JSON.\n              elide(i, i + 1);\n              break;\n          }\n          break;\n        default:\n          // Escape all control code-points and isolated surrogates which are\n          // not embeddable in XML.\n          // http://www.w3.org/TR/xml/#charsets says\n          //     Char ::= #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD]\n          //            | [#x10000-#x10FFFF]\n          if (ch < 0x20) {\n            if (ch == 9 || ch == 0xa || ch == 0xd) { continue; }\n          } else if (ch < 0xd800) {  // Not a surrogate.\n            continue;\n          } else if (ch < 0xe000) {  // A surrogate\n            if (Character.isHighSurrogate(ch) && i+1 < end\n                && Character.isLowSurrogate(jsonish.charAt(i+1))) {\n              ++i;  // Skip over low surrogate since we have already vetted it.\n              continue;\n            }\n          } else if (ch <= 0xfffd) {  // Not one of the 0xff.. controls.\n            continue;\n          }\n          replace(i, i + 1, \"\\\\u\");\n          for (int j = 4; --j >= 0;) {\n            sanitizedJson.append(HEX_DIGITS[(ch >>> (j << 2)) & 0xf]);\n          }\n          break;\n      }\n    }\n    if (!closed) { insert(end, '\"'); }\n  }",
+    "cve_description": "OWASP json-sanitizer before 1.2.1 allows XSS. An attacker who controls a substring of the input JSON, and controls another substring adjacent to a SCRIPT element in which the output is embedded as JavaScript, may be able to confuse the HTML parser as to where the SCRIPT element ends, and cause non-script content to be interpreted as JavaScript.",
+    "cwe_info": {
+      "CWE-79": {
+        "name": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The product does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Flow-1": {
+    "buggy_file_path": "flow-server/src/main/java/com/vaadin/flow/server/DevModeHandler.java",
+    "buggy_method": [
+      [
+        296,
+        385
+      ]
+    ],
+    "buggy_line": [
+      [
+        324,
+        325
+      ]
+    ],
+    "bug_type": "replace",
+    "compile_cmd": "mvn clean compile -pl flow-server",
+    "test_cmd": "mvn clean test -pl flow-server -Dtest=DevModeHandlerTest",
+    "lang": "Java",
+    "CVE": "CVE-2021-33604",
+    "github_url": "https://github.com/vaadin/flow",
+    "github_url_cve": "https://github.com/VJBench/Flow-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/vaadin/flow/commit/ca12a543f9edc5e18e0a7af3dd8ce2aa296a575c",
+    "introducing_files": [
+      "flow-server/src/main/java/com/vaadin/flow/server/DevModeHandler.java"
+    ],
+    "buggy_code": "    /**\n     * Serve a file by proxying to webpack.\n     * <p>\n     * Note: it considers the {@link HttpServletRequest#getPathInfo} that will\n     * be the path passed to the 'webpack-dev-server' which is running in the\n     * context root folder of the application.\n     * <p>\n     * Method returns {@code false} immediately if dev server failed on its\n     * startup.\n     *\n     * @param request\n     *            the servlet request\n     * @param response\n     *            the servlet response\n     * @return false if webpack returned a not found, true otherwise\n     * @throws IOException\n     *             in the case something went wrong like connection refused\n     */\n    public boolean serveDevModeRequest(HttpServletRequest request,\n            HttpServletResponse response) throws IOException {\n        // Do not serve requests if dev server starting or failed to start.\n        if (isDevServerFailedToStart.get() || !devServerStartFuture.isDone()) {\n            return false;\n        }\n        // Since we have 'publicPath=/VAADIN/' in webpack config,\n        // a valid request for webpack-dev-server should start with '/VAADIN/'\n        String requestFilename = request.getPathInfo();\n\n        if (HandlerHelper.isPathUnsafe(requestFilename)) {\n            getLogger().info(HandlerHelper.UNSAFE_PATH_ERROR_MESSAGE_PATTERN,\n                    requestFilename);\n            response.setStatus(HttpServletResponse.SC_FORBIDDEN);\n            return true;\n        }\n\n        // Redirect theme source request\n        if(APP_THEME_PATTERN.matcher(requestFilename).find()) {\n            requestFilename = \"/VAADIN/static\" + requestFilename;\n        }\n\n        HttpURLConnection connection = prepareConnection(requestFilename,\n                request.getMethod());\n\n        // Copies all the headers from the original request\n        Enumeration<String> headerNames = request.getHeaderNames();\n        while (headerNames.hasMoreElements()) {\n            String header = headerNames.nextElement();\n            connection.setRequestProperty(header,\n                    // Exclude keep-alive\n                    \"Connect\".equals(header) ? \"close\"\n                            : request.getHeader(header));\n        }\n\n        // Send the request\n        getLogger().debug(\"Requesting resource to webpack {}\",\n                connection.getURL());\n        int responseCode = connection.getResponseCode();\n        if (responseCode == HTTP_NOT_FOUND) {\n            getLogger().debug(\"Resource not served by webpack {}\",\n                    requestFilename);\n            // webpack cannot access the resource, return false so as flow can\n            // handle it\n            return false;\n        }\n        getLogger().debug(\"Served resource by webpack: {} {}\", responseCode,\n                requestFilename);\n\n        // Copies response headers\n        connection.getHeaderFields().forEach((header, values) -> {\n            if (header != null) {\n                response.addHeader(header, values.get(0));\n            }\n        });\n\n        if (responseCode == HTTP_OK) {\n            // Copies response payload\n            writeStream(response.getOutputStream(),\n                    connection.getInputStream());\n        } else if (responseCode < 400) {\n            response.setStatus(responseCode);\n        } else {\n            // Copies response code\n            response.sendError(responseCode);\n        }\n\n        // Close request to avoid issues in CI and Chrome\n        response.getOutputStream().close();\n\n        return true;\n    }",
+    "cve_description": "URL encoding error in development mode handler in com.vaadin:flow-server versions 2.0.0 through 2.6.1 (Vaadin 14.0.0 through 14.6.1), 3.0.0 through 6.0.9 (Vaadin 15.0.0 through 19.0.8) allows local user to execute arbitrary JavaScript code by opening crafted URL in browser.",
+    "cwe_info": {
+      "CWE-172": {
+        "name": "Encoding Error",
+        "description": "The product does not properly encode or decode the data, resulting in unexpected values."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Flow-2": {
+    "buggy_file_path": "flow-server/src/main/java/com/vaadin/flow/router/RouteNotFoundError.java",
+    "buggy_method": [
+      [
+        46,
+        69
+      ]
+    ],
+    "buggy_line": [
+      [
+        61,
+        65
+      ]
+    ],
+    "bug_type": "insertion",
+    "compile_cmd": "mvn clean compile -pl flow-server",
+    "test_cmd": "mvn clean test -pl flow-server -Dtest=RouteNotFoundErrorTest",
+    "lang": "Java",
+    "CVE": "CVE-2021-31412",
+    "github_url": "https://github.com/vaadin/flow",
+    "github_url_cve": "https://github.com/VJBench/Flow-2",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/vaadin/flow/commit/e4cf42f11ce79a309025611295ffafac252ed247",
+    "introducing_files": [
+      "flow-server/src/main/java/com/vaadin/flow/router/RouteNotFoundError.java"
+    ],
+    "buggy_code": "    @Override\n    public int setErrorParameter(BeforeEnterEvent event,\n            ErrorParameter<NotFoundException> parameter) {\n        String path = event.getLocation().getPath();\n        String additionalInfo = \"\";\n        if (parameter.hasCustomMessage()) {\n            additionalInfo = \"Reason: \" + parameter.getCustomMessage();\n        }\n        path = Jsoup.clean(path, Whitelist.none());\n        additionalInfo = Jsoup.clean(additionalInfo, Whitelist.none());\n\n        boolean productionMode = event.getUI().getSession().getConfiguration()\n                .isProductionMode();\n\n        String template = getErrorHtml(productionMode);\n        template = template.replace(\"{{path}}\", path);\n        template = template.replace(\"{{additionalInfo}}\", additionalInfo);\n        if (template.contains(\"{{routes}}\")) {\n            template = template.replace(\"{{routes}}\", getRoutes(event));\n        }\n\n        getElement().appendChild(new Html(template).getElement());\n        return HttpServletResponse.SC_NOT_FOUND;\n    }",
+    "cve_description": "Improper sanitization of path in default RouteNotFoundError view in com.vaadin:flow-server versions 1.0.0 through 1.0.14 (Vaadin 10.0.0 through 10.0.18), 1.1.0 prior to 2.0.0 (Vaadin 11 prior to 14), 2.0.0 through 2.6.1 (Vaadin 14.0.0 through 14.6.1), and 3.0.0 through 6.0.9 (Vaadin 15.0.0 through 19.0.8) allows network attacker to enumerate all available routes via crafted HTTP request when application is running in production mode and no custom handler for NotFoundException is provided.",
+    "cwe_info": {
+      "CWE-1295": {
+        "name": "Debug Messages Revealing Unnecessary Information",
+        "description": "The product fails to adequately prevent the revealing of unnecessary and potentially sensitive system information within debugging messages."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Netty-1": {
+    "buggy_file_path": "codec-http/src/main/java/io/netty/handler/codec/http/HttpObjectDecoder.java",
+    "buggy_method": [
+      [
+        720,
+        751
+      ]
+    ],
+    "buggy_line": [
+      [
+        731
+      ]
+    ],
+    "bug_type": "replace",
+    "compile_cmd": "./mvnw clean compile -pl codec-http -am",
+    "test_cmd": "./mvnw clean test -pl codec-http -am",
+    "lang": "Java",
+    "CVE": "CVE-2019-16869",
+    "github_url": "https://github.com/netty/netty",
+    "github_url_cve": "https://github.com/VJBench/Netty-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/netty/netty/commit/39cafcb05c99f2aa9fce7e6597664c9ed6a63a95",
+    "introducing_files": [
+      "codec-http/src/main/java/io/netty/handler/codec/http/HttpObjectDecoder.java"
+    ],
+    "buggy_code": "    private void splitHeader(AppendableCharSequence sb) {\n        final int length = sb.length();\n        int nameStart;\n        int nameEnd;\n        int colonEnd;\n        int valueStart;\n        int valueEnd;\n\n        nameStart = findNonWhitespace(sb, 0);\n        for (nameEnd = nameStart; nameEnd < length; nameEnd ++) {\n            char ch = sb.charAtUnsafe(nameEnd);\n            if (ch == ':' || Character.isWhitespace(ch)) {\n                break;\n            }\n        }\n\n        for (colonEnd = nameEnd; colonEnd < length; colonEnd ++) {\n            if (sb.charAtUnsafe(colonEnd) == ':') {\n                colonEnd ++;\n                break;\n            }\n        }\n\n        name = sb.subStringUnsafe(nameStart, nameEnd);\n        valueStart = findNonWhitespace(sb, colonEnd);\n        if (valueStart == length) {\n            value = EMPTY_VALUE;\n        } else {\n            valueEnd = findEndOfString(sb);\n            value = sb.subStringUnsafe(valueStart, valueEnd);\n        }\n    }",
+    "cve_description": "Netty before 4.1.42.Final mishandles whitespace before the colon in HTTP headers (such as a \"Transfer-Encoding : chunked\" line), which leads to HTTP request smuggling.",
+    "cwe_info": {
+      "CWE-444": {
+        "name": "Inconsistent Interpretation of HTTP Requests ('HTTP Request/Response Smuggling')",
+        "description": "The product acts as an intermediary HTTP agent\n         (such as a proxy or firewall) in the data flow between two\n         entities such as a client and server, but it does not\n         interpret malformed HTTP requests or responses in ways that\n         are consistent with how the messages will be processed by\n         those entities that are at the ultimate destination."
+      }
+    },
+    "env_info": {
+      "env_cmd": "./mvnw"
+    }
+  },
+  "Netty-2": {
+    "buggy_file_path": "codec-http/src/main/java/io/netty/handler/codec/http/HttpObjectDecoder.java",
+    "buggy_method": [
+      [
+        720,
+        765
+      ]
+    ],
+    "buggy_line": [
+      [
+        750
+      ]
+    ],
+    "bug_type": "replace",
+    "compile_cmd": "./mvnw clean compile -pl codec-http -am",
+    "test_cmd": "./mvnw clean test -pl codec-http -am",
+    "lang": "Java",
+    "CVE": "CVE-2019-20444",
+    "github_url": "https://github.com/netty/netty",
+    "github_url_cve": "https://github.com/VJBench/Netty-2",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/netty/netty/commit/a7c18d44b46e02dadfe3da225a06e5091f5f328e",
+    "introducing_files": [
+      "codec-http/src/main/java/io/netty/handler/codec/http/HttpObjectDecoder.java"
+    ],
+    "buggy_code": "    private void splitHeader(AppendableCharSequence sb) {\n        final int length = sb.length();\n        int nameStart;\n        int nameEnd;\n        int colonEnd;\n        int valueStart;\n        int valueEnd;\n\n        nameStart = findNonWhitespace(sb, 0);\n        for (nameEnd = nameStart; nameEnd < length; nameEnd ++) {\n            char ch = sb.charAtUnsafe(nameEnd);\n            // https://tools.ietf.org/html/rfc7230#section-3.2.4\n            //\n            // No whitespace is allowed between the header field-name and colon. In\n            // the past, differences in the handling of such whitespace have led to\n            // security vulnerabilities in request routing and response handling. A\n            // server MUST reject any received request message that contains\n            // whitespace between a header field-name and colon with a response code\n            // of 400 (Bad Request). A proxy MUST remove any such whitespace from a\n            // response message before forwarding the message downstream.\n            if (ch == ':' ||\n                    // In case of decoding a request we will just continue processing and header validation\n                    // is done in the DefaultHttpHeaders implementation.\n                    //\n                    // In the case of decoding a response we will \"skip\" the whitespace.\n                    (!isDecodingRequest() && Character.isWhitespace(ch))) {\n                break;\n            }\n        }\n\n        for (colonEnd = nameEnd; colonEnd < length; colonEnd ++) {\n            if (sb.charAtUnsafe(colonEnd) == ':') {\n                colonEnd ++;\n                break;\n            }\n        }\n\n        name = sb.subStringUnsafe(nameStart, nameEnd);\n        valueStart = findNonWhitespace(sb, colonEnd);\n        if (valueStart == length) {\n            value = EMPTY_VALUE;\n        } else {\n            valueEnd = findEndOfString(sb);\n            value = sb.subStringUnsafe(valueStart, valueEnd);\n        }\n    }",
+    "cve_description": "HttpObjectDecoder.java in Netty before 4.1.44 allows an HTTP header that lacks a colon, which might be interpreted as a separate header with an incorrect syntax, or might be interpreted as an \"invalid fold.\"",
+    "cwe_info": {
+      "CWE-444": {
+        "name": "CWE-444: Inconsistent Interpretation of HTTP Requests ('HTTP Request/Response Smuggling')",
+        "description": "The product acts as an intermediary HTTP agent\n         (such as a proxy or firewall) in the data flow between two\n         entities such as a client and server, but it does not\n         interpret malformed HTTP requests or responses in ways that\n         are consistent with how the messages will be processed by\n         those entities that are at the ultimate destination."
+      }
+    },
+    "env_info": {
+      "env_cmd": "./mvnw"
+    }
+  },
+  "Openfire-1": {
+    "buggy_file_path": "xmppserver/src/main/java/org/jivesoftware/util/FaviconServlet.java",
+    "buggy_method": [
+      [
+        184,
+        204
+      ]
+    ],
+    "buggy_line": [
+      [
+        188,
+        189,
+        197,
+        199,
+        200
+      ]
+    ],
+    "bug_type": "",
+    "compile_cmd": "mvn clean compile",
+    "test_cmd": "mvn clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2019-18394",
+    "github_url": "https://github.com/igniterealtime/Openfire",
+    "github_url_cve": "https://github.com/VJBench/Openfire-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/igniterealtime/Openfire/commit/e6a9db94f684056ced0d5e5a4291c89488fbeecc",
+    "introducing_files": "",
+    "cve_description": "A Server Side Request Forgery (SSRF) vulnerability in FaviconServlet.java in Ignite Realtime Openfire through 4.4.2 allows attackers to send arbitrary HTTP GET requests.",
+    "cwe_info": {
+      "CWE-918": {
+        "name": "Server-Side Request Forgery (SSRF)",
+        "description": "The web server receives a URL or similar request from an upstream component and retrieves the contents of this URL, but it does not sufficiently ensure that the request is being sent to the expected destination."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Jooby-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "jooby/src/main/java/org/jooby/Err.java",
+        "buggy_method": [
+          [
+            268,
+            298
+          ]
+        ],
+        "buggy_line": [
+          [
+            291,
+            294,
+            295
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "jooby/src/main/java/org/jooby/internal/HttpHandlerImpl.java",
+        "buggy_method": [
+          [
+            609,
+            636
+          ]
+        ],
+        "buggy_line": [
+          [
+            630
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "jooby/src/main/java/org/jooby/internal/RouteImpl.java",
+        "buggy_method": [
+          [
+            233,
+            239
+          ]
+        ],
+        "buggy_line": [
+          [
+            236
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "mvn clean compile -pl jooby",
+    "test_cmd": "mvn clean test -pl jooby",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2019-15477",
+    "github_url": "https://github.com/jooby-project/jooby",
+    "github_url_cve": "https://github.com/VJBench/Jooby-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/jooby-project/jooby/commit/27b4af283de1a2c2a6b0530039b46eef75ddf655",
+    "introducing_files": "",
+    "cve_description": "Jooby before 1.6.4 has XSS via the default error handler.",
+    "cwe_info": {
+      "CWE-79": {
+        "name": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+        "description": "The product does not neutralize or incorrectly neutralizes user-controllable input before it is placed in output that is used as a web page that is served to other users."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Emissary-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "src/main/java/emissary/pickup/WorkBundle.java",
+        "buggy_method": [
+          [
+            202,
+            211
+          ],
+          [
+            213,
+            230
+          ],
+          [
+            232,
+            238
+          ],
+          [
+            263,
+            272
+          ],
+          [
+            285,
+            296
+          ],
+          [
+            298,
+            307
+          ]
+        ],
+        "buggy_line": [
+          [
+            209
+          ],
+          [
+            221
+          ],
+          [
+            236
+          ],
+          [
+            270
+          ],
+          [
+            292,
+            293
+          ],
+          [
+            304
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "src/main/java/emissary/server/mvc/adapters/MoveToAdapter.java",
+        "buggy_method": [
+          [
+            1,
+            267
+          ]
+        ],
+        "buggy_line": [
+          []
+        ],
+        "bug_type": "deletion"
+      },
+      {
+        "buggy_file_path": "src/main/java/emissary/server/mvc/adapters/WorkSpaceAdapter.java",
+        "buggy_method": [
+          [
+            268,
+            298
+          ]
+        ],
+        "buggy_line": [
+          [
+            291,
+            294,
+            295
+          ]
+        ]
+      },
+      {
+        "buggy_file_path": "src/main/java/emissary/server/mvc/internal/MoveToAction.java",
+        "buggy_method": [
+          [
+            268,
+            298
+          ]
+        ],
+        "buggy_line": [
+          [
+            291,
+            294,
+            295
+          ]
+        ]
+      },
+      {
+        "buggy_file_path": "src/main/java/emissary/server/mvc/internal/WorkSpaceClientEnqueueAction.java",
+        "buggy_method": [
+          [
+            268,
+            298
+          ]
+        ],
+        "buggy_line": [
+          [
+            291,
+            294,
+            295
+          ]
+        ]
+      },
+      {
+        "buggy_file_path": "src/main/java/emissary/util/PayloadUtil.java",
+        "buggy_method": [
+          [
+            268,
+            298
+          ]
+        ],
+        "buggy_line": [
+          [
+            291,
+            294,
+            295
+          ]
+        ]
+      }
+    ],
+    "bug_type": "",
+    "compile_cmd": "mvn clean compile",
+    "test_cmd": "mvn clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2021-32634",
+    "github_url": "https://github.com/NationalSecurityAgency/emissary",
+    "github_url_cve": "https://github.com/VJBench/Emissary-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/NationalSecurityAgency/emissary/commit/40260b1ec1f76cc92361702cc14fa1e4388e19d7",
+    "introducing_files": "",
+    "cve_description": "Emissary is a distributed, peer-to-peer, data-driven workflow framework. Emissary 6.4.0 is vulnerable to Unsafe Deserialization of post-authenticated requests to the [`WorkSpaceClientEnqueue.action`](https://github.com/NationalSecurityAgency/emissary/blob/30c54ef16c6eb6ed09604a929939fb9f66868382/src/main/java/emissary/server/mvc/internal/WorkSpaceClientEnqueueAction.java) REST endpoint. This issue may lead to post-auth Remote Code Execution. This issue has been patched in version 6.5.0. As a workaround, one can disable network access to Emissary from untrusted sources.",
+    "cwe_info": {
+      "CWE-502": {
+        "name": "Deserialization of Untrusted Data",
+        "description": "The product deserializes untrusted data without sufficiently ensuring that the resulting data will be valid."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Spark-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "src/main/java/spark/resource/ClassPathResourceHandler.java",
+        "buggy_method": [
+          [
+            59,
+            88
+          ]
+        ],
+        "buggy_line": [
+          [
+            81
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "src/main/java/spark/resource/ClassPathResourceHandler.java",
+        "buggy_method": [
+          [
+            58,
+            87
+          ]
+        ],
+        "buggy_line": [
+          [
+            80
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "src/main/java/spark/staticfiles/StaticFilesConfiguration.java",
+        "buggy_method": [
+          [
+            62,
+            82
+          ]
+        ],
+        "buggy_line": [
+          [
+            73,
+            74,
+            75,
+            76,
+            77,
+            78
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "mvn clean compile",
+    "test_cmd": "mvn clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2016-9177",
+    "github_url": "https://github.com/perwendel/spark",
+    "github_url_cve": "https://github.com/VJBench/Spark-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/perwendel/spark/commit/efcb46c710e3f56805b9257a63d1306882f4faf9",
+    "introducing_files": "",
+    "cve_description": "Directory traversal vulnerability in Spark 2.5 allows remote attackers to read arbitrary files via a .. (dot dot) in the URI.",
+    "cwe_info": {
+      "CWE-22": {
+        "name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "description": "The product uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the product does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "TorpedoQuery-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "src/main/java/org/torpedoquery/jpa/internal/conditions/ConditionBuilder.java",
+        "buggy_method": [
+          [
+            254,
+            260
+          ]
+        ],
+        "buggy_line": [
+          [
+            256,
+            258
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "src/main/java/org/torpedoquery/jpa/internal/conditions/LikeCondition.java",
+        "buggy_method": [
+          [
+            86,
+            89
+          ]
+        ],
+        "buggy_line": [
+          [
+            88
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "mvn clean compile",
+    "test_cmd": "mvn clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2019-11343",
+    "github_url": "https://github.com/xjodoin/torpedoquery",
+    "github_url_cve": "https://github.com/VJBench/TorpedoQuery-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/xjodoin/torpedoquery/commit/3c20b874fba9cc2a78b9ace10208de1602b56c3f",
+    "introducing_files": "",
+    "cve_description": "Torpedo Query before 2.5.3 mishandles the LIKE operator in ConditionBuilder.java, LikeCondition.java, and NotLikeCondition.java.",
+    "cwe_info": {},
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Nmap4j-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "src/main/java/org/nmap4j/Nmap4j.java",
+        "buggy_method": [
+          [
+            87,
+            95
+          ]
+        ],
+        "buggy_line": [
+          [
+            94
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "src/main/java/org/nmap4j/valid/HostsInputValidator.java",
+        "buggy_method": [
+          [
+            12,
+            14
+          ]
+        ],
+        "buggy_line": [
+          [
+            13
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "mvn clean compile",
+    "test_cmd": "mvn clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2018-17228",
+    "github_url": "https://github.com/narkisr/nmap4j",
+    "github_url_cve": "https://github.com/VJBench/Nmap4j-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/narkisr/nmap4j/commit/06b58aa3345d2f977553685a026b93e61f0c491e",
+    "introducing_files": "",
+    "cve_description": "nmap4j 1.1.0 allows attackers to execute arbitrary commands via shell metacharacters in an includeHosts call.",
+    "cwe_info": {
+      "CWE-78": {
+        "name": "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')",
+        "description": "The product constructs all or part of an OS command using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify the intended OS command when it is sent to a downstream component."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Pac4j-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "pac4j-oidc/src/main/java/org/pac4j/oidc/profile/creator/TokenValidator.java",
+        "buggy_method": [
+          [
+            34,
+            83
+          ]
+        ],
+        "buggy_line": [
+          [
+            54,
+            55
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "mvn clean package -DskipTests",
+    "test_cmd": "mvn clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "java_version": 11,
+    "lang": "Java",
+    "CVE": "CVE-2021-44878",
+    "github_url": "https://github.com/pac4j/pac4j",
+    "github_url_cve": "https://github.com/VJBench/Pac4j-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/pac4j/pac4j/commit/22b82ffd702a132d9f09da60362fc6264fc281ae",
+    "introducing_files": "",
+    "cve_description": "If an OpenID Connect provider supports the \"none\" algorithm (i.e., tokens with no signature), pac4j v5.3.0 (and prior) does not refuse it without an explicit configuration on its side or for the \"idtoken\" response type which is not secure and violates the OpenID Core Specification. The \"none\" algorithm does not require any signature verification when validating the ID tokens, which allows the attacker to bypass the token validation by injecting a malformed ID token using \"none\" as the value of \"alg\" key in the header with an empty signature value.",
+    "cwe_info": {
+      "CWE-347": {
+        "name": "CWE-347: Improper Verification of Cryptographic Signature",
+        "description": "The product does not verify, or incorrectly verifies, the cryptographic signature for data."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "JAI-EXT-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "jt-jiffle/jt-jiffle-language/src/main/java/it/geosolutions/jaiext/jiffle/parser/node/Script.java",
+        "buggy_method": [
+          [
+            69,
+            82
+          ],
+          [
+            84,
+            232
+          ]
+        ],
+        "buggy_line": [
+          [
+            81
+          ],
+          [
+            102
+          ]
+        ],
+        "bug_type": "insertion"
+      },
+      {
+        "buggy_file_path": "jt-jiffle/jt-jiffle-language/src/main/java/it/geosolutions/jaiext/jiffle/Jiffle.java",
+        "buggy_method": [
+          [
+            518,
+            563
+          ]
+        ],
+        "buggy_line": [
+          [
+            561
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "mvn clean compile",
+    "test_cmd": "mvn clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2022-24816",
+    "github_url": "https://github.com/geosolutions-it/jai-ext",
+    "github_url_cve": "https://github.com/VJBench/JAI-EXT-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/geosolutions-it/jai-ext/commit/cb1d6565d38954676b0a366da4f965fef38da1cb",
+    "introducing_files": "",
+    "cve_description": "JAI-EXT is an open-source project which aims to extend the Java Advanced Imaging (JAI) API. Programs allowing Jiffle script to be provided via network request can lead to a Remote Code Execution as the Jiffle script is compiled into Java code via Janino, and executed. In particular, this affects the downstream GeoServer project. Version 1.2.22 will contain a patch that disables the ability to inject malicious code into the resulting script. Users unable to upgrade may negate the ability to compile Jiffle scripts from the final application, by removing janino-x.y.z.jar from the classpath.",
+    "cwe_info": {
+      "CWE-94": {
+        "name": "Improper Control of Generation of Code ('Code Injection')",
+        "description": "The product constructs all or part of a code segment using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify the syntax or behavior of the intended code segment."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Jackson-Modules-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "datetime/src/main/java/com/fasterxml/jackson/datatype/jsr310/DecimalUtils.java",
+        "buggy_method": [
+          [
+            96,
+            102
+          ]
+        ],
+        "buggy_line": [
+          [
+            102
+          ]
+        ],
+        "bug_type": "insertion"
+      },
+      {
+        "buggy_file_path": "datetime/src/main/java/com/fasterxml/jackson/datatype/jsr310/deser/DurationDeserializer.java",
+        "buggy_method": [
+          [
+            48,
+            85
+          ]
+        ],
+        "buggy_line": [
+          [
+            55,
+            56,
+            57
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "datetime/src/main/java/com/fasterxml/jackson/datatype/jsr310/deser/InstantDeserializer.java",
+        "buggy_method": [
+          [
+            280,
+            286
+          ]
+        ],
+        "buggy_line": [
+          [
+            282,
+            283,
+            284,
+            285
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "mvn clean compile -DskipTests -Dmaven.compiler.failOnWarning=false",
+    "test_cmd": "mvn clean test -Dmaven.compiler.failOnWarning=false",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2018-1000873",
+    "github_url": "https://github.com/FasterXML/jackson-modules-java8",
+    "github_url_cve": "https://github.com/VJBench/Jackson-Modules-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/FasterXML/jackson-modules-java8/commit/f29e03e21eb6ca0c11cda34cf511d245711a70ec",
+    "introducing_files": "",
+    "cve_description": "Fasterxml Jackson version Before 2.9.8 contains a CWE-20: Improper Input Validation vulnerability in Jackson-Modules-Java8 that can result in Causes a denial-of-service (DoS). This attack appear to be exploitable via The victim deserializes malicious input, specifically very large values in the nanoseconds field of a time value. This vulnerability appears to have been fixed in 2.9.8.",
+    "cwe_info": {
+      "CWE-20": {
+        "name": "Improper Input Validation",
+        "description": "The product receives input or data, but it does\n        not validate or incorrectly validates that the input has the\n        properties that are required to process the data safely and\n        correctly."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Apollo-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "apollo-portal/src/main/java/com/ctrip/framework/apollo/portal/component/RetryableRestTemplate.java",
+        "buggy_method": [
+          [
+            191,
+            213
+          ]
+        ],
+        "buggy_line": [
+          [
+            197
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "./mvnw clean compile",
+    "test_cmd": "./mvnw clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2020-15170",
+    "github_url": "https://github.com/ctripcorp/apollo",
+    "github_url_cve": "https://github.com/VJBench/Apollo-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/apolloconfig/apollo/commit/6ff6ddd47f9be87ad77a6a169cc46996cc5d89dd",
+    "introducing_files": "",
+    "cve_description": "apollo-adminservice before version 1.7.1 does not implement access controls. If users expose apollo-adminservice to internet(which is not recommended), there are potential security issues since apollo-adminservice is designed to work in intranet and it doesn't have access control built-in. Malicious hackers may access apollo-adminservice apis directly to access/edit the application's configurations. To fix the potential issue without upgrading, simply follow the advice that do not expose apollo-adminservice to internet.",
+    "cwe_info": {
+      "CWE-20": {
+        "name": "Improper Input Validation",
+        "description": "The product receives input or data, but it does\n        not validate or incorrectly validates that the input has the\n        properties that are required to process the data safely and\n        correctly."
+      }
+    },
+    "env_info": {
+      "env_cmd": "./mvnw"
+    }
+  },
+  "Elide-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "elide-core/src/main/java/com/yahoo/elide/core/PersistentResource.java",
+        "buggy_method": [
+          [
+            1552,
+            1583
+          ]
+        ],
+        "buggy_line": [
+          [
+            1560
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "elide-core/src/main/java/com/yahoo/elide/core/PersistentResource.java",
+        "buggy_method": [
+          [
+            267,
+            294
+          ]
+        ],
+        "buggy_line": [
+          [
+            273
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "mvn clean compile",
+    "test_cmd": "mvn clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2020-5289",
+    "github_url": "https://github.com/yahoo/elide",
+    "github_url_cve": "https://github.com/VJBench/Elide-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/yahoo/elide/commit/7239e47eca00226550300e5e67cdabbf12145ef0",
+    "introducing_files": "",
+    "cve_description": "In Elide before 4.5.14, it is possible for an adversary to \"guess and check\" the value of a model field they do not have access to assuming they can read at least one other field in the model. The adversary can construct filter expressions for an inaccessible field to filter a collection. The presence or absence of models in the returned collection can be used to reconstruct the value of the inaccessible field. Resolved in Elide 4.5.14 and greater.",
+    "cwe_info": {
+      "CWE-285": {
+        "name": "Improper Authorization",
+        "description": "The product does not perform or incorrectly performs an authorization check when an actor attempts to access a resource or perform an action."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "BC-Java-2": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "prov/src/main/java/org/bouncycastle/jcajce/provider/asymmetric/DH.java",
+        "buggy_method": [
+          [
+            20,
+            57
+          ]
+        ],
+        "buggy_line": [
+          [
+            41,
+            42,
+            43,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "prov/src/main/java/org/bouncycastle/jcajce/provider/asymmetric/EC.java",
+        "buggy_method": [
+          [
+            18,
+            216
+          ]
+        ],
+        "buggy_line": [
+          [
+            137,
+            138,
+            139,
+            140,
+            14
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "prov/src/main/java/org/bouncycastle/jcajce/provider/asymmetric/dh/IESCipher.java",
+        "buggy_method": [
+          [
+            107,
+            110
+          ],
+          [
+            250,
+            317
+          ],
+          [
+            364,
+            464
+          ]
+        ],
+        "buggy_line": [
+          [
+            137,
+            138,
+            139,
+            140,
+            141
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "prov/src/main/java/org/bouncycastle/jcajce/provider/asymmetric/ec/IESCipher.java",
+        "buggy_method": [
+          [
+            109,
+            112
+          ],
+          [
+            255,
+            339
+          ],
+          [
+            513,
+            531
+          ],
+          [
+            533,
+            540
+          ],
+          [
+            542,
+            550
+          ],
+          [
+            560,
+            567
+          ]
+        ],
+        "buggy_line": [
+          [
+            110
+          ],
+          [
+            267,
+            280,
+            281,
+            282,
+            283,
+            284,
+            285,
+            286,
+            287,
+            288,
+            289
+          ]
+        ],
+        "bug_type": "deletion"
+      },
+      {
+        "buggy_file_path": "prov/src/main/java/org/bouncycastle/jcajce/provider/asymmetric/ies/AlgorithmParametersSpi.java",
+        "buggy_method": [
+          [
+            41,
+            67
+          ],
+          [
+            104,
+            145
+          ]
+        ],
+        "buggy_line": [
+          [
+            60
+          ],
+          [
+            129
+          ]
+        ],
+        "bug_type": "insertion"
+      }
+    ],
+    "compile_cmd": "gradle build -x test",
+    "test_cmd": "gradle prov:test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2016-1000344",
+    "github_url": "https://github.com/bcgit/bc-java",
+    "github_url_cve": "https://github.com/VJBench/BC-Java-2",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/bcgit/bc-java/commit/9385b0ebd277724b167fe1d1456e3c112112be1f",
+    "introducing_files": "",
+    "cve_description": "In the Bouncy Castle JCE Provider version 1.55 and earlier the DHIES implementation allowed the use of ECB mode. This mode is regarded as unsafe and support for it has been removed from the provider.",
+    "cwe_info": {
+      "CWE-310": {
+        "name": "CWE CATEGORY: Cryptographic Issues",
+        "description": "Weaknesses in this category are related to the use of cryptography."
+      }
+    },
+    "env_info": {
+      "env_cmd": "gradle"
+    }
+  },
+  "Flow-3": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "flow-server/src/main/java/com/vaadin/flow/internal/nodefeature/ElementPropertyMap.java",
+        "buggy_method": [
+          [
+            68,
+            100
+          ],
+          [
+            183,
+            202
+          ],
+          [
+            204,
+            214
+          ],
+          [
+            216,
+            224
+          ],
+          [
+            226,
+            235
+          ],
+          [
+            237,
+            254
+          ]
+        ],
+        "buggy_line": [
+          [
+            79
+          ],
+          [
+            188
+          ],
+          [
+            211
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "flow-server/src/main/java/com/vaadin/flow/templatemodel/BeanModelType.java",
+        "buggy_method": [
+          [
+            629,
+            676
+          ]
+        ],
+        "buggy_line": [
+          [
+            667,
+            668
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "mvn clean install -DskipTests -pl flow-server -am",
+    "test_cmd": "mvn test -pl flow-server",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2018-25007",
+    "github_url": "https://github.com/vaadin/flow",
+    "github_url_cve": "https://github.com/VJBench/Flow-3",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/vaadin/flow/commit/d58da92fb10d94217b720ec17b8dd0858ef726e7",
+    "introducing_files": "",
+    "cve_description": "Missing check in UIDL request handler in com.vaadin:flow-server versions 1.0.0 through 1.0.5 (Vaadin 10.0.0 through 10.0.7, and 11.0.0 through 11.0.2) allows attacker to update element property values via crafted synchronization message.",
+    "cwe_info": {
+      "CWE-754": {
+        "name": "Improper Check for Unusual or Exceptional Conditions",
+        "description": "The product does not check or incorrectly checks for unusual or exceptional conditions that are not expected to occur frequently during day to day operation of the product."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "XStream-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "xstream/src/java/com/thoughtworks/xstream/XStream.java",
+        "buggy_method": [
+          [
+            639,
+            649
+          ]
+        ],
+        "buggy_line": [
+          [
+            645
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "mvn clean install -Dmaven.test.skip",
+    "test_cmd": "mvn clean install",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2020-26217",
+    "github_url": "https://github.com/x-stream/xstream",
+    "github_url_cve": "https://github.com/VJBench/XStream-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/x-stream/xstream/commit/0fec095d534126931c99fd38e9c6d41f5c685c1a",
+    "introducing_files": "",
+    "cve_description": "XStream before version 1.4.14 is vulnerable to Remote Code Execution.The vulnerability may allow a remote attacker to run arbitrary shell commands only by manipulating the processed input stream. Only users who rely on blocklists are affected. Anyone using XStream's Security Framework allowlist is not affected. The linked advisory provides code workarounds for users who cannot upgrade. The issue is fixed in version 1.4.14.",
+    "cwe_info": {
+      "CWE-78": {
+        "name": "Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection')",
+        "description": "The product constructs all or part of an OS command using externally-influenced input from an upstream component, but it does not neutralize or incorrectly neutralizes special elements that could modify the intended OS command when it is sent to a downstream component."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "XStream-2": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "xstream/src/java/com/thoughtworks/xstream/converters/collections/CollectionConverter.java",
+        "buggy_method": [
+          [
+            96,
+            100
+          ]
+        ],
+        "buggy_line": [
+          [
+            99
+          ]
+        ],
+        "bug_type": "insertion"
+      },
+      {
+        "buggy_file_path": "xstream/src/java/com/thoughtworks/xstream/converters/collections/MapConverter.java",
+        "buggy_method": [
+          [
+            103,
+            108
+          ]
+        ],
+        "buggy_line": [
+          [
+            107
+          ]
+        ],
+        "bug_type": "insertion"
+      },
+      {
+        "buggy_file_path": "xstream/src/java/com/thoughtworks/xstream/converters/extended/NamedMapConverter.java",
+        "buggy_method": [
+          [
+            285,
+            348
+          ]
+        ],
+        "buggy_line": [
+          [
+            342
+          ]
+        ],
+        "bug_type": "insertion"
+      }
+    ],
+    "compile_cmd": "mvn clean install -Dmaven.test.skip",
+    "test_cmd": "mvn clean install",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2021-43859",
+    "github_url": "https://github.com/x-stream/xstream",
+    "github_url_cve": "https://github.com/VJBench/XStream-2",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/x-stream/xstream/commit/e8e88621ba1c85ac3b8620337dd672e0c0c3a846",
+    "introducing_files": "",
+    "cve_description": "XStream is an open source java library to serialize objects to XML and back again. Versions prior to 1.4.19 may allow a remote attacker to allocate 100% CPU time on the target system depending on CPU type or parallel execution of such a payload resulting in a denial of service only by manipulating the processed input stream. XStream 1.4.19 monitors and accumulates the time it takes to add elements to collections and throws an exception if a set threshold is exceeded. Users are advised to upgrade as soon as possible. Users unable to upgrade may set the NO_REFERENCE mode to prevent recursion. See GHSA-rmr5-cpv2-vgjf for further details on a workaround if an upgrade is not possible.",
+    "cwe_info": {
+      "CWE-400": {
+        "name": "Uncontrolled Resource Consumption",
+        "description": "The product does not properly control the allocation and maintenance of a limited resource."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Jackson-databind-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "src/main/java/com/fasterxml/jackson/databind/deser/BeanDeserializerFactory.java",
+        "buggy_method": [
+          [
+            48,
+            65
+          ]
+        ],
+        "buggy_line": [
+          [
+            64
+          ]
+        ],
+        "bug_type": "insertion"
+      }
+    ],
+    "compile_cmd": "mvn clean compile",
+    "test_cmd": "mvn clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2017-15095",
+    "github_url": "https://github.com/FasterXML/jackson-databind",
+    "github_url_cve": "https://github.com/VJBench/Jackson-databind-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/FasterXML/jackson-databind/commit/ddfddfba6414adbecaff99684ef66eebd3a92e92",
+    "introducing_files": "",
+    "cve_description": "A deserialization flaw was discovered in the jackson-databind in versions before 2.8.10 and 2.9.1, which could allow an unauthenticated user to perform code execution by sending the maliciously crafted input to the readValue method of the ObjectMapper. This issue extends the previous flaw CVE-2017-7525 by blacklisting more classes that could be used maliciously.",
+    "cwe_info": {
+      "CWE-184": {
+        "name": "Incomplete List of Disallowed Inputs",
+        "description": "The product implements a protection mechanism that relies on a list of inputs (or properties of inputs) that are not allowed by policy or otherwise require other action to neutralize before additional processing takes place, but the list is incomplete."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Jackson-databind-2": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "src/main/java/com/fasterxml/jackson/databind/jsontype/impl/SubTypeValidator.java",
+        "buggy_method": [
+          [
+            11,
+            100
+          ]
+        ],
+        "buggy_line": [
+          [
+            21,
+            48,
+            49,
+            83
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "mvn clean compile",
+    "test_cmd": "mvn clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2018-7489",
+    "github_url": "https://github.com/FasterXML/jackson-databind",
+    "github_url_cve": "https://github.com/VJBench/Jackson-databind-2",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/FasterXML/jackson-databind/commit/6799f8f10cc78e9af6d443ed6982d00a13f2e7d2",
+    "introducing_files": "",
+    "cve_description": "FasterXML jackson-databind before 2.7.9.3, 2.8.x before 2.8.11.1 and 2.9.x before 2.9.5 allows unauthenticated remote code execution because of an incomplete fix for the CVE-2017-7525 deserialization flaw. This is exploitable by sending maliciously crafted JSON input to the readValue method of the ObjectMapper, bypassing a blacklist that is ineffective if the c3p0 libraries are available in the classpath.",
+    "cwe_info": {
+      "CWE-184": {
+        "name": "Incomplete List of Disallowed Inputs",
+        "description": "The product implements a protection mechanism that relies on a list of inputs (or properties of inputs) that are not allowed by policy or otherwise require other action to neutralize before additional processing takes place, but the list is incomplete."
+      },
+      "CWE-502": {
+        "name": "Deserialization of Untrusted Data",
+        "description": "The product deserializes untrusted data without sufficiently ensuring that the resulting data will be valid."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Flow-4": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "flow-server/src/main/java/com/vaadin/flow/server/DevModeHandler.java",
+        "buggy_method": [
+          [
+            280,
+            357
+          ]
+        ],
+        "buggy_line": [
+          [
+            306
+          ]
+        ],
+        "bug_type": "insertion"
+      },
+      {
+        "buggy_file_path": "flow-server/src/main/java/com/vaadin/flow/server/StaticFileServer.java",
+        "buggy_method": [
+          [
+            106,
+            155
+          ]
+        ],
+        "buggy_line": [
+          [
+            111,
+            112,
+            114
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "mvn clean compile -pl flow-server",
+    "test_cmd": "mvn clean test -pl flow-server -Dtest=DevModeHandlerTest,StaticFileServerTest",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2020-36321",
+    "github_url": "https://github.com/vaadin/flow",
+    "github_url_cve": "https://github.com/VJBench/Flow-4",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/vaadin/flow/commit/19fe3864f9d1567c5ac7a211189986ac093e781f",
+    "introducing_files": "",
+    "cve_description": "Improper URL validation in development mode handler in com.vaadin:flow-server versions 2.0.0 through 2.4.1 (Vaadin 14.0.0 through 14.4.2), and 3.0 prior to 5.0 (Vaadin 15 prior to 18) allows attacker to request arbitrary files stored outside of intended frontend resources folder.",
+    "cwe_info": {
+      "CWE-22": {
+        "name": "Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "description": "The product uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the product does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  },
+  "Lemminx-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "org.eclipse.lemminx/src/main/java/org/eclipse/lemminx/uriresolver/CacheResourcesManager.java",
+        "buggy_method": [
+          [
+            54,
+            54
+          ],
+          [
+            239,
+            242
+          ],
+          [
+            244,
+            249
+          ]
+        ],
+        "buggy_line": [
+          [
+            54
+          ],
+          [
+            240
+          ],
+          [
+            245,
+            246,
+            247
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "./mvnw clean compile",
+    "test_cmd": "./mvnw clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2022-0673",
+    "github_url": "https://github.com/eclipse/lemminx",
+    "github_url_cve": "https://github.com/VJBench/Lemminx-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/eclipse/lemminx/commit/48f23ab4dae19268027ede6c923d12e0b5e8d1fe",
+    "introducing_files": "",
+    "cve_description": "A flaw was found in LemMinX in versions prior to 0.19.0. Cache poisoning of external schema files due to directory traversal.",
+    "cwe_info": {
+      "CWE-22": {
+        "name": "CWE-22: Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')",
+        "description": "The product uses external input to construct a pathname that is intended to identify a file or directory that is located underneath a restricted parent directory, but the product does not properly neutralize special elements within the pathname that can cause the pathname to resolve to a location that is outside of the restricted directory."
+      }
+    },
+    "env_info": {
+      "env_cmd": "./mvnw"
+    }
+  },
+  "Jdom-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "core/src/java/org/jdom2/input/SAXBuilder.java",
+        "buggy_method": [
+          [
+            908,
+            1011
+          ]
+        ],
+        "buggy_line": [
+          [
+            974,
+            975,
+            976,
+            977,
+            978
+          ]
+        ],
+        "bug_type": "deletion"
+      }
+    ],
+    "compile_cmd": "ant compile",
+    "test_cmd": "ant junit",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2021-33813",
+    "github_url": "https://github.com/hunterhacker/jdom",
+    "github_url_cve": "https://github.com/VJBench/Jdom-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/hunterhacker/jdom/commit/2a25ee409d09fb3eed75a4272ab8540c5261f960",
+    "introducing_files": "",
+    "cve_description": "An XXE issue in SAXBuilder in JDOM through 2.0.6 allows attackers to cause a denial of service via a crafted HTTP request.",
+    "cwe_info": {
+      "CWE-611": {
+        "name": "CWE-611: Improper Restriction of XML External Entity Reference",
+        "description": "The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output."
+      }
+    },
+    "env_info": {
+      "env_cmd": "ant"
+    }
+  },
+  "Lemminx-2": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "org.eclipse.lemminx/src/main/java/org/eclipse/lemminx/extensions/contentmodel/participants/diagnostics/LSPSAXParser.java",
+        "buggy_method": [
+          [
+            65,
+            70
+          ],
+          [
+            72,
+            83
+          ],
+          [
+            87,
+            92
+          ],
+          [
+            94,
+            158
+          ],
+          [
+            160,
+            167
+          ],
+          [
+            187,
+            211
+          ]
+        ],
+        "buggy_line": [
+          [
+            65,
+            67
+          ],
+          [
+            76,
+            77,
+            78,
+            79
+          ],
+          [
+            90
+          ],
+          [
+            97
+          ],
+          [
+            160
+          ],
+          [
+            201,
+            208
+          ]
+        ],
+        "bug_type": "replace"
+      },
+      {
+        "buggy_file_path": "org.eclipse.lemminx/src/main/java/org/eclipse/lemminx/extensions/contentmodel/participants/diagnostics/XMLValidator.java",
+        "buggy_method": [
+          [
+            67,
+            134
+          ]
+        ],
+        "buggy_line": [
+          [
+            70,
+            84,
+            90,
+            126
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "./mvnw clean compile",
+    "test_cmd": "./mvnw clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2022-0671",
+    "github_url": "https://github.com/eclipse/lemminx",
+    "github_url_cve": "https://github.com/VJBench/Lemminx-2",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/eclipse/lemminx/commit/b46cb1f283c70b85c22221b30a4aff62be495237",
+    "introducing_files": "",
+    "cve_description": "A flaw was found in vscode-xml in versions prior to 0.19.0. Schema download could lead to blind SSRF or DoS via a large file.",
+    "cwe_info": {
+      "CWE-400": {
+        "name": "Uncontrolled Resource Consumption",
+        "description": "The product does not properly control the allocation and maintenance of a limited resource."
+      },
+      "CWE-918": {
+        "name": "Server-Side Request Forgery (SSRF)",
+        "description": "The web server receives a URL or similar request from an upstream component and retrieves the contents of this URL, but it does not sufficiently ensure that the request is being sent to the expected destination."
+      }
+    },
+    "env_info": {
+      "env_cmd": "./mvnw"
+    }
+  },
+  "Lemminx-3": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "org.eclipse.lemminx/src/main/java/org/eclipse/lemminx/uriresolver/CacheResourcesManager.java",
+        "buggy_method": [
+          [
+            184,
+            239
+          ]
+        ],
+        "buggy_line": [
+          [
+            192
+          ]
+        ],
+        "bug_type": "insertion"
+      },
+      {
+        "buggy_file_path": "org.eclipse.lemminx/src/main/java/org/eclipse/lemminx/uriresolver/InvalidURIException.java",
+        "buggy_method": [
+          [
+            54,
+            57
+          ]
+        ],
+        "buggy_line": [
+          [
+            55
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "./mvnw clean compile",
+    "test_cmd": "./mvnw clean test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2022-0672",
+    "github_url": "https://github.com/eclipse/lemminx",
+    "github_url_cve": "https://github.com/VJBench/Lemminx-3",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/eclipse/lemminx/commit/076b88052c2a63f60a98ef4b45e3e38c217b70ae",
+    "introducing_files": "",
+    "cve_description": "A flaw was found in LemMinX in versions prior to 0.19.0. Insecure redirect could allow unauthorized access to sensitive information locally if LemMinX is run under a privileged user.",
+    "cwe_info": {
+      "CWE-200": {
+        "name": "CWE-200: Exposure of Sensitive Information to an Unauthorized Actor",
+        "description": "The product exposes sensitive information to an actor that is not explicitly authorized to have access to that information."
+      }
+    },
+    "env_info": {
+      "env_cmd": "./mvnw"
+    }
+  },
+  "TwelveMonkeys-1": {
+    "buggy_info": [
+      {
+        "buggy_file_path": "imageio/imageio-metadata/src/main/java/com/twelvemonkeys/imageio/metadata/xmp/XMPReader.java",
+        "buggy_method": [
+          [
+            66,
+            97
+          ],
+          [
+            111,
+            172
+          ],
+          [
+            180,
+            193
+          ],
+          [
+            195,
+            213
+          ],
+          [
+            215,
+            258
+          ]
+        ],
+        "buggy_line": [
+          [
+            70,
+            71
+          ],
+          [
+            112,
+            130,
+            142,
+            164
+          ],
+          [
+            182
+          ],
+          [
+            207
+          ],
+          [
+            219,
+            233
+          ]
+        ],
+        "bug_type": "replace"
+      }
+    ],
+    "compile_cmd": "mvn clean install -DskipTests",
+    "test_cmd": "mvn test",
+    "test_num": "",
+    "test_fail_num": "",
+    "lang": "Java",
+    "CVE": "CVE-2021-23792",
+    "github_url": "https://github.com/haraldk/TwelveMonkeys",
+    "github_url_cve": "https://github.com/VJBench/TwelveMonkeys-1",
+    "github_url_cve_branch": "",
+    "fix_commit": "https://github.com/haraldk/TwelveMonkeys/commit/da4efe98bf09e1cce91b7633cb251958a200fc80",
+    "introducing_files": "",
+    "cve_description": "The package com.twelvemonkeys.imageio:imageio-metadata before 3.7.1 are vulnerable to XML External Entity (XXE) Injection due to an insecurely initialized XML parser for reading XMP Metadata. An attacker can exploit this vulnerability if they are able to supply a file (e.g. when an online profile picture is processed) with a malicious XMP segment. If the XMP metadata of the uploaded image is parsed, then the XXE vulnerability is triggered.",
+    "cwe_info": {
+      "CWE-611": {
+        "name": "CWE-611: Improper Restriction of XML External Entity Reference",
+        "description": "The product processes an XML document that can contain XML entities with URIs that resolve to documents outside of the intended sphere of control, causing the product to embed incorrect documents into its output."
+      }
+    },
+    "env_info": {
+      "env_cmd": "mvn"
+    }
+  }
+}

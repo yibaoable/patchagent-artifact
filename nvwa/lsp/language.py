@@ -5,6 +5,10 @@ from enum import StrEnum
 class LanguageType(StrEnum):
     C = "c"
     JAVA = "java"
+    GO = "go"
+    PYTHON = "python"
+    TYPESCRIPT = "typescript"
+    JAVASCRIPT = "javascript"
 
 
 class LanguageServer:

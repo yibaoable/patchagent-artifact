@@ -7,6 +7,51 @@ from nvwa.logger import log
 
 
 def revise_patch(patch: str, project_path: str) -> tuple[str, bool]:
+    def resolve_patch_path(file_path: str) -> tuple[str, bool]:
+        normalized = os.path.normpath(file_path).lstrip("/\\")
+        candidate = os.path.join(project_path, normalized)
+        if os.path.exists(candidate):
+            return normalized, False
+
+        parts = [part for part in normalized.split(os.sep) if part not in ("", ".")]
+        for idx in range(1, len(parts)):
+            suffix = os.path.join(*parts[idx:])
+            if os.path.exists(os.path.join(project_path, suffix)):
+                return suffix, True
+
+        return normalized, False
+
+    def normalize_patch_paths(raw_patch: str) -> tuple[str, bool]:
+        fixed = False
+        normalized_lines = []
+
+        for line in raw_patch.splitlines():
+            if line.startswith("diff --git a/"):
+                file_path_a, file_path_b = re.findall(r"diff --git a/(.*) b/(.*)", line)[0]
+                fixed_file_path_a, fixed_a = resolve_patch_path(file_path_a)
+                fixed_file_path_b, fixed_b = resolve_patch_path(file_path_b)
+                fixed_file_path_a = os.path.normpath(fixed_file_path_a)
+                fixed_file_path_b = os.path.normpath(fixed_file_path_b)
+                fixed = fixed or fixed_a or fixed_b or file_path_a != fixed_file_path_a or file_path_b != fixed_file_path_b
+                normalized_lines.append(f"diff --git a/{fixed_file_path_a} b/{fixed_file_path_b}")
+            elif line.startswith("--- a/"):
+                file_path = re.findall(r"--- a/(.*)", line)[0]
+                fixed_file_path, changed = resolve_patch_path(file_path)
+                fixed_file_path = os.path.normpath(fixed_file_path)
+                fixed = fixed or changed or file_path != fixed_file_path
+                normalized_lines.append(f"--- a/{fixed_file_path}")
+            elif line.startswith("+++ b/"):
+                file_path = re.findall(r"\+\+\+ b/(.*)", line)[0]
+                fixed_file_path, changed = resolve_patch_path(file_path)
+                fixed_file_path = os.path.normpath(fixed_file_path)
+                fixed = fixed or changed or file_path != fixed_file_path
+                normalized_lines.append(f"+++ b/{fixed_file_path}")
+            else:
+                normalized_lines.append(line)
+
+        suffix = "\n" if raw_patch.endswith("\n") else ""
+        return "\n".join(normalized_lines) + suffix, fixed
+
     def revise_hunk(lines: list[str], file_content: list[str]) -> tuple[str, bool]:
         orignal_line_number = sum(1 for line in lines[1:] if not line.startswith("+"))
         patched_line_number = sum(1 for line in lines[1:] if not line.startswith("-"))
@@ -21,7 +66,9 @@ def revise_patch(patch: str, project_path: str) -> tuple[str, bool]:
         modified_line_number = None
         corrected_line_number = None
 
-        for test_line_no in range(max(1, int(numbers[0]) - 5), min(len(file_content) - len(lines), int(numbers[0]) + 5)):
+        search_start = max(1, int(numbers[0]) - 5)
+        search_end = min(len(file_content) - orignal_line_number + 2, int(numbers[0]) + 6)
+        for test_line_no in range(search_start, search_end):
             temp_hunk = ""
             temp_modified_line_number = 0
             line_number = test_line_no
@@ -45,6 +92,9 @@ def revise_patch(patch: str, project_path: str) -> tuple[str, bool]:
                 corrected_line_number = test_line_no
                 hunk = temp_hunk
 
+        if corrected_line_number is None or modified_line_number is None:
+            return "\n".join(lines) + "\n", False
+
         header = f"@@ -{corrected_line_number},{orignal_line_number} +{corrected_line_number},{patched_line_number} @@\n"
         fixed = (
             modified_line_number != 0
@@ -57,23 +107,43 @@ def revise_patch(patch: str, project_path: str) -> tuple[str, bool]:
         return header + hunk, fixed
 
     def revise_block(lines: list[str]) -> tuple[list[str], bool]:
-        file_path_a = re.findall(r"--- a/(.*)", lines[0])[0]
-        file_path_b = re.findall(r"\+\+\+ b/(.*)", lines[1])[0]
-        fixed_file_path_a = os.path.normpath(file_path_a)
-        fixed_file_path_b = os.path.normpath(file_path_b)
-        block_fixed = file_path_a != fixed_file_path_a or file_path_b != fixed_file_path_b
+        cursor = 0
+        fixed_lines = []
+        block_fixed = False
+
+        if lines[cursor].startswith("diff --git a/"):
+            file_path_a, file_path_b = re.findall(r"diff --git a/(.*) b/(.*)", lines[cursor])[0]
+            fixed_file_path_a, fixed_a = resolve_patch_path(file_path_a)
+            fixed_file_path_b, fixed_b = resolve_patch_path(file_path_b)
+            fixed_file_path_a = os.path.normpath(fixed_file_path_a)
+            fixed_file_path_b = os.path.normpath(fixed_file_path_b)
+            block_fixed = block_fixed or fixed_a or fixed_b or file_path_a != fixed_file_path_a or file_path_b != fixed_file_path_b
+            fixed_lines.append(f"diff --git a/{fixed_file_path_a} b/{fixed_file_path_b}\n")
+            cursor += 1
+
+        while cursor < len(lines) and not lines[cursor].startswith("--- a/"):
+            fixed_lines.append(lines[cursor] + "\n")
+            cursor += 1
+
+        file_path_a = re.findall(r"--- a/(.*)", lines[cursor])[0]
+        file_path_b = re.findall(r"\+\+\+ b/(.*)", lines[cursor + 1])[0]
+        fixed_file_path_a, fixed_a = resolve_patch_path(file_path_a)
+        fixed_file_path_b, fixed_b = resolve_patch_path(file_path_b)
+        fixed_file_path_a = os.path.normpath(fixed_file_path_a)
+        fixed_file_path_b = os.path.normpath(fixed_file_path_b)
+        block_fixed = block_fixed or file_path_a != fixed_file_path_a or file_path_b != fixed_file_path_b or fixed_a or fixed_b
 
         assert file_path_a == file_path_b and fixed_file_path_a == fixed_file_path_b
-        fixed_lines = [
+        fixed_lines += [
             f"--- a/{fixed_file_path_a}\n",
             f"+++ b/{fixed_file_path_b}\n",
         ]
 
-        with open(os.path.join(project_path, file_path_a), "r") as f:
+        with open(os.path.join(project_path, fixed_file_path_a), "r") as f:
             file_content = f.readlines()
 
         last_line = -1
-        for line_no in range(2, len(lines)):
+        for line_no in range(cursor + 2, len(lines)):
             if lines[line_no].startswith("@@"):
                 if last_line != -1:
                     hunk_lines, hunk_fixed = revise_hunk(lines[last_line:line_no], file_content)
@@ -87,28 +157,33 @@ def revise_patch(patch: str, project_path: str) -> tuple[str, bool]:
 
         return fixed_lines, block_fixed
 
+    normalized_patch, normalized_fixed = normalize_patch_paths(patch)
     try:
-        lines = patch.splitlines()
+        lines = normalized_patch.splitlines()
         fixed_lines = []
 
         last_line = -1
-        fixed = False
+        fixed = normalized_fixed
         for line_no in range(len(lines)):
-            if lines[line_no].startswith("--- a/"):
+            if lines[line_no].startswith("diff --git a/"):
                 if last_line != -1:
                     block_lines, block_fixed = revise_block(lines[last_line:line_no])
                     fixed_lines += block_lines
                     fixed = fixed or block_fixed
+                last_line = line_no
+            elif lines[line_no].startswith("--- a/") and last_line == -1:
                 last_line = line_no
         if last_line != -1:
             block_lines, block_fixed = revise_block(lines[last_line:])
             fixed_lines += block_lines
             fixed = fixed or block_fixed
 
+        if len(fixed_lines) == 0:
+            return normalized_patch, normalized_fixed
         return "".join(fixed_lines), fixed
     except Exception:
         log.warning("Failed to revise patch")
-        return patch, False
+        return normalized_patch, normalized_fixed
 
 
 def extract_cpp_function_name(function_name: str) -> Union[str, None]:

@@ -75,8 +75,9 @@ def batch_run(projects_data, action="checkout", max_workers=1):
     
     results = []
 
-    for tag, data in projects_data.items():
+    for bug_id, data in projects_data.items():
         project = data.get("project")
+        tag = data.get("tag")
         
         completed += 1
         print(f"\n[进度: {completed}/{total}]")

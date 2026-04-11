@@ -11,6 +11,7 @@ from nvwa.sky.task import PatchTask, skyset_tools
 from nvwa.lsp.language import LanguageType, LanguageServer
 from nvwa.parser.sanitizer import Sanitizer
 
+CLANGD_PATH = os.environ.get("CLANGD_PATH", "clangd")
 
 class ClangdServer(LanguageServer):
     def __init__(self, task: PatchTask):
@@ -24,6 +25,13 @@ class ClangdServer(LanguageServer):
         return [LanguageType.C]
 
     def _compile(self):
+        build_dir = getattr(self.task, "compile_commands_dir", None)
+        if build_dir is not None:
+            compile_commands_json = os.path.join(build_dir, "compile_commands.json")
+            if not os.path.exists(compile_commands_json):
+                raise FileNotFoundError(f"compile_commands.json not found: {compile_commands_json}")
+            return build_dir
+
         build_dir = skyset_tools.get_sanitizer_build_path(self.project, self.tag, Sanitizer.BearSanitizer)
         compile_commands_log = os.path.join(build_dir, "compile_commands.log")
         compile_commands_json = os.path.join(build_dir, "compile_commands.json")
@@ -49,7 +57,7 @@ class ClangdServer(LanguageServer):
 
     def _start(self):
         self.proc = subprocess.Popen(
-            ["clangd", "--clang-tidy", f"--compile-commands-dir={self.build_dir}", "--log=error"],
+            [CLANGD_PATH, "--clang-tidy", f"--compile-commands-dir={self.build_dir}", "--log=error"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,

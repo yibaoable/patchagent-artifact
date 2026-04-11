@@ -27,6 +27,8 @@ class PatchTask:
         self.sanitizer: Sanitizer = sanitizer
         self.patch: Union[None, str] = None
         self.sanitizer_report: Union[None, SanitizerReport] = None
+        self.work_dir = ""
+        self.language = ""
 
         if not skip_setup:
             assert self.setup(), f"Failed to setup {self}"
@@ -72,6 +74,15 @@ class PatchTask:
         assert os.path.exists(self.report_path)
         with open(self.report_path) as f:
             return f.read()
+
+    @property
+    def issue_summary(self) -> str:
+        assert self.sanitizer_report is not None
+        return self.sanitizer_report.summary
+
+    @property
+    def issue_kind(self) -> str:
+        return "sanitizer report"
 
     def build(self, *args, **kwargs) -> tuple[bool, str]:
         log.info(f"Building {self}")

@@ -13,7 +13,9 @@ parser.add_argument("--save", action="store_true", help="Save test report")
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    sanitizer = skyset_tools.get_config(args.project, args.tag)["sanitizer"]
+    a = skyset_tools.get_config(args.project, args.tag)
+    print("[test]",a)
+    sanitizer = a["sanitizer"]
 
     if args.action in ["checkout", "all"]:
         print(f"Building {args.project}:{args.tag}")

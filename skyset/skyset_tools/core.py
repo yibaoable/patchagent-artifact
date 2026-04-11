@@ -23,6 +23,7 @@ from typing import Union, Optional
 
 
 ROOT = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+print("root:",ROOT)
 ASANCC = os.path.join(ROOT, "skyset_tools", "compiler", "asancc")
 ASANCXX = os.path.join(ROOT, "skyset_tools", "compiler", "asan++")
 UBSANCC = os.path.join(ROOT, "skyset_tools", "compiler", "ubsancc")
@@ -72,8 +73,10 @@ def get_immutable_path(project: str, tag: str) -> str:
 
 
 def get_sanitizer_build_path(project: str, tag: str, sanitizer: str, patch: bool = False) -> str:
+    if project == "secbench":
+        config = get_config(project, tag)
+        return config["host_src_dir"]
     return os.path.join(get_sky_path(project, tag), f"{sanitizer}{'_Patch' if patch else ''}")
-
 
 def get_functional_test_path(project: str, tag: str, patch: bool = False) -> str:
     return os.path.join(get_sky_path(project, tag), f"Functional{'_Patch' if patch else ''}")
@@ -81,6 +84,7 @@ def get_functional_test_path(project: str, tag: str, patch: bool = False) -> str
 
 def get_config(project: str, tag: str) -> dict:
     config_path = os.path.join(get_sky_path(project, tag), "config.yml")
+    print("config_path:", config_path)
     if not os.path.exists(config_path):
         return {}
     with open(config_path) as f:
@@ -225,6 +229,25 @@ def checkout(
     # elif patch_path is not None:
     #     if not apply_patch(mutable_path, patch_path):
     #         return (False, "Patch failed to apply")
+
+def build(
+    project: str,
+    tag: str,
+    sanitizer: str,
+    patch_path: Union[str, None] = None,
+    rebuild: bool = True,
+) -> tuple[bool, str]:
+    if project == "secbench":
+        src_dir = get_config(project, tag)["host_src_dir"]
+        cc = os.path.join(src_dir, "compile_commands.json")
+        if os.path.exists(cc):
+            return (True, "")
+        return (False, f"compile_commands.json not found: {cc}")
+
+    ret, msg = checkout(project, tag, sanitizer, patch_path, rebuild)
+    if not ret:
+        return (False, msg)
+    return compile(project, tag, sanitizer, patch_path, rebuild)
 
 def compile(
     project: str,

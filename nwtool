@@ -11,6 +11,12 @@ import random
 import argparse
 from nvwa.sky.utils import get_all_task, make_task
 from nvwa.context import ContextManager
+from nvwa.dataset_container import (
+    DatasetContainerTask,
+    run_case_in_container,
+    running_inside_dataset_container,
+    should_containerize_dataset,
+)
 from nvwa.frontend import patch
 from nvwa.logger import log
 
@@ -25,13 +31,55 @@ parser.add_argument("--tmux", dest="tmux", action="store_true", help="tmux mode"
 parser.add_argument("--max_sessions", type=int, default=5, help="max tmux sessions")
 parser.add_argument("--skip_linux", dest="skip_linux", action="store_true", help="skip linux")
 parser.add_argument("--skip_extractfix", dest="skip_extractfix", action="store_true", help="skip extractfix")
+parser.add_argument("--dataset", type=str, default="skyset", choices=["skyset", "patcheval", "secbench", "vul4j", "vjbench"], help="dataset backend")
+parser.add_argument("--dataset_path", type=str, help="dataset json path for dataset adapters")
+parser.add_argument("--input_mode", type=str, default="auto", choices=["auto", "sanitizer", "vuln_func"], help="input source for SEC-bench prompts")
 
 args = parser.parse_args()
 
+
+def _build_inner_args(project: str, tag: str) -> list[str]:
+    inner_args = [
+        "--project",
+        project,
+        "--tag",
+        tag,
+        "--model",
+        args.model,
+        "--thershold",
+        str(args.thershold),
+        "--dataset",
+        args.dataset,
+        "--input_mode",
+        args.input_mode,
+    ]
+
+    if args.log_path:
+        inner_args.extend(["--log_path", args.log_path])
+    if args.dataset_path:
+        inner_args.extend(["--dataset_path", args.dataset_path])
+    if args.reset:
+        inner_args.append("--reset")
+    if args.skip_linux:
+        inner_args.append("--skip_linux")
+    if args.skip_extractfix:
+        inner_args.append("--skip_extractfix")
+
+    return inner_args
+
 if __name__ == "__main__":
     all_task = []
-    for task in get_all_task(project=args.project, tag=args.tag, skip_linux=args.skip_linux, skip_extractfix=args.skip_extractfix, skip_setup=True):
-        cm = ContextManager(task, load_context=True, path=args.log_path)
+    for task in get_all_task(
+        project=args.project,
+        tag=args.tag,
+        skip_linux=args.skip_linux,
+        skip_extractfix=args.skip_extractfix,
+        dataset=args.dataset,
+        dataset_path=args.dataset_path,
+        input_mode=args.input_mode,
+        skip_setup=True,
+    ):
+        cm = ContextManager(task, load_context=True, path=args.log_path, model=args.model)
         if (cm.patch is None and cm.count < args.thershold) or args.reset:
             all_task.append((task.project, task.tag))
 
@@ -46,6 +94,12 @@ if __name__ == "__main__":
                 command += f" --model {args.model}"
             if args.log_path:
                 command += f" --log_path {args.log_path}"
+            if args.dataset:
+                command += f" --dataset {args.dataset}"
+            if args.dataset_path:
+                command += f" --dataset_path {args.dataset_path}"
+            if args.input_mode:
+                command += f" --input_mode {args.input_mode}"
             if args.reset:
                 command += " --reset"
 
@@ -59,7 +113,26 @@ if __name__ == "__main__":
             log.info(f"Start tmux session {tmux_session}")
             os.system(f"tmux has-session -t {tmux_session} 2>/dev/null || tmux new-session -d -s {tmux_session} '{command}'")
         else:
-            task = make_task(project, tag)
+            if should_containerize_dataset(args.dataset) and not running_inside_dataset_container():
+                task = make_task(
+                    project,
+                    tag,
+                    dataset=args.dataset,
+                    dataset_path=args.dataset_path,
+                    input_mode=args.input_mode,
+                    skip_setup=True,
+                )
+                log.info(f"Patch {i + 1}/{len(all_task)} {task.project}-{task.tag} in dataset container")
+                returncode = run_case_in_container(
+                    DatasetContainerTask(dataset=task.dataset, tag=task.tag, container_name=task.container_name),  # type: ignore[arg-type]
+                    os.getcwd(),
+                    _build_inner_args(project, tag),
+                )
+                if returncode != 0:
+                    log.error(f"Dataset container exited with code {returncode} for {task.project}-{task.tag}")
+                continue
+
+            task = make_task(project, tag, dataset=args.dataset, dataset_path=args.dataset_path, input_mode=args.input_mode)
             log.info(f"Patch {i + 1}/{len(all_task)} {task.project}-{task.tag}")
             patch(task, reset=args.reset, model=args.model, log_path=args.log_path)
 

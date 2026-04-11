@@ -84,21 +84,39 @@ class Context:
 
 
 class ContextManager:
-    def __init__(self, task: PatchTask, load_context: bool = False, path: Union[str, None] = None) -> None:
+    def __init__(self, task: PatchTask, load_context: bool = False, path: Union[str, None] = None, model: str = "gpt-4") -> None:
         self.task: PatchTask = task
+        self.model = model
         self.contexts: List[Context] = []
         if path is None or os.path.isfile(path):
             self._path = path
         else:
-            self._path = os.path.join(path, f"{self.task.project}-{self.task.tag}.json")
+            self._path = os.path.join(path, self._result_filename())
 
         if load_context:
             log.info(f"Loading contexts from {self.path}")
             self.load(self.path)
 
+    def _result_filename(self) -> str:
+        # Get dataset name
+        dataset = getattr(self.task, "dataset", "skyset")
+        
+        # Get instance id - for secbench it's instance_id, for others it's tag
+        instance_id = getattr(self.task, "instance_id", self.task.tag)
+        
+        # Get input mode
+        input_mode = getattr(self.task, "input_mode", getattr(self.task, "effective_input_mode", "auto"))
+        
+        return f"{dataset}-{instance_id}_{input_mode}.json"
+
     @property
     def path(self) -> str:
-        return self._path or os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "results", f"{self.task.project}-{self.task.tag}.json"))
+        if self._path:
+            return self._path
+        # Create model-specific directory
+        model_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "results", self.model))
+        os.makedirs(model_dir, exist_ok=True)
+        return os.path.join(model_dir, self._result_filename())
 
     @property
     def patch(self) -> Union[str, None]:

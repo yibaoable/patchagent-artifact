@@ -11,60 +11,23 @@ from nvwa.logger import log
 from nvwa.sky.task import PatchTask
 from nvwa.lsp.language import LanguageType, LanguageServer
 
-JDTLS_HOME = os.environ.get("JDTLS_HOME", "/opt/jdtls")
-LSP_JAVA_HOME = os.environ.get("LSP_JAVA_HOME", "/usr/lib/jvm/jdk-21.0.7+6/bin/java")
+TSSERVER_PATH = os.environ.get("TSSERVER_PATH", "/opt/tools/node/bin/node,/opt/tools/node/bin/typescript-language-serverr")
 
-class JavaLanguageServer(LanguageServer):
+class TypeScriptLanguageServer(LanguageServer):
     def __init__(self, task: PatchTask):
         super().__init__(task)
-        
-        self.jdtls_home = Path(JDTLS_HOME)
-        self.build_dir = (
-            self.task.immutable_project_path
-            if os.path.isdir(self.task.immutable_project_path)
-            else self.task.work_dir
-        )
+        self.build_dir = self.task.work_dir
 
         self._start()
-        print(f"JavaLanguageServer started with PID {self.proc.pid}, workspace={self.build_dir}")
 
     @classmethod
     def supported_languages(cls) -> list[LanguageType]:
-        return [LanguageType.JAVA]
+        return [LanguageType.TYPESCRIPT]
 
     def _start(self):
-        """启动eclipse.jdt.ls服务器"""
-        # 检查jdtls安装目录
-        if not self.jdtls_home.exists():
-            raise FileNotFoundError(f"jdtls目录不存在: {self.jdtls_home}")
-        workspace_dir = Path(f"/tmp/jdtls-workspace/{self.task.tag}/.jdtls-workspace")
-        
-        # 查找launcher JAR
-        launcher_jars = list(self.jdtls_home.glob("plugins/org.eclipse.equinox.launcher_*.jar"))
-        if not launcher_jars:
-            raise FileNotFoundError("未找到equinox launcher JAR")
-        launcher_jar = launcher_jars[0]
-        
-        # 根据操作系统选择配置目录
-        if sys.platform.startswith('linux'):
-            config_dir = self.jdtls_home / "config_linux"
-        elif sys.platform.startswith('darwin'):
-            config_dir = self.jdtls_home / "config_mac"
-        elif sys.platform.startswith('win32'):
-            config_dir = self.jdtls_home / "config_win"
-        else:
-            raise RuntimeError(f"不支持的操作系统: {sys.platform}")
-        
-        
+        """启动typescript-language-server服务器"""
         self.proc = subprocess.Popen(
-            [LSP_JAVA_HOME] + [
-                "-jar",
-                str(launcher_jar),
-                "-configuration",
-                str(config_dir),
-                "-data",
-                str(workspace_dir)
-            ],
+            [TSSERVER_PATH] + ["--stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
@@ -72,7 +35,6 @@ class JavaLanguageServer(LanguageServer):
             universal_newlines=True,
         )
 
-        workspace_uri = f"file://{self.build_dir}"
         self.send_request(
             {
                 "jsonrpc": "2.0",
@@ -81,15 +43,10 @@ class JavaLanguageServer(LanguageServer):
                 "params": {
                     "processId": None,
                     "rootPath": None,
-                    "rootUri": workspace_uri,
+                    "rootUri": f"file://{self.build_dir}",
                     "capabilities": {},
                     "trace": "off",
-                    "workspaceFolders": [
-                        {
-                            "uri": workspace_uri,
-                            "name": os.path.basename(self.build_dir) or "workspace",
-                        }
-                    ],
+                    "workspaceFolders": None,
                 },
             }
         )
@@ -136,7 +93,7 @@ class JavaLanguageServer(LanguageServer):
                 "params": {
                     "textDocument": {
                         "uri": f"file://{path}",
-                        "languageId": "java",
+                        "languageId": "typescript",
                         "version": 1,
                         "text": content,
                     }
@@ -147,15 +104,16 @@ class JavaLanguageServer(LanguageServer):
             {
                 "jsonrpc": "2.0",
                 "id": 2,
-                "method": "textDocument/definition",
+                "method": "workspace/executeCommand",
                 "params": {
-                    "textDocument": {
-                        "uri": f"file://{path}",
-                    },
-                    "position": {
-                        "line": line,
-                        "character": chr,
-                    },
+                "command": "_typescript.goToSourceDefinition", 
+                    "arguments": [
+                        f"file://{path}",
+                        {
+                            "line": line,
+                            "character": chr
+                        }
+                    ]
                 },
             }
         )
@@ -191,7 +149,7 @@ class JavaLanguageServer(LanguageServer):
                 "params": {
                     "textDocument": {
                         "uri": f"file://{path}",
-                        "languageId": "java",
+                        "languageId": "typescript",
                         "version": 1,
                         "text": content,
                     }
@@ -221,9 +179,6 @@ class JavaLanguageServer(LanguageServer):
 
         return results["contents"]["value"]
 
-    def _normalize_symbol(self, name: str) -> str:
-        return "".join(ch.lower() for ch in name if ch.isalnum())
-
     def _locate_symbol(self, symbol_name: str) -> list[str]:
 
         self.send_request(
@@ -238,22 +193,14 @@ class JavaLanguageServer(LanguageServer):
         )
 
         results = self.read_response()
-        log.info(f"Symbol search results for '{symbol_name}': {results}")
         if results is None:
             return []
 
-        query_norm = self._normalize_symbol(symbol_name)
-        exact_matches = []
-        fuzzy_matches = []
-        all_locations = []
-
+        locations = []
         for result in results:
-            name = result.get("name", "")
-            container = result.get("containerName", "")
-            location = result.get("location")
-            if location is None:
+            if result["name"] != symbol_name:
                 continue
-
+            location = result["location"]
             prefix = f"file://{self.build_dir}/"
             path_ = location["uri"]
             if path_.startswith(prefix):
@@ -263,33 +210,9 @@ class JavaLanguageServer(LanguageServer):
                 log.warning(f"Trying to locate symbol in {path_}")
             line_ = location["range"]["start"]["line"] + 1
             chr_ = location["range"]["start"]["character"] + 1
-            location_str = f"{path_}:{line_}:{chr_}"
-            if name:
-                location_str = f"{location_str}::{name}"
-            all_locations.append(location_str)
+            locations.append(f"{path_}:{line_}:{chr_}")
 
-            name_norm = self._normalize_symbol(name)
-            container_norm = self._normalize_symbol(container)
-
-            if name_norm == query_norm:
-                exact_matches.append(location_str)
-                continue
-
-            if name_norm.endswith(query_norm) or query_norm in name_norm:
-                fuzzy_matches.append(location_str)
-                continue
-
-            if query_norm in container_norm:
-                fuzzy_matches.append(location_str)
-
-        if exact_matches:
-            return exact_matches
-        if fuzzy_matches:
-            log.info(f"Symbol '{symbol_name}' matched fuzzy candidates: {fuzzy_matches}")
-            return fuzzy_matches
-
-        log.warning(f"Symbol {symbol_name} not found, returning all candidates: {all_locations}")
-        return all_locations
+        return locations
 
     def find_definition(self, path: str, line: int, chr: int) -> list[str]:
         filepath = os.path.join(self.build_dir, path)
@@ -329,15 +252,13 @@ class JavaLanguageServer(LanguageServer):
         while True:
             data = self.proc.stdout.read(1)  # type: ignore
             if not data:
-                log.error("No data from jdtls")
+                log.error("No data from typescript-language-server")
                 break
-            output_buffer += data
-            # print(f"Received data: {output_buffer}", flush=True)  # Debug output
+            output_buffer += data # type: ignore
 
             while True:
                 try:
                     response = json.loads(output_buffer)
-                    print(f"Response: {response}")
                     if response.get("method") != None or response.get("id") != 2:
                         output_buffer = ""
                         break
