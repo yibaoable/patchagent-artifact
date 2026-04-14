@@ -13,8 +13,9 @@ from nvwa.agent.base import BaseAgent
 from nvwa.context import Context, ContextManager
 from nvwa.proxy.default import create_locate_tool, create_validate_tool, create_viewcode_tool
 from nvwa.agent.monkey.prompt import (
-    MONKEY_SYSTEM_PROMPT_TEMPLATE,
+    get_monkey_system_prompt,
     MONKEY_USER_PROMPT_TEMPLATE,
+    MONKEY_USER_PROMPT_TEMPLATE_SINGLE_SHOT,
 )
 
 
@@ -61,39 +62,36 @@ class MonkeyOpenAIAgent(BaseAgent):
             lc_tools.append(create_locate_tool(context, auto_hint=self.auto_hint))
         oai_tools = [convert_to_openai_tool(tool) for tool in lc_tools]
 
-        single_shot_note = ""
-        if self.single_shot_validate:
-            single_shot_note = (
-                "\n## Single-shot validation mode\n"
-                "You can call `validate` at most once. After that call the agent run ends immediately. So call `validate` when you think your patch is good enough. "
-                "The patch you submit is kept as the final patch even if validation fails. "
-                "You may call `locate` and `viewcode` multiple times before the final validation to inspect the code and understand the cause of the vulnerability.\n"
-            )
+        system_prompt = get_monkey_system_prompt(getattr(context.task, "language", ""))
+        # ChatPromptTemplate treats `{}` as template variables; escape braces in static system prompt examples.
+        escaped_system_prompt = system_prompt.replace("{", "{{").replace("}", "}}")
+        user_prompt_template = (
+            MONKEY_USER_PROMPT_TEMPLATE_SINGLE_SHOT if self.single_shot_validate else MONKEY_USER_PROMPT_TEMPLATE
+        )
 
         if self.locate_tool:
             self.prompt = ChatPromptTemplate.from_messages(
                 [
-                    ("system", MONKEY_SYSTEM_PROMPT_TEMPLATE),
-                    ("user", MONKEY_USER_PROMPT_TEMPLATE),
+                    ("system", escaped_system_prompt),
+                    ("user", user_prompt_template),
                     MessagesPlaceholder(variable_name="agent_scratchpad"),
                 ]
             )
-            context.add_system_message(MONKEY_SYSTEM_PROMPT_TEMPLATE.format())
+            context.add_system_message(system_prompt)
         else:
             self.prompt = ChatPromptTemplate.from_messages(
                 [
-                    ("user", MONKEY_USER_PROMPT_TEMPLATE),
+                    ("user", user_prompt_template),
                     MessagesPlaceholder(variable_name="agent_scratchpad"),
                 ]
             )
 
         context.add_user_message(
-            MONKEY_USER_PROMPT_TEMPLATE.format(
+            user_prompt_template.format(
                 project=context.task.project,
                 tag=context.task.tag,
                 issue=issue_summary,
                 issue_kind=issue_kind,
-                single_shot_note=single_shot_note,
                 error_cases=self.error_cases,
             )
         )
@@ -122,7 +120,6 @@ class MonkeyOpenAIAgent(BaseAgent):
                 "issue": lambda input: issue_summary,
                 "issue_kind": lambda input: issue_kind,
                 "error_cases": lambda input: self.error_cases,
-                "single_shot_note": lambda input: single_shot_note,
                 "agent_scratchpad": lambda input: format_to_openai_tool_messages(input["intermediate_steps"]),
             }
             | self.prompt

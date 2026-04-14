@@ -1,7 +1,12 @@
 import os
 import time
 import json
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Optional
+
+try:
+    import tiktoken
+except ImportError:
+    tiktoken = None
 
 from nvwa.model_aliases import readable_model_dirname
 from nvwa.sky.task import PatchTask
@@ -19,6 +24,8 @@ class Context:
         self.single_shot_validate = False
         # One entry per validate() call: revised patch text, pass/fail, report string.
         self.patch_validation_results: List[Dict[str, Any]] = []
+        # Token usage statistics
+        self.token_usage: Optional[Dict[str, int]] = None
 
     def __enter__(self):
         self.start_time = time.time()
@@ -30,6 +37,52 @@ class Context:
     @property
     def tool_calls(self):
         return [message["message"] for message in self.messages if message["role"] == "tool"]
+
+    def calculate_token_usage(self, model: str = "gpt-4-turbo") -> Dict[str, int]:
+        """Calculate token usage for this context based on messages.
+        
+        Returns:
+            Dict with keys 'input_tokens', 'output_tokens', 'total_tokens'
+        """
+        if not self.messages or tiktoken is None:
+            return {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
+        
+        try:
+            encoder = tiktoken.encoding_for_model(model)
+        except Exception:
+            # Fallback to gpt-4-turbo encoding if model not found
+            try:
+                encoder = tiktoken.encoding_for_model("gpt-4-turbo")
+            except Exception:
+                return {"input_tokens": 0, "output_tokens": 0, "total_tokens": 0}
+        
+        input_tokens = 0
+        output_tokens = 0
+        
+        # First two messages are system and user prompts
+        if len(self.messages) >= 2:
+            for i in range(2):
+                if self.messages[i]["role"] in ["system", "user"]:
+                    input_tokens += len(encoder.encode(self.messages[i]["message"]))
+        
+        # Process remaining messages
+        for i in range(2, len(self.messages)):
+            message = self.messages[i]
+            role = message["role"]
+            
+            if role == "ai":
+                output_tokens += len(encoder.encode(message["message"]))
+            elif role == "tool":
+                # Tool results are part of input for next turn
+                tool_result = message["message"].get("result", "")
+                input_tokens += len(encoder.encode(tool_result))
+        
+        total_tokens = input_tokens + output_tokens
+        return {
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+            "total_tokens": total_tokens,
+        }
 
     def add_tool_call(self, name: str, args: dict, result: str):
         self.messages.append(
@@ -73,12 +126,17 @@ class Context:
             )
 
     def dump(self):
+        # Calculate token usage if not already done
+        if self.token_usage is None:
+            self.token_usage = self.calculate_token_usage()
+        
         return {
             "patch": self.patch,
             "elapsed_time": self.elapsed_time,
             "messages": self.messages,
             "single_shot_validate": self.single_shot_validate,
             "patch_validation_results": list(self.patch_validation_results),
+            "token_usage": self.token_usage,
         }
 
     def load(self, data: dict):
@@ -87,6 +145,7 @@ class Context:
         self.messages = data.get("messages", [])
         self.single_shot_validate = bool(data.get("single_shot_validate", False))
         self.patch_validation_results = list(data.get("patch_validation_results", []))
+        self.token_usage = data.get("token_usage", None)
         if self.task.patch is None and self.patch is not None:
             self.task.patch = self.patch
             log.info(f"Task {self.task} has been patched.")
@@ -136,7 +195,16 @@ class ContextManager:
         if os.path.exists(path):
             with open(path, "r") as f:
                 json_data = json.load(f)
-            for data in json_data:
+            # Handle both old format (array) and new format (dict with summary)
+            if isinstance(json_data, dict) and "contexts" in json_data:
+                contexts_data = json_data.get("contexts", [])
+            elif isinstance(json_data, list):
+                contexts_data = json_data
+            else:
+                log.warning(f"Unexpected JSON format in {path}")
+                return
+            
+            for data in contexts_data:
                 context = Context(self.task)
                 context.load(data)
                 self.contexts.append(context)
@@ -145,14 +213,33 @@ class ContextManager:
         path = path or self.path
         log.info(f"Saving contexts to {path}")
         data = []
+        total_input_tokens = 0
+        total_output_tokens = 0
+        total_tokens = 0
+        
         for context in self.contexts:
             c = context.dump()
             if len(c['messages']) > 2: # HACK: it means critical error happened
                 data.append(c)
+                # Accumulate token usage
+                if c.get('token_usage'):
+                    total_input_tokens += c['token_usage'].get('input_tokens', 0)
+                    total_output_tokens += c['token_usage'].get('output_tokens', 0)
+                    total_tokens += c['token_usage'].get('total_tokens', 0)
+        
         if len(data) > 0:
+            # Add summary statistics at the top level
+            summary = {
+                "total_input_tokens": total_input_tokens,
+                "total_output_tokens": total_output_tokens,
+                "total_tokens": total_tokens,
+                "num_attempts": len(data),
+                "contexts": data,
+            }
             os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path, "w") as f:
-                json.dump(data, f, indent=4)
+                json.dump(summary, f, indent=4)
+            log.info(f"Token usage summary: input={total_input_tokens}, output={total_output_tokens}, total={total_tokens}")
 
     @property
     def elapsed_time(self):

@@ -153,6 +153,61 @@ class TypeScriptLanguageServer(LanguageServer):
 
         return locations
 
+    def _find_definition_old(self, path: str, line: int, chr: int, timeout: float | None = None) -> Union[list[str], None]:
+        with open(path, "r") as f:
+            content = f.read()
+
+        self.send_request(
+            {
+                "jsonrpc": "2.0",
+                "method": "textDocument/didOpen",
+                "params": {
+                    "textDocument": {
+                        "uri": f"file://{path}",
+                        "languageId": "java",
+                        "version": 1,
+                        "text": content,
+                    }
+                },
+            }
+        )
+        self.send_request(
+            {
+                "jsonrpc": "2.0",
+                "id": 2,
+                "method": "textDocument/definition",
+                "params": {
+                    "textDocument": {
+                        "uri": f"file://{path}",
+                    },
+                    "position": {
+                        "line": line,
+                        "character": chr,
+                    },
+                },
+            }
+        )
+
+        results = self.read_response(expected_id=2, timeout=timeout)
+
+        if results is None:
+            return None
+
+        locations = []
+        for result in results:
+            prefix = f"file://{self.build_dir}/"
+            path_ = result["uri"]
+            if path_.startswith(prefix):
+                path_ = path_[len(prefix) :]
+            else:
+                path_ = path_.replace("file://", "")
+                log.warning(f"Trying to locate symbol in {path_}")
+            line_ = result["range"]["start"]["line"] + 1
+            chr_ = result["range"]["start"]["character"] + 1
+            locations.append(f"{path_}:{line_}:{chr_}")
+
+        return locations
+
     def _hover(self, path: str, line: int, chr: int, timeout: float | None = None) -> Union[str, None]:
         with open(path, "r") as f:
             content = f.read()
@@ -244,9 +299,30 @@ class TypeScriptLanguageServer(LanguageServer):
                 log.warning(f"Timed out finding definition for {filepath}:{line + 1}:{chr + 1}")
                 return []
 
-            locations = self._find_definition(filepath, line, chr, remaining)
-            if locations is not None:
+            locations = None
+            try:
+                locations = self._find_definition(filepath, line, chr, remaining)
+            except Exception as e:
+                log.warning(f"Primary find_definition failed for {filepath}:{line + 1}:{chr + 1}: {e}")
+
+            if locations:
                 return locations
+
+            # Fallback to the legacy definition API when source-definition times out/fails.
+            fallback_remaining = self._remaining_timeout(deadline)
+            if fallback_remaining <= 0:
+                log.warning(f"Timed out finding definition for {filepath}:{line + 1}:{chr + 1}")
+                return []
+
+            old_locations = None
+            try:
+                old_locations = self._find_definition_old(filepath, line, chr, fallback_remaining)
+            except Exception as e:
+                log.warning(f"Fallback find_definition_old failed for {filepath}:{line + 1}:{chr + 1}: {e}")
+
+            if old_locations is not None:
+                return old_locations
+
             if self._remaining_timeout(deadline) <= 0:
                 log.warning(f"Timed out finding definition for {filepath}:{line + 1}:{chr + 1}")
                 return []

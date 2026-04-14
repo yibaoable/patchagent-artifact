@@ -35,13 +35,21 @@ def analyze_validation_results(directory_path, mode='single_validate'):
             with open(json_file, 'r', encoding='utf-8') as f:
                 data = json.load(f)
             
-            # 确保数据是列表且不为空
-            if not isinstance(data, list) or len(data) == 0:
+            # Handle both format: old format (list) and new format (dict with contexts)
+            if isinstance(data, dict) and "contexts" in data:
+                contexts = data.get("contexts", [])
+            elif isinstance(data, list):
+                contexts = data
+            else:
                 print(f"警告: {json_file.name} 数据格式不正确或为空")
                 continue
             
+            if len(contexts) == 0:
+                print(f"警告: {json_file.name} contexts 为空")
+                continue
+            
             # 获取最后一个字典
-            last_item = data[-1]
+            last_item = contexts[-1]
             
             if mode == 'single_validate':
                 # Single Shot 模式：查看 patch_validation_results
