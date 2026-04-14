@@ -55,7 +55,7 @@ results
 ├── doubao1_8
     ├──secbench
         ├──sanitizer
-            ├──id1.json
+           ├──id1.json
             ├──id2.json
         ├──vuln_func
             ├──id1.json
@@ -71,6 +71,6 @@ results
 统计结果
 ```bash
 # result_dir 如results/doubao1_8/vul4j/vuln_func
-python results/analyse_result.py -d {result_dir}
+python results/analyse_result.py -d {result_dir} -m {input_mode}
 ```
 统计结果final_result.json默认保存在result_dir
