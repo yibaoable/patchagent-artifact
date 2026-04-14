@@ -110,11 +110,11 @@ def _build_container_inner_env(task: DatasetContainerTask, cwd: str) -> list[str
         inner_env.append("pwd")
     elif task.dataset == "secbench":
         inner_env.append("apt-get update && apt-get install -y universal-ctags bear")
-        inner_env.append(
-            "wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key --no-check-certificate| apt-key add - && "
-            "add-apt-repository \"deb http://apt.llvm.org/focal/ llvm-toolchain-focal-16 main\" && "
-            "apt-get update && apt-get install -y libclang-16-dev clang-16 clangd-16"
-        )
+        # inner_env.append(
+        #     "wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key --no-check-certificate| apt-key add - && "
+        #     "add-apt-repository \"deb http://apt.llvm.org/focal/ llvm-toolchain-focal-16 main\" && "
+        #     "apt-get update && apt-get install -y libclang-16-dev clang-16 clangd-16"
+        # )
     return inner_env
 
 
