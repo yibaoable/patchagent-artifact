@@ -22,7 +22,7 @@ python -m pip install --upgrade pip setuptools wheel
 python -m pip install python-dotenv GitPython pika meson pandas openpyxl clang==16.0.1 unidiff litellm prettytable matplotlib venn langchain==0.2.5 langchain-community==0.2.5 langchain-core==0.2.9 langchain-experimental==0.0.61 langchain-openai==0.1.8 openai==1.35.1 httpx==0.27.2
 
 # .env 补充OPENAI_BASE_URL和OPENAI_API_KEY字段
-cp .env_tmp .env
+cp .env.tmp .env
 
 ```
 
