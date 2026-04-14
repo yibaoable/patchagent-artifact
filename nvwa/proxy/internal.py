@@ -5,14 +5,66 @@ import tempfile
 import clang.cindex
 from clang.cindex import Config
 
-for verion in range(16, 10, -1):
-    path = f"/usr/lib/llvm-{verion}/lib/libclang.so.1"
-    try:
-        if os.path.exists(path):
-            Config.set_library_file(path)
-            break
-    except:
-        continue
+# for verion in range(16, 10, -1):
+#     path = f"/usr/lib/llvm-{verion}/lib/libclang.so.1"
+#     try:
+#         if os.path.exists(path):
+#             Config.set_library_file(path)
+#             break
+#     except:
+#         continue
+def setup_libclang() -> None:
+    candidates = []
+
+    # 1. 优先使用显式环境变量
+    env_file = os.environ.get("LIBCLANG_FILE")
+    if env_file:
+        candidates.append(env_file)
+
+    env_path = os.environ.get("LIBCLANG_PATH")
+    if env_path:
+        candidates.extend([
+            os.path.join(env_path, "libclang.so"),
+            os.path.join(env_path, "libclang.so.1"),
+            os.path.join(env_path, "libclang-16.so.1"),
+            os.path.join(env_path, "libclang-16.so"),
+        ])
+
+    # 2. 优先使用你挂载的 agent_tools
+    candidates.extend([
+        "/opt/tools/llvm16/lib/libclang.so",
+        "/opt/tools/llvm16/lib/libclang.so.1",
+        "/opt/tools/llvm16/lib/libclang-16.so.1",
+        "/opt/tools/llvm16/lib/libclang-16.so",
+    ])
+
+    # 3. 回退到系统安装路径
+    for version in range(16, 10, -1):
+        candidates.extend([
+            f"/usr/lib/llvm-{version}/lib/libclang.so",
+            f"/usr/lib/llvm-{version}/lib/libclang.so.1",
+            f"/usr/lib/llvm-{version}/lib/libclang-{version}.so.1",
+            f"/usr/lib/llvm-{version}/lib/libclang-{version}.so",
+        ])
+
+    tried = []
+    for path in candidates:
+        try:
+            if not path:
+                continue
+            real = os.path.realpath(path)
+            tried.append((path, real))
+            if os.path.exists(real):
+                Config.set_library_file(real)
+                return
+        except Exception:
+            continue
+
+    raise RuntimeError(
+        "Failed to locate usable libclang. Tried: "
+        + ", ".join([f"{p} -> {r}" for p, r in tried])
+    )
+setup_libclang()
 
 from nvwa import lsp
 from nvwa.logger import log
@@ -60,17 +112,97 @@ def _iter_symbol_columns(line: str, symbol: str) -> list[int]:
     return [match.start() + 1 for match in pattern.finditer(line)]
 
 
-def _fallback_locations_from_viewcode(context: Context, path: str, start_line: int, end_line: int, symbol: str) -> list[str]:
+def _parse_location(location: str) -> tuple[str, int, int] | None:
+    core = location.split("::", 1)[0]
+    parts = core.rsplit(":", 2)
+    if len(parts) == 2:
+        path, line = parts
+        column = "1"
+    elif len(parts) == 3:
+        path, line, column = parts
+    else:
+        return None
+
+    try:
+        return path.lstrip("/"), int(line), int(column)
+    except ValueError:
+        return None
+
+
+def _viewcode_range_candidates(locations: list[str], path: str, start_line: int, end_line: int) -> list[tuple[str, int, int]]:
+    normalized_path = path.lstrip("/")
+    candidates = []
+    for location in locations:
+        parsed = _parse_location(location)
+        if parsed is None:
+            continue
+        candidate_path, line, column = parsed
+        if candidate_path != normalized_path or not (start_line <= line <= end_line):
+            continue
+        candidates.append((location, line, column))
+    return candidates
+
+
+def _select_nearest_candidate(
+    candidates: list[tuple[str, int, int]],
+    line_no: int,
+    column: int,
+) -> str | None:
+    if not candidates:
+        return None
+
+    return min(
+        candidates,
+        key=lambda item: (
+            item[1] > line_no,
+            abs(item[1] - line_no),
+            abs(item[2] - column),
+            item[1],
+            item[2],
+        ),
+    )[0]
+
+
+def _fallback_locations_from_viewcode(
+    context: Context,
+    path: str,
+    start_line: int,
+    end_line: int,
+    symbol: str,
+    fast_path_locations: list[str],
+) -> list[str]:
+    narrowed_candidates = _viewcode_range_candidates(fast_path_locations, path, start_line, end_line)
+    if len(narrowed_candidates) == 1:
+        return [narrowed_candidates[0][0]]
+
     realpath = os.path.join(context.task.immutable_project_path, path)
     if not os.path.isfile(realpath):
-        return []
+        return [location for location, _, _ in narrowed_candidates]
 
     try:
         with open(realpath, "r", encoding="utf-8", errors="ignore") as f:
             lines = f.readlines()
     except OSError as exc:
         log.warning(f"Failed to read {realpath} for locate fallback: {exc}")
-        return []
+        return [location for location, _, _ in narrowed_candidates]
+
+    if narrowed_candidates:
+        narrowed_locations = []
+        seen_locations = set()
+        candidate_lines = {line for _, line, _ in narrowed_candidates}
+        last_line = min(end_line, len(lines))
+        for line_no in range(max(1, start_line), last_line + 1):
+            if line_no in candidate_lines:
+                continue
+            for column in _iter_symbol_columns(lines[line_no - 1], symbol):
+                location = _select_nearest_candidate(narrowed_candidates, line_no, column)
+                if location is None or location in seen_locations:
+                    continue
+                seen_locations.add(location)
+                narrowed_locations.append(location)
+        if narrowed_locations:
+            return narrowed_locations
+        return [location for location, _, _ in narrowed_candidates]
 
     location_set = set()
     last_line = min(end_line, len(lines))
@@ -181,7 +313,14 @@ def locate(context: Context, symbol: str, auto_hint=False) -> tuple[dict, str]:
                     except Exception as e:
                         log.warning(f"Failed to parse {realpath} with Clang: {e}")
 
-                location_set = _fallback_locations_from_viewcode(context, path, start_line, end_line, symbol)
+                location_set = _fallback_locations_from_viewcode(
+                    context,
+                    path,
+                    start_line,
+                    end_line,
+                    symbol,
+                    fast_path_locations,
+                )
                 if len(location_set) > 0:
                     return location_set
 
@@ -253,9 +392,26 @@ def validate(context: Context, patch: str, auto_hint=False) -> tuple[dict, str]:
 
     patch, _ = revise_patch(patch, context.task.immutable_project_path)
 
-    with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".patch") as f:
         f.write(patch)
-    ret, report = context.task.validate(f.name)
+        tmp_path = f.name
+    try:
+        ret, report = context.task.validate(tmp_path)
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+
+    context.patch_validation_results.append(
+        {
+            "patch": patch,
+            "validation_passed": bool(ret),
+            "report": report,
+        }
+    )
+    if getattr(context, "single_shot_validate", False):
+        context.task.patch = patch
 
     header = "Congratulations! The patch is correct!" if ret else "Sorry, the patch is incorrect."
     patch_desc = f"Here is the patch:\n{patch}"

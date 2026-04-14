@@ -296,6 +296,7 @@ def _validate_local_vjbench_patch(
     logs: list[str] = []
     ok, prep_logs = _prepare_local_validate_dir(vuln_id, validate_dir)
     logs.extend(prep_logs)
+    logs.append(f"Prepared local validate dir at {validate_dir}\n")
     if not ok:
         return False, "".join(logs)
 

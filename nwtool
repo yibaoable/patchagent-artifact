@@ -19,11 +19,12 @@ from nvwa.dataset_container import (
 )
 from nvwa.frontend import patch
 from nvwa.logger import log
+from nvwa.model_aliases import resolve_model_alias
 
 parser = argparse.ArgumentParser(description="Nvwa Patch Tool")
 parser.add_argument("--project", type=str, help="project name")
 parser.add_argument("--tag", type=str, help="tag name")
-parser.add_argument("--model", type=str, default="gpt-4", help="model name")
+parser.add_argument("--model", type=str, default="gpt-4", help="model name (short aliases in nwtool, e.g. deepseekv3)")
 parser.add_argument("--log_path", type=str, help="log path")
 parser.add_argument("--thershold", type=int, default=15, help="thershold")
 parser.add_argument("--reset", dest="reset", action="store_true", help="reset history")
@@ -34,8 +35,25 @@ parser.add_argument("--skip_extractfix", dest="skip_extractfix", action="store_t
 parser.add_argument("--dataset", type=str, default="skyset", choices=["skyset", "patcheval", "secbench", "vul4j", "vjbench"], help="dataset backend")
 parser.add_argument("--dataset_path", type=str, help="dataset json path for dataset adapters")
 parser.add_argument("--input_mode", type=str, default="auto", choices=["auto", "sanitizer", "vuln_func"], help="input source for SEC-bench prompts")
+parser.add_argument(
+    "--single_shot_validate",
+    dest="single_shot_validate",
+    action="store_true",
+    help="first validate ends the agent turn; keep that patch even if validation fails (see api.patch docstring)",
+)
+parser.add_argument(
+    "--max_iteration",
+    type=int,
+    default=-1,
+    help="max DefaultPolicy agents to run (-1 = all). With --single_shot_validate, 1 is typical",
+)
 
 args = parser.parse_args()
+
+resolved_model = resolve_model_alias(args.model)
+if resolved_model != args.model:
+    log.info(f"model alias {str(args.model).strip().lower()!r} → {resolved_model!r}")
+    args.model = resolved_model
 
 
 def _build_inner_args(project: str, tag: str) -> list[str]:
@@ -64,6 +82,10 @@ def _build_inner_args(project: str, tag: str) -> list[str]:
         inner_args.append("--skip_linux")
     if args.skip_extractfix:
         inner_args.append("--skip_extractfix")
+    if args.single_shot_validate:
+        inner_args.append("--single_shot_validate")
+    if args.max_iteration != -1:
+        inner_args.extend(["--max_iteration", str(args.max_iteration)])
 
     return inner_args
 
@@ -102,6 +124,10 @@ if __name__ == "__main__":
                 command += f" --input_mode {args.input_mode}"
             if args.reset:
                 command += " --reset"
+            if args.single_shot_validate:
+                command += " --single_shot_validate"
+            if args.max_iteration != -1:
+                command += f" --max_iteration {args.max_iteration}"
 
             while True:
                 num_sessions = int(os.popen("tmux ls | grep -c nwtool-").read().strip())
@@ -134,7 +160,15 @@ if __name__ == "__main__":
 
             task = make_task(project, tag, dataset=args.dataset, dataset_path=args.dataset_path, input_mode=args.input_mode)
             log.info(f"Patch {i + 1}/{len(all_task)} {task.project}-{task.tag}")
-            patch(task, reset=args.reset, model=args.model, log_path=args.log_path)
+            patch(
+                task,
+                reset=args.reset,
+                model=args.model,
+                log_path=args.log_path,
+                max_iteration=args.max_iteration,
+                single_shot_validate=args.single_shot_validate,
+            )
 
 # ./nwtool --log_path ./archives/gpt-4 --model gpt-4
+# ./nwtool --project zstd --tag d68aa19-heap_buffer_overflow --single_shot_validate --max_iteration 1
 # ./nwtool --log_path ./archives/claude-3-opus --model claude-3-opus

@@ -39,7 +39,7 @@ def create_react_locate_tool(context: Context) -> StructuredTool:
     return StructuredTool.from_function(locate)
 
 
-def create_react_validate_tool(context: Context) -> StructuredTool:
+def create_react_validate_tool(context: Context, return_direct: bool = False) -> StructuredTool:
     def validate(thought: str, patch: str) -> str:
         """
         Returns the validation result of the patch. The patch should be a multi-hunk patch, here is a example:
@@ -64,4 +64,4 @@ def create_react_validate_tool(context: Context) -> StructuredTool:
         context.add_tool_call("validate", args | {"thought": thought}, result)
         return result
 
-    return StructuredTool.from_function(validate)
+    return StructuredTool.from_function(validate, return_direct=return_direct)

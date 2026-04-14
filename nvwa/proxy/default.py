@@ -36,7 +36,9 @@ def create_locate_tool(context: Context, auto_hint: bool = False) -> StructuredT
     return StructuredTool.from_function(locate)
 
 
-def create_validate_tool(context: Context, auto_hint: bool = False) -> StructuredTool:
+def create_validate_tool(
+    context: Context, auto_hint: bool = False, return_direct: bool = False
+) -> StructuredTool:
     def validate(patch: str) -> str:
         """
         Returns the validation result of the patch. The patch should be a multi-hunk patch, here is a example:
@@ -61,4 +63,4 @@ def create_validate_tool(context: Context, auto_hint: bool = False) -> Structure
         context.add_tool_call("validate", args, result)
         return result
 
-    return StructuredTool.from_function(validate)
+    return StructuredTool.from_function(validate, return_direct=return_direct)

@@ -3,6 +3,7 @@ import re
 import sys
 import json
 import time
+import select
 import subprocess
 from typing import Union
 from pathlib import Path
@@ -13,12 +14,14 @@ from nvwa.lsp.language import LanguageType, LanguageServer
 
 JDTLS_HOME = os.environ.get("JDTLS_HOME", "/opt/jdtls")
 LSP_JAVA_HOME = os.environ.get("LSP_JAVA_HOME", "/usr/lib/jvm/jdk-21.0.7+6/bin/java")
+JDTLS_REQUEST_TIMEOUT_SECONDS = float(os.environ.get("JDTLS_REQUEST_TIMEOUT_SECONDS", "600"))
 
 class JavaLanguageServer(LanguageServer):
     def __init__(self, task: PatchTask):
         super().__init__(task)
         
         self.jdtls_home = Path(JDTLS_HOME)
+        self.request_timeout = JDTLS_REQUEST_TIMEOUT_SECONDS
         self.build_dir = (
             self.task.immutable_project_path
             if os.path.isdir(self.task.immutable_project_path)
@@ -125,7 +128,7 @@ class JavaLanguageServer(LanguageServer):
         self.proc.stdin.write(full_message)  # type: ignore
         self.proc.stdin.flush()  # type: ignore
 
-    def _find_definition(self, path: str, line: int, chr: int) -> Union[list[str], None]:
+    def _find_definition(self, path: str, line: int, chr: int, timeout: float | None = None) -> Union[list[str], None]:
         with open(path, "r") as f:
             content = f.read()
 
@@ -160,7 +163,7 @@ class JavaLanguageServer(LanguageServer):
             }
         )
 
-        results = self.read_response()
+        results = self.read_response(timeout=timeout)
 
         if results is None:
             return None
@@ -180,7 +183,7 @@ class JavaLanguageServer(LanguageServer):
 
         return locations
 
-    def _hover(self, path: str, line: int, chr: int) -> Union[str, None]:
+    def _hover(self, path: str, line: int, chr: int, timeout: float | None = None) -> Union[str, None]:
         with open(path, "r") as f:
             content = f.read()
 
@@ -215,7 +218,7 @@ class JavaLanguageServer(LanguageServer):
             }
         )
 
-        results = self.read_response()
+        results = self.read_response(timeout=timeout)
         if results is None or results['contents']['value'] is None:
             return ""
 
@@ -224,7 +227,7 @@ class JavaLanguageServer(LanguageServer):
     def _normalize_symbol(self, name: str) -> str:
         return "".join(ch.lower() for ch in name if ch.isalnum())
 
-    def _locate_symbol(self, symbol_name: str) -> list[str]:
+    def _locate_symbol(self, symbol_name: str, timeout: float | None = None) -> list[str]:
 
         self.send_request(
             {
@@ -237,7 +240,7 @@ class JavaLanguageServer(LanguageServer):
             }
         )
 
-        results = self.read_response()
+        results = self.read_response(timeout=timeout)
         log.info(f"Symbol search results for '{symbol_name}': {results}")
         if results is None:
             return []
@@ -291,15 +294,28 @@ class JavaLanguageServer(LanguageServer):
         log.warning(f"Symbol {symbol_name} not found, returning all candidates: {all_locations}")
         return all_locations
 
+    def _remaining_timeout(self, deadline: float) -> float:
+        return max(0.0, deadline - time.monotonic())
+
     def find_definition(self, path: str, line: int, chr: int) -> list[str]:
         filepath = os.path.join(self.build_dir, path)
         log.info(f"Finding definition for {filepath}:{line}:{chr}")
         line, chr = line - 1, chr - 1
+        deadline = time.monotonic() + self.request_timeout
 
         while True:
-            locations = self._find_definition(filepath, line, chr)
+            remaining = self._remaining_timeout(deadline)
+            if remaining <= 0:
+                log.warning(f"Timed out finding definition for {filepath}:{line + 1}:{chr + 1}")
+                return []
+
+            locations = self._find_definition(filepath, line, chr, remaining)
             if locations is not None:
                 return locations
+
+            if self._remaining_timeout(deadline) <= 0:
+                log.warning(f"Timed out finding definition for {filepath}:{line + 1}:{chr + 1}")
+                return []
             self.stop()
             self._start()
 
@@ -307,37 +323,68 @@ class JavaLanguageServer(LanguageServer):
         filepath = os.path.join(self.build_dir, path)
         log.info(f"Get hint for {filepath}:{line}:{chr}")  # hover
         line, chr = line - 1, chr - 1
+        deadline = time.monotonic() + self.request_timeout
 
         while True:
-            hint = self._hover(filepath, line, chr)
+            remaining = self._remaining_timeout(deadline)
+            if remaining <= 0:
+                log.warning(f"Timed out getting hint for {filepath}:{line + 1}:{chr + 1}")
+                return ""
+
+            hint = self._hover(filepath, line, chr, remaining)
             if hint is not None:
                 return hint
+
+            if self._remaining_timeout(deadline) <= 0:
+                log.warning(f"Timed out getting hint for {filepath}:{line + 1}:{chr + 1}")
+                return ""
             self.stop()
             self._start()
 
     def locate_symbol(self, symbol_name: str) -> list[str]:
         log.info(f"Locating symbol {symbol_name}")
+        deadline = time.monotonic() + self.request_timeout
         while True:
-            locations = self._locate_symbol(symbol_name)
+            remaining = self._remaining_timeout(deadline)
+            if remaining <= 0:
+                log.warning(f"Timed out locating symbol {symbol_name}")
+                return []
+
+            locations = self._locate_symbol(symbol_name, remaining)
             if locations is not None:
                 return locations
+
+            if self._remaining_timeout(deadline) <= 0:
+                log.warning(f"Timed out locating symbol {symbol_name}")
+                return []
             self.stop()
             self._start()
 
-    def read_response(self):
+    def read_response(self, timeout: float | None = None):
         output_buffer = ""
+        deadline = None if timeout is None else time.monotonic() + timeout
         while True:
+            if deadline is not None:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    log.warning("Timed out waiting for response from jdtls")
+                    return None
+                ready, _, _ = select.select([self.proc.stdout], [], [], remaining)  # type: ignore[arg-type]
+                if not ready:
+                    log.warning("Timed out waiting for response from jdtls")
+                    return None
+
             data = self.proc.stdout.read(1)  # type: ignore
             if not data:
                 log.error("No data from jdtls")
                 break
             output_buffer += data
-            # print(f"Received data: {output_buffer}", flush=True)  # Debug output
+            # print(f"Received data: {output_buffer}")  # Debug output
 
             while True:
                 try:
                     response = json.loads(output_buffer)
-                    print(f"Response: {response}")
+                    # print(f"Response: {response}")
                     if response.get("method") != None or response.get("id") != 2:
                         output_buffer = ""
                         break

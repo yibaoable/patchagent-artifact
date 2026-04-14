@@ -3,6 +3,7 @@ import re
 import sys
 import json
 import time
+import select
 import subprocess
 from typing import Union
 from pathlib import Path
@@ -12,11 +13,15 @@ from nvwa.sky.task import PatchTask
 from nvwa.lsp.language import LanguageType, LanguageServer
 
 PYRIGHT_PATH = os.environ.get("PYRIGHT_PATH", "/opt/tools/node/bin/node,/opt/tools/node/bin/pyright-langserver")
+pyright_cmd = PYRIGHT_PATH.split(',')
+PYRIGHT_REQUEST_TIMEOUT_SECONDS = float(os.environ.get("PYRIGHT_REQUEST_TIMEOUT_SECONDS", "600"))
 
 class PythonLanguageServer(LanguageServer):
     def __init__(self, task: PatchTask):
         super().__init__(task)
         self.build_dir = self.task.work_dir
+        self.instance_id = getattr(self.task, "instance_id", self.task.tag)
+        self.request_timeout = PYRIGHT_REQUEST_TIMEOUT_SECONDS
 
         self._start()
 
@@ -27,7 +32,7 @@ class PythonLanguageServer(LanguageServer):
     def _start(self):
         """启动gopls服务器"""
         self.proc = subprocess.Popen(
-            [PYRIGHT_PATH] + ["--stdio"],
+            pyright_cmd + ["--stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
@@ -42,9 +47,14 @@ class PythonLanguageServer(LanguageServer):
                 "method": "initialize",
                 "params": {
                     "processId": None,
-                    "rootPath": None,
+                    "rootPath": self.build_dir,
                     "rootUri": f"file://{self.build_dir}",
                     "capabilities": {},
+                    "initializationOptions": {
+                        "python": {
+                            "defaultInterpreterPath": f"/workspace/PoC_env/{self.instance_id}/bin/python"
+                        }
+                    },
                     "trace": "off",
                     "workspaceFolders": None,
                 },
@@ -82,7 +92,7 @@ class PythonLanguageServer(LanguageServer):
         self.proc.stdin.write(full_message)  # type: ignore
         self.proc.stdin.flush()  # type: ignore
 
-    def _find_definition(self, path: str, line: int, chr: int) -> Union[list[str], None]:
+    def _find_definition(self, path: str, line: int, chr: int, timeout: float | None = None) -> Union[list[str], None]:
         with open(path, "r") as f:
             content = f.read()
 
@@ -117,7 +127,7 @@ class PythonLanguageServer(LanguageServer):
             }
         )
 
-        results = self.read_response()
+        results = self.read_response(timeout=timeout)
 
         if results is None:
             return None
@@ -137,7 +147,7 @@ class PythonLanguageServer(LanguageServer):
 
         return locations
 
-    def _hover(self, path: str, line: int, chr: int) -> Union[str, None]:
+    def _hover(self, path: str, line: int, chr: int, timeout: float | None = None) -> Union[str, None]:
         with open(path, "r") as f:
             content = f.read()
 
@@ -172,13 +182,13 @@ class PythonLanguageServer(LanguageServer):
             }
         )
 
-        results = self.read_response()
+        results = self.read_response(timeout=timeout)
         if results is None or results['contents']['value'] is None:
             return ""
 
         return results["contents"]["value"]
 
-    def _locate_symbol(self, symbol_name: str) -> list[str]:
+    def _locate_symbol(self, symbol_name: str, timeout: float | None = None) -> list[str]:
 
         self.send_request(
             {
@@ -191,7 +201,7 @@ class PythonLanguageServer(LanguageServer):
             }
         )
 
-        results = self.read_response()
+        results = self.read_response(timeout=timeout)
         if results is None:
             return []
 
@@ -213,15 +223,27 @@ class PythonLanguageServer(LanguageServer):
 
         return locations
 
+    def _remaining_timeout(self, deadline: float) -> float:
+        return max(0.0, deadline - time.monotonic())
+
     def find_definition(self, path: str, line: int, chr: int) -> list[str]:
         filepath = os.path.join(self.build_dir, path)
         log.info(f"Finding definition for {filepath}:{line}:{chr}")
         line, chr = line - 1, chr - 1
+        deadline = time.monotonic() + self.request_timeout
 
         while True:
-            locations = self._find_definition(filepath, line, chr)
+            remaining = self._remaining_timeout(deadline)
+            if remaining <= 0:
+                log.warning(f"Timed out finding definition for {filepath}:{line + 1}:{chr + 1}")
+                return []
+
+            locations = self._find_definition(filepath, line, chr, remaining)
             if locations is not None:
                 return locations
+            if self._remaining_timeout(deadline) <= 0:
+                log.warning(f"Timed out finding definition for {filepath}:{line + 1}:{chr + 1}")
+                return []
             self.stop()
             self._start()
 
@@ -229,35 +251,66 @@ class PythonLanguageServer(LanguageServer):
         filepath = os.path.join(self.build_dir, path)
         log.info(f"Get hint for {filepath}:{line}:{chr}")  # hover
         line, chr = line - 1, chr - 1
+        deadline = time.monotonic() + self.request_timeout
 
         while True:
-            hint = self._hover(filepath, line, chr)
+            remaining = self._remaining_timeout(deadline)
+            if remaining <= 0:
+                log.warning(f"Timed out getting hint for {filepath}:{line + 1}:{chr + 1}")
+                return ""
+
+            hint = self._hover(filepath, line, chr, remaining)
             if hint is not None:
                 return hint
+            if self._remaining_timeout(deadline) <= 0:
+                log.warning(f"Timed out getting hint for {filepath}:{line + 1}:{chr + 1}")
+                return ""
             self.stop()
             self._start()
 
     def locate_symbol(self, symbol_name: str) -> list[str]:
         log.info(f"Locating symbol {symbol_name}")
+        deadline = time.monotonic() + self.request_timeout
         while True:
-            locations = self._locate_symbol(symbol_name)
+            remaining = self._remaining_timeout(deadline)
+            if remaining <= 0:
+                log.warning(f"Timed out locating symbol {symbol_name}")
+                return []
+
+            locations = self._locate_symbol(symbol_name, remaining)
             if locations is not None:
                 return locations
+            if self._remaining_timeout(deadline) <= 0:
+                log.warning(f"Timed out locating symbol {symbol_name}")
+                return []
             self.stop()
             self._start()
 
-    def read_response(self):
+    def read_response(self, timeout: float | None = None):
         output_buffer = ""
+        deadline = None if timeout is None else time.monotonic() + timeout
         while True:
+            if deadline is not None:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    log.warning("Timed out waiting for response from pyright")
+                    return None
+                ready, _, _ = select.select([self.proc.stdout], [], [], remaining)  # type: ignore[arg-type]
+                if not ready:
+                    log.warning("Timed out waiting for response from pyright")
+                    return None
             data = self.proc.stdout.read(1)  # type: ignore
             if not data:
-                log.error("No data from pyright")
+                log.error("No data from typescript-language-server")
                 break
             output_buffer += data # type: ignore
+            if data == '\n':
+                log.info(f"Complete line: {output_buffer.strip()}")
 
             while True:
                 try:
                     response = json.loads(output_buffer)
+                    print(json.dumps(response, indent=2))  # 只输出格式化的JSON
                     if response.get("method") != None or response.get("id") != 2:
                         output_buffer = ""
                         break
@@ -268,6 +321,7 @@ class PythonLanguageServer(LanguageServer):
                         start = output_buffer.index("{")
                         end = output_buffer.rindex("}") + 1
                         response = json.loads(output_buffer[start:end])
+                        print(json.dumps(response, indent=2))  # 只输出格式化的JSON
                         if response.get("method") != None or response.get("id") != 2:
                             output_buffer = ""
                             break

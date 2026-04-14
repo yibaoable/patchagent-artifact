@@ -1,8 +1,9 @@
 import os
 import time
 import json
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
+from nvwa.model_aliases import readable_model_dirname
 from nvwa.sky.task import PatchTask
 from nvwa.logger import log
 
@@ -14,6 +15,10 @@ class Context:
         self.patch = None
         self.messages = []
         self.elapsed_time = None
+        # When True, first validate ends the agent run (see MonkeyOpenAIAgent + validate tool return_direct).
+        self.single_shot_validate = False
+        # One entry per validate() call: revised patch text, pass/fail, report string.
+        self.patch_validation_results: List[Dict[str, Any]] = []
 
     def __enter__(self):
         self.start_time = time.time()
@@ -72,12 +77,16 @@ class Context:
             "patch": self.patch,
             "elapsed_time": self.elapsed_time,
             "messages": self.messages,
+            "single_shot_validate": self.single_shot_validate,
+            "patch_validation_results": list(self.patch_validation_results),
         }
 
     def load(self, data: dict):
         self.patch = data.get("patch", None)
         self.elapsed_time = data.get("elapsed_time", None)
         self.messages = data.get("messages", [])
+        self.single_shot_validate = bool(data.get("single_shot_validate", False))
+        self.patch_validation_results = list(data.get("patch_validation_results", []))
         if self.task.patch is None and self.patch is not None:
             self.task.patch = self.patch
             log.info(f"Task {self.task} has been patched.")
@@ -91,32 +100,27 @@ class ContextManager:
         if path is None or os.path.isfile(path):
             self._path = path
         else:
-            self._path = os.path.join(path, self._result_filename())
+            self._path = os.path.join(path, self._result_relpath())
 
         if load_context:
             log.info(f"Loading contexts from {self.path}")
             self.load(self.path)
 
-    def _result_filename(self) -> str:
-        # Get dataset name
+    def _result_relpath(self) -> str:
         dataset = getattr(self.task, "dataset", "skyset")
-        
-        # Get instance id - for secbench it's instance_id, for others it's tag
         instance_id = getattr(self.task, "instance_id", self.task.tag)
-        
-        # Get input mode
         input_mode = getattr(self.task, "input_mode", getattr(self.task, "effective_input_mode", "auto"))
-        
-        return f"{dataset}-{instance_id}_{input_mode}.json"
+        model_name = readable_model_dirname(self.model)
+        return os.path.join(model_name, dataset, input_mode, f"{instance_id}.json")
 
     @property
     def path(self) -> str:
         if self._path:
+            os.makedirs(os.path.dirname(self._path), exist_ok=True)
             return self._path
-        # Create model-specific directory
-        model_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "results", self.model))
-        os.makedirs(model_dir, exist_ok=True)
-        return os.path.join(model_dir, self._result_filename())
+        path = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "results", self._result_relpath()))
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        return path
 
     @property
     def patch(self) -> Union[str, None]:
@@ -146,6 +150,7 @@ class ContextManager:
             if len(c['messages']) > 2: # HACK: it means critical error happened
                 data.append(c)
         if len(data) > 0:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
             with open(path, "w") as f:
                 json.dump(data, f, indent=4)
 

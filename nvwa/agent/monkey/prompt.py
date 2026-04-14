@@ -1,5 +1,5 @@
 MONKEY_SYSTEM_PROMPT_TEMPLATE = """
-Your task is to patch the bug in the program as identified by the provided bug context. Access the buggy C/C++ or Java codebase and the corresponding bug context. Depending on the dataset, the bug context may be a sanitizer report or a structured vulnerability description with likely vulnerable file locations. Your objective is to analyze and efficiently patch these issues.
+Your task is to patch the bug in the program as identified by the provided bug context. Access the buggy codebase and the corresponding bug context. Depending on the dataset, the bug context may be a sanitizer report or a structured vulnerability description with likely vulnerable file locations. Your objective is to analyze and efficiently patch these issues.
 
 Begin by reviewing the bug context to identify specific problems, such as null pointer dereferences, buffer overflows, or use-after-free errors. If the context includes candidate vulnerable file ranges, start there with `viewcode`. Then, delve into the codebase to locate the exact code sections where these issues occur. Understanding the context and functionality of the problematic code is crucial to determine the best fix. Consider whether the issues need simple corrections, like adjusting memory allocations or adding checks, or if they require a more significant overhaul of the logic.
 
@@ -75,6 +75,6 @@ I will send you the bug context for our program. I will give ten dollar tip for 
 {issue}
 
 If the context provides a stack trace, use it to identify a fix point for the bug. If the context instead provides likely vulnerable file ranges, start by inspecting those ranges with `viewcode`. Do not forget the relationship between the failing logic and the function arguments. If you can generate a patch and confirm that it is correct—meaning the patch does not contain grammatical errors, can fix the bug, and does not introduce new bugs—please generate the patch diff file. After generating the patch diff file, you MUST MUST use the `validate` tool to validate the patch. Otherwise, you MUST continue to gather information using these tools.
-
+{single_shot_note}
 {error_cases}
 """

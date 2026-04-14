@@ -3,6 +3,7 @@ import re
 import sys
 import json
 import time
+import select
 import subprocess
 from typing import Union
 from pathlib import Path
@@ -11,12 +12,15 @@ from nvwa.logger import log
 from nvwa.sky.task import PatchTask
 from nvwa.lsp.language import LanguageType, LanguageServer
 
-TSSERVER_PATH = os.environ.get("TSSERVER_PATH", "/opt/tools/node/bin/node,/opt/tools/node/bin/typescript-language-serverr")
+TSSERVER_PATH = os.environ.get("TSSERVER_PATH", "/opt/tools/node/bin/node,/opt/tools/node/bin/typescript-language-server")
+tsserver_cmd = TSSERVER_PATH.split(',')
+TSSERVER_REQUEST_TIMEOUT_SECONDS = float(os.environ.get("TSSERVER_REQUEST_TIMEOUT_SECONDS", "60"))
 
 class TypeScriptLanguageServer(LanguageServer):
     def __init__(self, task: PatchTask):
         super().__init__(task)
         self.build_dir = self.task.work_dir
+        self.request_timeout = TSSERVER_REQUEST_TIMEOUT_SECONDS
 
         self._start()
 
@@ -27,7 +31,7 @@ class TypeScriptLanguageServer(LanguageServer):
     def _start(self):
         """启动typescript-language-server服务器"""
         self.proc = subprocess.Popen(
-            [TSSERVER_PATH] + ["--stdio"],
+            tsserver_cmd + ["--stdio"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             stderr=subprocess.DEVNULL,
@@ -42,16 +46,29 @@ class TypeScriptLanguageServer(LanguageServer):
                 "method": "initialize",
                 "params": {
                     "processId": None,
-                    "rootPath": None,
+                    "rootPath": self.build_dir,
                     "rootUri": f"file://{self.build_dir}",
                     "capabilities": {},
+                    "initializationOptions":{
+                        "typescript": {
+                            "preferences": {
+                                "includePackageJsonAutoImports": "auto",
+                                "importModuleSpecifierPreference": "relative",  # 优先相对路径导入
+                                "quoteStyle": "single",  # 单引号偏好
+                                "allowTextChangesInNewFiles": True
+                            },
+                            "tsserver": {
+                                "logVerbosity": "verbose",
+                                "logDirectory": os.path.expanduser("~/.tsserver-logs")
+                            }
+                        }
+                    },
                     "trace": "off",
                     "workspaceFolders": None,
                 },
             }
         )
         self.send_request({"jsonrpc": "2.0", "method": "initialized", "params": {}})
-
 
     def stop(self):
         time.sleep(1)
@@ -82,7 +99,7 @@ class TypeScriptLanguageServer(LanguageServer):
         self.proc.stdin.write(full_message)  # type: ignore
         self.proc.stdin.flush()  # type: ignore
 
-    def _find_definition(self, path: str, line: int, chr: int) -> Union[list[str], None]:
+    def _find_definition(self, path: str, line: int, chr: int, timeout: float | None = None) -> Union[list[str], None]:
         with open(path, "r") as f:
             content = f.read()
 
@@ -118,7 +135,7 @@ class TypeScriptLanguageServer(LanguageServer):
             }
         )
 
-        results = self.read_response()
+        results = self.read_response(timeout=timeout)
 
         if results is None:
             return None
@@ -138,7 +155,7 @@ class TypeScriptLanguageServer(LanguageServer):
 
         return locations
 
-    def _hover(self, path: str, line: int, chr: int) -> Union[str, None]:
+    def _hover(self, path: str, line: int, chr: int, timeout: float | None = None) -> Union[str, None]:
         with open(path, "r") as f:
             content = f.read()
 
@@ -173,13 +190,13 @@ class TypeScriptLanguageServer(LanguageServer):
             }
         )
 
-        results = self.read_response()
+        results = self.read_response(timeout=timeout)
         if results is None or results['contents']['value'] is None:
             return ""
 
         return results["contents"]["value"]
 
-    def _locate_symbol(self, symbol_name: str) -> list[str]:
+    def _locate_symbol(self, symbol_name: str, timeout: float | None = None) -> list[str]:
 
         self.send_request(
             {
@@ -192,7 +209,7 @@ class TypeScriptLanguageServer(LanguageServer):
             }
         )
 
-        results = self.read_response()
+        results = self.read_response(timeout=timeout)
         if results is None:
             return []
 
@@ -214,15 +231,27 @@ class TypeScriptLanguageServer(LanguageServer):
 
         return locations
 
+    def _remaining_timeout(self, deadline: float) -> float:
+        return max(0.0, deadline - time.monotonic())
+
     def find_definition(self, path: str, line: int, chr: int) -> list[str]:
         filepath = os.path.join(self.build_dir, path)
         log.info(f"Finding definition for {filepath}:{line}:{chr}")
         line, chr = line - 1, chr - 1
+        deadline = time.monotonic() + self.request_timeout
 
         while True:
-            locations = self._find_definition(filepath, line, chr)
+            remaining = self._remaining_timeout(deadline)
+            if remaining <= 0:
+                log.warning(f"Timed out finding definition for {filepath}:{line + 1}:{chr + 1}")
+                return []
+
+            locations = self._find_definition(filepath, line, chr, remaining)
             if locations is not None:
                 return locations
+            if self._remaining_timeout(deadline) <= 0:
+                log.warning(f"Timed out finding definition for {filepath}:{line + 1}:{chr + 1}")
+                return []
             self.stop()
             self._start()
 
@@ -230,31 +259,62 @@ class TypeScriptLanguageServer(LanguageServer):
         filepath = os.path.join(self.build_dir, path)
         log.info(f"Get hint for {filepath}:{line}:{chr}")  # hover
         line, chr = line - 1, chr - 1
+        deadline = time.monotonic() + self.request_timeout
 
         while True:
-            hint = self._hover(filepath, line, chr)
+            remaining = self._remaining_timeout(deadline)
+            if remaining <= 0:
+                log.warning(f"Timed out getting hint for {filepath}:{line + 1}:{chr + 1}")
+                return ""
+
+            hint = self._hover(filepath, line, chr, remaining)
             if hint is not None:
                 return hint
+            if self._remaining_timeout(deadline) <= 0:
+                log.warning(f"Timed out getting hint for {filepath}:{line + 1}:{chr + 1}")
+                return ""
             self.stop()
             self._start()
 
     def locate_symbol(self, symbol_name: str) -> list[str]:
         log.info(f"Locating symbol {symbol_name}")
+        deadline = time.monotonic() + self.request_timeout
         while True:
-            locations = self._locate_symbol(symbol_name)
+            remaining = self._remaining_timeout(deadline)
+            if remaining <= 0:
+                log.warning(f"Timed out locating symbol {symbol_name}")
+                return []
+
+            locations = self._locate_symbol(symbol_name, remaining)
             if locations is not None:
                 return locations
+            if self._remaining_timeout(deadline) <= 0:
+                log.warning(f"Timed out locating symbol {symbol_name}")
+                return []
             self.stop()
             self._start()
 
-    def read_response(self):
+    def read_response(self, timeout: float | None = None):
         output_buffer = ""
+        deadline = None if timeout is None else time.monotonic() + timeout
         while True:
+            if deadline is not None:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    log.warning("Timed out waiting for response from typescript-language-server")
+                    return None
+                ready, _, _ = select.select([self.proc.stdout], [], [], remaining)  # type: ignore[arg-type]
+                if not ready:
+                    log.warning("Timed out waiting for response from typescript-language-server")
+                    return None
             data = self.proc.stdout.read(1)  # type: ignore
             if not data:
                 log.error("No data from typescript-language-server")
                 break
             output_buffer += data # type: ignore
+            print(output_buffer)
+            if data == '\n':
+                log.info(f"Complete line: {output_buffer.strip()}")
 
             while True:
                 try:

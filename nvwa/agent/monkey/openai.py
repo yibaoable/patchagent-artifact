@@ -28,6 +28,7 @@ class MonkeyOpenAIAgent(BaseAgent):
         counterexample_num: int = 3,
         locate_tool: bool = True,
         max_iterations: int = 30,
+        single_shot_validate: bool = False,
     ):
         super().__init__(context_manager)
 
@@ -37,6 +38,7 @@ class MonkeyOpenAIAgent(BaseAgent):
         self.counterexample_num = counterexample_num
         self.locate_tool = locate_tool
         self.max_iterations = max_iterations
+        self.single_shot_validate = single_shot_validate
         self.error_cases = self.get_previous_error_cases()
 
         self.llm = ChatOpenAI(temperature=self.temperature, model=self.model)
@@ -45,13 +47,28 @@ class MonkeyOpenAIAgent(BaseAgent):
         issue_summary = getattr(context.task, "issue_summary")
         issue_kind = getattr(context.task, "issue_kind", "bug context")
 
+        context.single_shot_validate = self.single_shot_validate
+
         lc_tools = [
             create_viewcode_tool(context, auto_hint=self.auto_hint),
-            create_validate_tool(context, auto_hint=self.auto_hint),
+            create_validate_tool(
+                context,
+                auto_hint=self.auto_hint,
+                return_direct=self.single_shot_validate,
+            ),
         ]
         if self.locate_tool:
             lc_tools.append(create_locate_tool(context, auto_hint=self.auto_hint))
         oai_tools = [convert_to_openai_tool(tool) for tool in lc_tools]
+
+        single_shot_note = ""
+        if self.single_shot_validate:
+            single_shot_note = (
+                "\n## Single-shot validation mode\n"
+                "You can call `validate` at most once. After that call the agent run ends immediately. So call `validate` when you think your patch is good enough. "
+                "The patch you submit is kept as the final patch even if validation fails. "
+                "You may call `locate` and `viewcode` multiple times before the final validation to inspect the code and understand the cause of the vulnerability.\n"
+            )
 
         if self.locate_tool:
             self.prompt = ChatPromptTemplate.from_messages(
@@ -76,6 +93,7 @@ class MonkeyOpenAIAgent(BaseAgent):
                 tag=context.task.tag,
                 issue=issue_summary,
                 issue_kind=issue_kind,
+                single_shot_note=single_shot_note,
                 error_cases=self.error_cases,
             )
         )
@@ -104,6 +122,7 @@ class MonkeyOpenAIAgent(BaseAgent):
                 "issue": lambda input: issue_summary,
                 "issue_kind": lambda input: issue_kind,
                 "error_cases": lambda input: self.error_cases,
+                "single_shot_note": lambda input: single_shot_note,
                 "agent_scratchpad": lambda input: format_to_openai_tool_messages(input["intermediate_steps"]),
             }
             | self.prompt
@@ -132,7 +151,7 @@ class MonkeyOpenAIAgent(BaseAgent):
 
     def _apply(self):
         log.info(
-            f"Applying {self.__class__.__name__} (model: {self.model}, temperature: {self.temperature}, auto_hint: {self.auto_hint}, counterexample_num: {self.counterexample_num}, locate_tool: {self.locate_tool})"
+            f"Applying {self.__class__.__name__} (model: {self.model}, temperature: {self.temperature}, auto_hint: {self.auto_hint}, counterexample_num: {self.counterexample_num}, locate_tool: {self.locate_tool}, single_shot_validate: {self.single_shot_validate})"
         )
 
         with self.context_manager.new_context() as context:

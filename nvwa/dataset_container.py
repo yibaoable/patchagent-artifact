@@ -58,9 +58,8 @@ def _mount_dirs_from_args(cwd: str, inner_args: list[str]) -> list[str]:
     return mount_dirs
 
 
-def build_container_command(task: DatasetContainerTask, cwd: str, inner_args: list[str]) -> list[str]:
+def _build_container_base_args(task: DatasetContainerTask, cwd: str, extra_mount_dirs: list[str]) -> list[str]:
     cwd = os.path.abspath(cwd)
-    script_path = os.path.join(cwd, "nwtool")
     container_name = _container_name(task)
 
     args = [
@@ -72,15 +71,15 @@ def build_container_command(task: DatasetContainerTask, cwd: str, inner_args: li
         "-v", f"{cwd}:{cwd}",
         "-v", "agent_venv:/opt/venv:ro",
         "-v", "agent_tools:/opt/tools:ro",
-        "-v", "/opt/jdtls:/opt/jdtls",
-        "-v", "/usr/lib/jvm/jdk-21.0.7+6:/usr/lib/jvm/jdk-21.0.7+6",
+        # "-v", "/opt/jdtls:/opt/jdtls",
+        # "-v", "/usr/lib/jvm/jdk-21.0.7+6:/usr/lib/jvm/jdk-21.0.7+6",
         "--entrypoint",
         "/bin/bash",
     ]
 
-    for mount_dir in _mount_dirs_from_args(cwd, inner_args):
+    for mount_dir in extra_mount_dirs:
         args.extend(["-v", f"{mount_dir}:{mount_dir}"])
-    
+
     if task.dataset == "vul4j":
         args.extend([
             "-v", "/cache_vul4j/m2:/root/.m2",
@@ -92,6 +91,10 @@ def build_container_command(task: DatasetContainerTask, cwd: str, inner_args: li
             "-v", "/cache/gradle:/root/.gradle",
         ])
 
+    return args
+
+
+def _build_container_inner_env(task: DatasetContainerTask, cwd: str) -> list[str]:
     inner_env = [
         f"export {RUNNING_IN_DATASET_CONTAINER_ENV}=1",
         f"export {DATASET_NAME_ENV}={shlex.quote(task.dataset)}",
@@ -101,27 +104,50 @@ def build_container_command(task: DatasetContainerTask, cwd: str, inner_args: li
         "export PATH=/opt/venv/bin:/opt/tools:$PATH",
     ]
     if task.dataset == "vjbench":
-        inner_env.append("export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 && export PATH=$JAVA_HOME/bin:$PATH &&")
+        inner_env.append("export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 && export PATH=$JAVA_HOME/bin:$PATH")
     if task.dataset in {"patcheval", "vul4j", "vjbench"}:
-        inner_env.append("apt-get update && apt-get install -y universal-ctags")
+        # inner_env.append("apt-get update && apt-get install -y universal-ctags")
+        inner_env.append("pwd")
     elif task.dataset == "secbench":
         inner_env.append("apt-get update && apt-get install -y universal-ctags bear")
-        # inner_env.append(
-        #     f"wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key --no-check-certificate| apt-key add - && "
-        #     f" add-apt-repository \"deb http://apt.llvm.org/focal/ llvm-toolchain-focal-16 main\" && "
-        #     f"apt-get update && apt-get install -y libclang-16-dev clang-16 clangd-16"
-        # )
+        inner_env.append(
+            "wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key --no-check-certificate| apt-key add - && "
+            "add-apt-repository \"deb http://apt.llvm.org/focal/ llvm-toolchain-focal-16 main\" && "
+            "apt-get update && apt-get install -y libclang-16-dev clang-16 clangd-16"
+        )
+    return inner_env
+
+
+def build_container_shell_command(task: DatasetContainerTask, cwd: str, inner_command: str) -> list[str]:
+    cwd = os.path.abspath(cwd)
+    args = _build_container_base_args(task, cwd, [])
+    inner_env = _build_container_inner_env(task, cwd)
+    inner_env.append(f"cd {shlex.quote(cwd)} && source .venv/bin/activate && {inner_command}")
+    args.extend([task.container_name, "-lc", " && ".join(inner_env)])
+    return args
+
+
+def build_container_command(task: DatasetContainerTask, cwd: str, inner_args: list[str]) -> list[str]:
+    cwd = os.path.abspath(cwd)
+    script_path = os.path.join(cwd, "nwtool")
+    args = _build_container_base_args(task, cwd, _mount_dirs_from_args(cwd, inner_args))
+    inner_env = _build_container_inner_env(task, cwd)
     inner_env.append(
         f"cd {shlex.quote(cwd)} && "
         f"source .venv/bin/activate && "
         f"{shlex.quote(script_path)} {shlex.join(inner_args)}"
     )
-
     args.extend([task.container_name, "-lc", " && ".join(inner_env)])
     return args
 
 
 def run_case_in_container(task: DatasetContainerTask, cwd: str, inner_args: list[str]) -> int:
     command = build_container_command(task, cwd, inner_args)
+    completed = subprocess.run(command, stdout=None, stderr=None)
+    return completed.returncode
+
+
+def run_shell_in_container(task: DatasetContainerTask, cwd: str, inner_command: str) -> int:
+    command = build_container_shell_command(task, cwd, inner_command)
     completed = subprocess.run(command, stdout=None, stderr=None)
     return completed.returncode

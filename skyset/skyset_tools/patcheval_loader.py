@@ -7,7 +7,7 @@ from typing import Dict, Generator, Iterable, Optional
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 PATCHEVAL_MARKERS = ("cve_id", "repo", "programming_language", "vul_func")
-SUPPORTED_LANGUAGES = {"python", "javascript", "go"}
+SUPPORTED_LANGUAGES = {"python", "javascript", "go", "typescript"}
 
 
 def _default_container_name(instance_id: str) -> str:
@@ -27,13 +27,18 @@ def _normalize_project_name(config: dict) -> str:
     if repo.endswith(".git"):
         repo = repo[:-4]
     if repo:
-        return repo.rsplit("/", 1)[-1].lower()
+        return repo.rsplit("/", 1)[-1]
 
     return str(config.get("cve_id") or config.get("instance_id") or "")
 
 
 def _normalize_language(config: dict) -> str:
     language = str(config.get("programming_language") or config.get("language") or "").strip().lower()
+    if language == "javascript":
+        vuln_funcs = config.get("vul_func")
+        file_name = vuln_funcs[0].get("file_path")
+        if file_name.endswith(".ts"):
+            language = "typescript"
     if language not in SUPPORTED_LANGUAGES:
         raise ValueError(f"Unsupported Patcheval language: {language or '<empty>'}")
     return language

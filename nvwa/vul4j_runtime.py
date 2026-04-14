@@ -16,7 +16,7 @@ def _vul4j_compile_success(output: str) -> bool:
     return "Compile failed!" not in output
 
 def _vul4j_test_success(output: str) -> bool:
-    print(f"Vul4J Test Output:\n{output}\n{'-'*60}")
+    # print(f"Vul4J Test Output:\n{output}\n{'-'*60}")
     text = output
     json_match = re.search(r'\{.*\}', text, re.DOTALL)
     if re.search(r'Number of running tests:\s*0', text, re.IGNORECASE):
@@ -304,17 +304,22 @@ def _prepare_local_validate_dir(vuln_id: str, validate_dir: str) -> tuple[bool, 
         _append_failed_step(logs, "clean validate dir", rc, out, err)
         if rc != 0:
             return False, logs
+        validate_ready = _local_validate_dir_has_checkout_contents(validate_dir)
+        if validate_ready:
+            return True, logs
+
+    if validate_exists and not validate_ready:
+        # 删除损坏的目录并重新 checkout
+        rc, out, err = _run_local_command(
+            f"rm -rf {shlex.quote(validate_dir)} && "
+            f"vul4j checkout -i {shlex.quote(vuln_id)} -d {shlex.quote(validate_dir)}"
+        )
+        _append_failed_step(logs, "recreate validate dir", rc, out, err)
+        if rc != 0:
+            return False, logs
         return True, logs
 
-    if validate_exists:
-        try:
-            _remove_local_path(validate_dir)
-        except FileNotFoundError:
-            pass
-        except OSError as exc:
-            logs.append(_format_step("remove broken validate dir", 1, "", str(exc)))
-            return False, logs
-
+    # 目录不存在，直接 checkout
     parent = os.path.dirname(validate_dir) or "/"
     rc, out, err = _run_local_command(
         f"mkdir -p {shlex.quote(parent)} && vul4j checkout -i {shlex.quote(vuln_id)} -d {shlex.quote(validate_dir)}"
@@ -407,7 +412,9 @@ def validate_vul4j_patch_v2(
         _append_failed_step(logs, "clean validate dir", rc, out, err)
         if rc != 0:
             return False, "".join(logs)
-    else:
+        validate_ready = _container_validate_dir_has_checkout_contents(exec_container, validate_dir)
+
+    if not validate_ready:
         if validate_exists:
             rc, out, err = _docker_exec_root(exec_container, f"rm -rf {shlex.quote(validate_dir)}")
             _append_failed_step(logs, "remove broken validate dir", rc, out, err)
