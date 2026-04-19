@@ -17,6 +17,7 @@ def analyze_validation_results(directory_path, mode='single_validate'):
     # 存储结果
     passed_cases = []
     failed_cases = []
+    patches = []
     
     # 获取目录下所有 JSON 文件
     json_files = list(Path(directory_path).glob("*.json"))
@@ -50,6 +51,15 @@ def analyze_validation_results(directory_path, mode='single_validate'):
             
             # 获取最后一个字典
             last_item = contexts[-1]
+
+            # 收集补丁信息，用于导出 patches.json
+            patch_value_for_export = last_item.get('patch', "") if isinstance(last_item, dict) else ""
+            if patch_value_for_export is None:
+                patch_value_for_export = ""
+            patches.append({
+                'cve': json_file.stem,
+                'fix_patch': patch_value_for_export
+            })
             
             if mode == 'single_validate':
                 # Single Shot 模式：查看 patch_validation_results
@@ -103,7 +113,8 @@ def analyze_validation_results(directory_path, mode='single_validate'):
         'passed_count': len(passed_cases),
         'failed_count': len(failed_cases),
         'passed_cases': passed_cases,
-        'failed_cases': failed_cases
+        'failed_cases': failed_cases,
+        'patches': patches
     }
     
     return stats
@@ -118,8 +129,12 @@ def print_statistics(stats):
     print("=" * 60)
     print(f"分析模式: {'Single Shot模式' if stats['mode'] == 'single_validate' else '普通模式'}")
     print(f"总案例数: {stats['total_cases']}")
-    print(f"通过案例数: {stats['passed_count']} ({stats['passed_count']/stats['total_cases']*100:.1f}%)")
-    print(f"失败案例数: {stats['failed_count']} ({stats['failed_count']/stats['total_cases']*100:.1f}%)")
+    if stats['total_cases'] > 0:
+        print(f"通过案例数: {stats['passed_count']} ({stats['passed_count']/stats['total_cases']*100:.1f}%)")
+        print(f"失败案例数: {stats['failed_count']} ({stats['failed_count']/stats['total_cases']*100:.1f}%)")
+    else:
+        print("通过案例数: 0 (0.0%)")
+        print("失败案例数: 0 (0.0%)")
     print("\n" + "=" * 60)
     
     if stats['passed_cases']:
@@ -182,6 +197,12 @@ def main():
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
         print(f"\n详细结果已保存到 {output_path}")
+
+        # 默认额外导出 patches.json（与 final_result.json 同目录）
+        patches_output_path = f"{args.directory}/patches.json"
+        with open(patches_output_path, 'w', encoding='utf-8') as f:
+            json.dump(results.get('patches', []), f, indent=2, ensure_ascii=False)
+        print(f"补丁列表已保存到 {patches_output_path}")
 
 if __name__ == "__main__":
     main()

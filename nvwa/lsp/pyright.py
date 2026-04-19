@@ -310,7 +310,6 @@ class PythonLanguageServer(LanguageServer):
             while True:
                 try:
                     response = json.loads(output_buffer)
-                    # print(json.dumps(response, indent=2))  # 只输出格式化的JSON
                     if response.get("method") != None or response.get("id") != 2:
                         output_buffer = ""
                         break
@@ -321,7 +320,6 @@ class PythonLanguageServer(LanguageServer):
                         start = output_buffer.index("{")
                         end = output_buffer.rindex("}") + 1
                         response = json.loads(output_buffer[start:end])
-                        # print(json.dumps(response, indent=2))  # 只输出格式化的JSON
                         if response.get("method") != None or response.get("id") != 2:
                             output_buffer = ""
                             break

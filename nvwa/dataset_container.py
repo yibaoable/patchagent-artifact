@@ -106,8 +106,8 @@ def _build_container_inner_env(task: DatasetContainerTask, cwd: str) -> list[str
     if task.dataset == "vjbench":
         inner_env.append("export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-amd64 && export PATH=$JAVA_HOME/bin:$PATH")
     if task.dataset in {"patcheval", "vul4j", "vjbench"}:
-        # inner_env.append("apt-get update && apt-get install -y universal-ctags")
-        inner_env.append("pwd")
+        inner_env.append("apt-get update && apt-get install -y universal-ctags")
+        # inner_env.append("pwd")
     elif task.dataset == "secbench":
         inner_env.append("apt-get update && apt-get install -y universal-ctags bear")
         # inner_env.append(

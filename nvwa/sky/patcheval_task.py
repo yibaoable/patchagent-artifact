@@ -52,6 +52,8 @@ class PatchevalTask(VulnFuncTask):
 
     def _locations(self) -> list[str]:
         locations: list[str] = []
+        if not self.config.get("vul_func"):
+            return locations
         for entry in self.config.get("vul_func") or []:
             if not isinstance(entry, dict):
                 continue

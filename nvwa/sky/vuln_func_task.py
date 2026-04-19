@@ -10,6 +10,7 @@ from nvwa.parser.sanitizer import Sanitizer
 from nvwa.proxy.utils import revise_patch
 from nvwa.sky.task import PatchTask, ROOT
 
+WITH_LOCATION_INSTRUCTION = os.getenv("WITH_LOCATION_INSTRUCTION", "false")
 
 def _normalize_sanitizer(raw: Optional[str | Sanitizer]) -> Sanitizer:
     if isinstance(raw, Sanitizer):
@@ -209,7 +210,7 @@ class VulnFuncTask(PatchTask):
             lines.extend(["", "Bug description:", description])
 
         locations = self._locations()
-        if locations:
+        if locations and WITH_LOCATION_INSTRUCTION == "true":
             lines.extend(["", "Likely vulnerable locations (start with these file ranges):"])
             lines.extend(f"- {location}" for location in locations)
         else:

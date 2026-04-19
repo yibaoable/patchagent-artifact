@@ -16,6 +16,7 @@ from nvwa.secb_runtime import prepare_secbench_immutable_dir, validate_secbench_
 from nvwa.sky.task import PatchTask, ROOT
 from skyset.skyset_tools.secb_loader import SecbDatasetLoader
 
+WITH_LOCATION_INSTRUCTION = os.getenv("WITH_LOCATION_INSTRUCTION", "false")
 
 def _normalize_sanitizer(raw: Optional[str | Sanitizer]) -> Sanitizer:
     if isinstance(raw, Sanitizer):
@@ -210,7 +211,7 @@ class SecbTask(PatchTask):
         elif self.config.get("bug_report"):
             lines.extend(["", "Bug report:", str(self.config["bug_report"]).strip()])
 
-        if self.vul_func:
+        if self.vul_func and WITH_LOCATION_INSTRUCTION == "true":
             lines.extend(["", "Likely vulnerable locations (start with these file ranges):"])
             for item in self.vul_func:
                 file_path = item.get("file_path", "<unknown>")

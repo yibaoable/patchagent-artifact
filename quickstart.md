@@ -39,7 +39,7 @@ cp .env.tmp .env
 ```
 - dataset:可选 patcheval，vul4j，vjbench，secbench
 - model:可选 deepseekv3, doubao1_8, doubao2_0
-    - **如需增加模型**，更换.env中的OPENAI_API_KEY和OPENAI_BASE_URL字段，并在 `nvwa/model_aliases.py` 的 MODEL_ALIASES 中添加 `可读model名-实际model_id` 映射。例如`"deepseekv3":"ep-20251205193935-fsfw9"`
+    - **如需更换/新增模型**，更换.env中的OPENAI_API_KEY和OPENAI_BASE_URL字段，并在 `nvwa/model_aliases.py` 的 `MODEL_ALIASES` 中添加 `可读model名-实际model_id` 映射。例如`"deepseekv3":"ep-20251205193935-fsfw9"`
 - input_mode:可选 sanitizer，vuln_func
 - tmux:启动并发修复。可通过 --max_sessions 指定并发数，默认为5
 - single_shot_validate: 使用不带feedback的模式。不添加该参数则默认使用带feedback的模式

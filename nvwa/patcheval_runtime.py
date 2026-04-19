@@ -173,6 +173,10 @@ def _validate_local_patcheval_patch(
     if rc != 0:
         return False, _append_classified_failure(logs, "fix-run.sh", rc, out, err, language)
 
+    rc, out, err = _run_local_command("bash prepare.sh", cwd=workspace_root)
+    if rc != 0:
+        return False, _append_classified_failure(logs, "prepare.sh", rc, out, err, language)
+
     rc, _, _ = _run_local_command("test -f unit_test.sh", cwd=workspace_root)
     if rc == 0:
         rc, out, err = _run_local_command("bash unit_test.sh", cwd=workspace_root)
@@ -217,6 +221,10 @@ def _validate_docker_patcheval_patch(
     if rc != 0:
         return False, _append_classified_failure(logs, "fix-run.sh", rc, out, err, language)
 
+    rc, out, err = _docker_exec(exec_container, workspace_root, "bash prepare.sh")
+    if rc != 0:
+        return False, _append_classified_failure(logs, "prepare.sh", rc, out, err, language)
+
     rc, _, _ = _docker_exec(exec_container, workspace_root, "test -f unit_test.sh")
     if rc == 0:
         rc, out, err = _docker_exec(exec_container, workspace_root, "bash unit_test.sh")
@@ -239,6 +247,7 @@ def validate_patcheval_patch_v2(
     validate_dir = validate_dir or ""
     workspace_root = _workspace_root(validate_dir)
     patch_container_path = patch_container_path or os.path.join(workspace_root, "fix.patch")
+    print(f"Validating patch with instance_id={instance_id}, container_name={container_name}, immutable_dir={immutable_dir}, validate_dir={validate_dir}, language={language}, patch_container_path={patch_container_path}")
 
     if running_inside_dataset_container():
         return _validate_local_patcheval_patch(
