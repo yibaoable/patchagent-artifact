@@ -22,6 +22,7 @@ from nvwa.dataset_container import (
 from nvwa.frontend import patch
 from nvwa.logger import log
 from nvwa.model_aliases import resolve_model_alias
+from nvwa.tmux_utils import build_tmux_session_name
 
 parser = argparse.ArgumentParser(description="Nvwa Patch Tool")
 parser.add_argument("--project", type=str, help="project name")
@@ -112,7 +113,8 @@ if __name__ == "__main__":
     random.shuffle(all_task)
     for i, (project, tag) in enumerate(all_task):
         if args.tmux:
-            tmux_session = f"nwtool-{project}-{tag}"
+            raw_tmux_session = f"nwtool-{project}-{tag}"
+            tmux_session = build_tmux_session_name(project, tag)
             command = f"./nwtool --project {project} --tag {tag}"
             if args.model:
                 command += f" --model {args.model}"
@@ -138,6 +140,8 @@ if __name__ == "__main__":
                 log.info(f"Waiting for tmux sessions to be less than {args.max_sessions}")
                 time.sleep(10)
 
+            if tmux_session != raw_tmux_session:
+                log.info(f"Normalized tmux session {raw_tmux_session} -> {tmux_session}")
             log.info(f"Start tmux session {tmux_session}")
             os.system(f"tmux has-session -t {tmux_session} 2>/dev/null || tmux new-session -d -s {tmux_session} '{command}'")
         else:
