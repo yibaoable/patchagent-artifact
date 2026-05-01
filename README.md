@@ -66,11 +66,10 @@ Output directory: `results/{model_name}/{dataset}/{input_mode}`
 Example:
 ```
 results
-├── gpt_5_4
-    ├──secbench
-        ├──vuln_func
-            ├──id1.json
-            ├──id2.json
+results/gpt_5_4
+├── patcheval
+│   └── vuln_func
+        └── CVE-2023-24623
 ```
 Summarize results:
 ```bash
