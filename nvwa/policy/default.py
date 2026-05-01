@@ -7,6 +7,7 @@ from nvwa.agent.monkey import MonkeyOpenAIAgent
 
 class DefaultPolicy(BasePolicy):
     MONKEYOPENAI_ITERATION_NUM = 3
+    AGENTS_PER_TEMPERATURE = 5
 
     def __init__(
         self,
@@ -21,6 +22,10 @@ class DefaultPolicy(BasePolicy):
         self.single_shot_validate = single_shot_validate
         self.agent_list: List[BaseAgent] = []
 
+    @classmethod
+    def default_agent_attempt_count(cls) -> int:
+        return cls.MONKEYOPENAI_ITERATION_NUM * cls.AGENTS_PER_TEMPERATURE
+
     def _agent_generator(self) -> Iterator[BaseAgent]:
         ssv = self.single_shot_validate
         for i in range(self.MONKEYOPENAI_ITERATION_NUM):
@@ -31,5 +36,4 @@ class DefaultPolicy(BasePolicy):
 
         for i in range(self.MONKEYOPENAI_ITERATION_NUM):
             yield MonkeyOpenAIAgent(self.context_manager, model=self.model, temperature=i * (1 / (self.MONKEYOPENAI_ITERATION_NUM - 1)), locate_tool=True, single_shot_validate=ssv)
-
 

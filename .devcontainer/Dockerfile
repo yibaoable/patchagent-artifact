@@ -12,3 +12,5 @@ ENV LC_CTYPE C.UTF-8
 ENV LANG C.UTF-8
 
 RUN echo "yes" | apt-get install msttcorefonts -y -qq && rm ~/.cache/matplotlib -fr
+
+COPY patchagent-artifact/ /workspace/

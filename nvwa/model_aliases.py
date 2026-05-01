@@ -2,9 +2,7 @@ import os
 
 
 MODEL_ALIASES = {
-    "deepseekv3": "ep-20251205193935-fsfw9",
-    "doubao1_8": "ep-20260108114920-hhfv7",
-    "doubao2_0": "ep-20260224102322-bql7q",
+    "gpt_5_4": "gpt-5.4",
 }
 
 READABLE_MODEL_NAMES = {model_id: alias for alias, model_id in MODEL_ALIASES.items()}

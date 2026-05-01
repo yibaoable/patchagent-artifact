@@ -103,6 +103,100 @@ def _append_failed_step(logs: list[str], name: str, rc: int, stdout: str, stderr
         logs.append(_format_step(name, rc, stdout, stderr))
 
 
+def _append_step(logs: list[str], name: str, rc: int, stdout: str, stderr: str) -> None:
+    logs.append(_format_step(name, rc, stdout, stderr))
+
+
+def _format_note(name: str, lines: list[str]) -> str:
+    body = "\n".join(line for line in lines if line)
+    return (
+        f"=========={name}===========\n"
+        f"{body or '<empty>'}\n"
+        f"===================================\n"
+    )
+
+
+def _normalize_expected_exit_code(expected_exit_code: Optional[int]) -> int:
+    try:
+        return int(expected_exit_code if expected_exit_code is not None else 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def _runtime_container_source(setup_log: str) -> str:
+    if "docker run rc=0" in setup_log:
+        return "created"
+    if "docker start rc=0" in setup_log or "inspect container rc=0" in setup_log or "inspect running rc=0" in setup_log:
+        return "reused"
+    return "unknown"
+
+
+def _repo_changes_apply_command(repo_changes_path: str = "/testcase/repo_changes.diff") -> str:
+    quoted = shlex.quote(repo_changes_path)
+    return "\n".join(
+        [
+            f"if [[ -f {quoted} ]]; then",
+            f"    if ! git apply --check {quoted} &>/dev/null; then",
+            '        echo "Repository changes already applied or cannot be applied cleanly. Proceeding with patch."',
+            "    else",
+            '        echo "Applying repository changes from repo_changes.diff..."',
+            f"        git apply {quoted} || echo \"Warning: Could not apply repo_changes.diff cleanly. Proceeding anyway.\"",
+            "    fi",
+            "fi",
+        ]
+    )
+
+
+def _build_repro_failure_stderr(
+    stderr: str,
+    *,
+    expected_exit_code: int,
+    actual_exit_code: int,
+    matched_failure_keywords: bool,
+) -> str:
+    details = [stderr or ""]
+    if matched_failure_keywords:
+        details.append("matched_failure_keywords=true")
+    details.append(f"expected_exit_code={expected_exit_code}")
+    details.append(f"actual_exit_code={actual_exit_code}")
+    return "\n".join(item for item in details if item)
+
+
+def _secbench_repro_succeeded(
+    actual_exit_code: int,
+    expected_exit_code: int,
+    matched_failure_keywords: bool,
+) -> bool:
+    return not matched_failure_keywords and (
+        actual_exit_code == 0 or actual_exit_code == expected_exit_code
+    )
+
+
+def _append_secbench_validate_context(
+    logs: list[str],
+    *,
+    mode: str,
+    validate_dir: str,
+    work_dir: str,
+    expected_exit_code: int,
+    runtime_container: Optional[str] = None,
+    runtime_container_source: Optional[str] = None,
+) -> None:
+    lines = [
+        f"mode={mode}",
+        f"work_dir={work_dir}",
+        f"validate_dir={validate_dir}",
+        f"expected_exit_code={expected_exit_code}",
+        "workspace_reset=git reset --hard && git clean -xdf before validate",
+        "mount_note=mounted source changes are visible in the container, but uncommitted changes in validate_dir are discarded before patching",
+    ]
+    if runtime_container:
+        lines.append(f"runtime_container={runtime_container}")
+    if runtime_container_source:
+        lines.append(f"runtime_container_source={runtime_container_source}")
+    logs.append(_format_note("secbench validate context", lines))
+
+
 def _runtime_container_name(instance_id: str) -> str:
     sanitized = re.sub(r"[^a-zA-Z0-9_.-]+", "-", instance_id).strip("-.").lower()
     prefix = os.getenv("SECBENCH_RUNTIME_CONTAINER_PREFIX", "secbench")
@@ -432,8 +526,17 @@ def _validate_local_secbench_patch(
     validate_dir: str,
     patch_text: str,
     sanitizer: Optional[str | Sanitizer] = None,
+    expected_exit_code: Optional[int] = None,
 ) -> tuple[bool, str]:
     logs: list[str] = []
+    normalized_expected_exit_code = _normalize_expected_exit_code(expected_exit_code)
+    _append_secbench_validate_context(
+        logs,
+        mode="dataset-container-local",
+        validate_dir=validate_dir,
+        work_dir=immutable_dir,
+        expected_exit_code=normalized_expected_exit_code,
+    )
     ok, prep_logs = _prepare_local_secbench_validate_dir(immutable_dir, validate_dir)
     logs.extend(prep_logs)
     if not ok:
@@ -444,9 +547,13 @@ def _validate_local_secbench_patch(
         patch_path = patch_file.name
 
     try:
+        rc, out, err = _run_local_command(_repo_changes_apply_command(), cwd=validate_dir)
+        _append_failed_step(logs, "apply repo_changes.diff", rc, out, err)
+        if rc != 0:
+            return False, "".join(logs)
 
-        rc, out, err = _run_local_command(f"secb patch {shlex.quote(patch_path)}", cwd=validate_dir)
-        _append_failed_step(logs, "secb patch", rc, out, err)
+        rc, out, err = _run_local_command(f"git apply {shlex.quote(patch_path)}", cwd=validate_dir)
+        _append_failed_step(logs, "apply model patch", rc, out, err)
         if rc != 0:
             return False, "".join(logs)
 
@@ -457,12 +564,37 @@ def _validate_local_secbench_patch(
 
         rc, out, err = _run_local_command("secb repro", cwd=validate_dir)
         repro_text = f"{out or ''}\n{err or ''}"
-        if any(keyword in repro_text for keyword in _failure_keywords(sanitizer)) or rc != 0:
-            logs.append(_format_step("secb repro", rc, out, err))
+        matched_failure_keywords = any(keyword in repro_text for keyword in _failure_keywords(sanitizer))
+        if not _secbench_repro_succeeded(rc, normalized_expected_exit_code, matched_failure_keywords):
+            logs.append(
+                _format_step(
+                    "secb repro",
+                    rc,
+                    out,
+                    _build_repro_failure_stderr(
+                        err,
+                        expected_exit_code=normalized_expected_exit_code,
+                        actual_exit_code=rc,
+                        matched_failure_keywords=matched_failure_keywords,
+                    ),
+                )
+            )
             return False, "".join(logs)
     finally:
         Path(patch_path).unlink(missing_ok=True)
 
+    logs.append(
+        _format_note(
+            "secbench validate result",
+            [
+                "SUCCESS: Run Test passed",
+                f"expected_exit_code={normalized_expected_exit_code}",
+                f"actual_exit_code={rc}",
+                f"matched_failure_keywords={str(matched_failure_keywords).lower()}",
+                "success_rule=(actual_exit_code == 0 || actual_exit_code == expected_exit_code) && matched_failure_keywords == false",
+            ],
+        )
+    )
     return True, "".join(logs)
 
 
@@ -475,9 +607,11 @@ def validate_secbench_patch_v2(
     validate_dir: Optional[str] = None,
     sanitizer: Optional[str | Sanitizer] = None,
     patch_container_path: str = "/testcase/model_patch.diff",
+    expected_exit_code: Optional[int] = None,
 ) -> tuple[bool, str]:
     del immutable_dir
     validate_dir = validate_dir or work_dir
+    normalized_expected_exit_code = _normalize_expected_exit_code(expected_exit_code)
 
     if running_inside_dataset_container():
         return _validate_local_secbench_patch(
@@ -485,6 +619,7 @@ def validate_secbench_patch_v2(
             validate_dir=validate_dir,
             patch_text=patch_text,
             sanitizer=sanitizer,
+            expected_exit_code=normalized_expected_exit_code,
         )
 
     logs: list[str] = []
@@ -493,6 +628,18 @@ def validate_secbench_patch_v2(
         if setup_log:
             logs.append(setup_log)
         return False, "".join(logs)
+    if setup_log:
+        logs.append(setup_log)
+
+    _append_secbench_validate_context(
+        logs,
+        mode="host-runtime-container",
+        validate_dir=validate_dir,
+        work_dir=work_dir,
+        expected_exit_code=normalized_expected_exit_code,
+        runtime_container=exec_container,
+        runtime_container_source=_runtime_container_source(setup_log),
+    )
 
     ok, prep_logs = _prepare_docker_secbench_validate_dir(exec_container, work_dir, validate_dir)
     logs.extend(prep_logs)
@@ -511,8 +658,13 @@ def validate_secbench_patch_v2(
     finally:
         Path(local_patch_path).unlink(missing_ok=True)
 
-    rc, out, err = _docker_exec(exec_container, validate_dir, f"secb patch {shlex.quote(patch_container_path)}")
-    _append_failed_step(logs, "secb patch", rc, out, err)
+    rc, out, err = _docker_exec(exec_container, validate_dir, _repo_changes_apply_command())
+    _append_failed_step(logs, "apply repo_changes.diff", rc, out, err)
+    if rc != 0:
+        return False, "".join(logs)
+
+    rc, out, err = _docker_exec(exec_container, validate_dir, f"git apply {shlex.quote(patch_container_path)}")
+    _append_failed_step(logs, "apply model patch", rc, out, err)
     if rc != 0:
         return False, "".join(logs)
 
@@ -523,14 +675,34 @@ def validate_secbench_patch_v2(
 
     rc, out, err = _docker_exec(exec_container, validate_dir, "secb repro")
     repro_text = f"{out or ''}\n{err or ''}"
-    if any(keyword in repro_text for keyword in _failure_keywords(sanitizer)) or rc != 0:
-        logs.append(_format_step("secb repro", rc, out, err))
+    matched_failure_keywords = any(keyword in repro_text for keyword in _failure_keywords(sanitizer))
+    if not _secbench_repro_succeeded(rc, normalized_expected_exit_code, matched_failure_keywords):
+        logs.append(
+            _format_step(
+                "secb repro",
+                rc,
+                out,
+                _build_repro_failure_stderr(
+                    err,
+                    expected_exit_code=normalized_expected_exit_code,
+                    actual_exit_code=rc,
+                    matched_failure_keywords=matched_failure_keywords,
+                ),
+            )
+        )
         return False, "".join(logs)
     else:
         logs.append(
-            f"==========secbench validate result===========\n"
-            f"SUCCESS: Run Test passed\n"
-            f"===================================\n"
+            _format_note(
+                "secbench validate result",
+                [
+                    "SUCCESS: Run Test passed",
+                    f"expected_exit_code={normalized_expected_exit_code}",
+                    f"actual_exit_code={rc}",
+                    f"matched_failure_keywords={str(matched_failure_keywords).lower()}",
+                    "success_rule=(actual_exit_code == 0 || actual_exit_code == expected_exit_code) && matched_failure_keywords == false",
+                ],
+            )
         )
     return True, "".join(logs)
 
@@ -547,4 +719,5 @@ def validate_secbench_patch(
         container_name=config["container_name"],
         work_dir=config["work_dir"],
         sanitizer=config.get("sanitizer"),
+        expected_exit_code=config.get("exit_code"),
     )

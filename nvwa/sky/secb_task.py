@@ -83,6 +83,10 @@ class SecbTask(PatchTask):
 
         self.work_dir = str(self.config["work_dir"])
         self.container_name = str(self.config["container_name"])
+        try:
+            self.expected_exit_code = int(self.config.get("exit_code", 0) or 0)
+        except (TypeError, ValueError):
+            self.expected_exit_code = 0
         self.raw_sanitizer_report = str(self.config.get("sanitizer_report") or "")
         self.bug_description = str(self.config.get("bug_description") or "")
         self.vul_func = list(self.config.get("vul_func") or [])
@@ -414,6 +418,7 @@ class SecbTask(PatchTask):
             immutable_dir=self.immutable_project_path,
             validate_dir=self.work_dir,
             sanitizer=self.sanitizer,
+            expected_exit_code=self.expected_exit_code,
         )
         if ret:
             self.patch = patch_text

@@ -14,6 +14,10 @@ from nvwa.logger import log
 
 
 class Context:
+    TOOL_LOG_PREVIEW_CHARS = 200
+    MESSAGE_SHAPE_LIMIT = 6
+    TOOL_DEBUG_LIMIT = 3
+
     def __init__(self, task: PatchTask) -> None:
         self.task = task
 
@@ -37,6 +41,73 @@ class Context:
     @property
     def tool_calls(self):
         return [message["message"] for message in self.messages if message["role"] == "tool"]
+
+    def latest_tool_call(self) -> Optional[Dict[str, Any]]:
+        tool_calls = self.tool_calls
+        if len(tool_calls) == 0:
+            return None
+        return tool_calls[-1]
+
+    def _truncate_text(self, text: Any, limit: Optional[int] = None) -> str:
+        limit = self.TOOL_LOG_PREVIEW_CHARS if limit is None else limit
+        text = str(text).replace("\n", "\\n")
+        if len(text) <= limit:
+            return text
+        return text[: limit - 3] + "..."
+
+    def _summarize_patch_text(self, patch: str) -> str:
+        lines = patch.splitlines()
+        first_line = lines[0] if len(lines) > 0 else ""
+        hunk_count = sum(1 for line in lines if line.startswith("@@"))
+        return (
+            f"<diff len={len(patch)} lines={len(lines)} hunks={hunk_count} "
+            f"first_line={self._truncate_text(first_line, 80)!r}>"
+        )
+
+    def _summarize_arg_value(self, key: str, value: Any) -> str:
+        if key == "patch" and isinstance(value, str):
+            return self._summarize_patch_text(value)
+        if isinstance(value, str):
+            return repr(self._truncate_text(value, 80))
+        if isinstance(value, (int, float, bool)) or value is None:
+            return repr(value)
+        if isinstance(value, dict):
+            return f"<dict keys={sorted(value.keys())}>"
+        if isinstance(value, (list, tuple, set)):
+            return f"<{type(value).__name__} len={len(value)}>"
+        return f"<{type(value).__name__}>"
+
+    def _summarize_result(self, name: str, result: str) -> str:
+        if name == "validate":
+            first_line = result.splitlines()[0] if len(result) > 0 else ""
+            return f"<validation_result len={len(result)} first_line={self._truncate_text(first_line, 80)!r}>"
+        return f"<result len={len(result)} preview={self._truncate_text(result)!r}>"
+
+    def _summarize_tool_call(self, tool_call: Dict[str, Any]) -> str:
+        args = tool_call.get("args", {})
+        arg_summary = ", ".join(
+            f"{key}={self._summarize_arg_value(key, value)}"
+            for key, value in args.items()
+        )
+        result_summary = self._summarize_result(tool_call.get("name", "tool"), tool_call.get("result", ""))
+        return f"{tool_call.get('name', 'tool')}({arg_summary}) {result_summary}"
+
+    def message_shape_summary(self, limit: int = MESSAGE_SHAPE_LIMIT) -> str:
+        messages = self.messages[-limit:]
+        parts = []
+        for message in messages:
+            role = message["role"]
+            if role == "tool":
+                parts.append(f"tool({message['message'].get('name', 'unknown')})")
+            else:
+                parts.append(role)
+        return " -> ".join(parts) if len(parts) > 0 else "<empty>"
+
+    def tool_call_debug_summary(self, limit: int = TOOL_DEBUG_LIMIT) -> str:
+        tool_calls = self.tool_calls[-limit:]
+        if len(tool_calls) == 0:
+            return "<no tool calls>"
+        return " | ".join(self._summarize_tool_call(tool_call) for tool_call in tool_calls)
 
     def calculate_token_usage(self, model: str = "gpt-4-turbo") -> Dict[str, int]:
         """Calculate token usage for this context based on messages.
@@ -85,16 +156,13 @@ class Context:
         }
 
     def add_tool_call(self, name: str, args: dict, result: str):
-        self.messages.append(
-            {
-                "role": "tool",
-                "message": {
-                    "name": name,
-                    "args": args,
-                    "result": result,
-                },
-            }
-        )
+        tool_message = {
+            "name": name,
+            "args": args,
+            "result": result,
+        }
+        self.messages.append({"role": "tool", "message": tool_message})
+        log.info(f"Recorded tool call: tool={name} summary={self._summarize_tool_call(tool_message)}")
         if self.task.patch is not None:
             self.patch = self.task.patch
 

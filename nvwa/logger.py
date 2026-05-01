@@ -3,6 +3,8 @@ import os
 from logging.handlers import RotatingFileHandler
 from datetime import datetime
 
+from nvwa.model_aliases import readable_model_dirname
+
 # ANSI escape sequences for colored and bold output
 COLORS = {
     "HEADER": "\033[95m",  # Purple
@@ -82,6 +84,34 @@ def setup_logger(log_file=None, level=logging.INFO, max_size=10000000, backups=5
     logger.addHandler(console_handler)
 
     return logger
+
+
+def case_log_path(task, model: str, root_dir: str = "logs/cases") -> str:
+    dataset = getattr(task, "dataset", "skyset")
+    instance_id = getattr(task, "instance_id", getattr(task, "tag", "unknown"))
+    input_mode = getattr(task, "input_mode", getattr(task, "effective_input_mode", "auto"))
+    model_name = readable_model_dirname(model)
+    return os.path.join(root_dir, model_name, dataset, input_mode, f"{instance_id}.log")
+
+
+def attach_case_file_handler(task, model: str, root_dir: str = "logs/cases", level=logging.INFO):
+    path = case_log_path(task, model, root_dir=root_dir)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+
+    handler = RotatingFileHandler(path, maxBytes=10000000, backupCount=5)
+    handler.setLevel(level)
+    handler.setFormatter(ColoredFormatter("[%(asctime)s] %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+    log.addHandler(handler)
+    log.info(f"Attached case log handler at {path}")
+    return handler
+
+
+def detach_case_file_handler(handler) -> None:
+    if handler is None:
+        return
+
+    log.removeHandler(handler)
+    handler.close()
 
 
 logging.setLoggerClass(CustomLogger)
